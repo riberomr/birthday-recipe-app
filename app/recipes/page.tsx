@@ -18,7 +18,7 @@ export default async function RecipesPage() {
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/">
                         <Button variant="ghost" size="icon" className="rounded-full">
-                            <ArrowLeft className="h-6 w-6" />
+                            <ArrowLeft className="h-6 w-6 text-pink-600 dark:text-white" />
                         </Button>
                     </Link>
                     <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">Recetas</h1>
