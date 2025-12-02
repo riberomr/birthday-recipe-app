@@ -38,8 +38,8 @@ export default function Home() {
           transition={{ type: "spring", bounce: 0.5 }}
           className="bg-white dark:bg-zinc-900 p-8 rounded-3xl shadow-xl border-4 border-pink-200 dark:border-pink-900"
         >
-          <h1 className="text-4xl font-bold text-pink-500 mb-2">¡Feliz Cumple!</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300">40 Años Cocinando Amor</p>
+          <h1 className="text-4xl font-bold text-pink-500 mb-2">V1 pagina de recetas</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300">🥰 Cocinando Amor 🥰</p>
           <div className="mt-6 text-6xl">🎂</div>
         </motion.div>
 
