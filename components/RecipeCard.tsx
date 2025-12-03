@@ -48,8 +48,8 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                         <span className="text-xs">{recipe.cook_time_minutes} min cook</span>
                     </div>
                     <div className="mt-1 flex justify-between items-center w-full">
-                        <StarRating rating={4} readonly size="sm" />
-                        <span className="text-xs text-gray-400">4.0 (12)</span>
+                        <StarRating rating={recipe.average_rating?.rating || 0} readonly size="sm" />
+                        <span className="text-xs text-gray-400">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
                     </div>
                 </CardFooter>
             </Card>

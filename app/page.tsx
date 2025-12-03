@@ -28,9 +28,6 @@ export default function Home() {
       </div>
 
       <div className="z-10 w-full max-w-md flex flex-col items-center gap-8 text-center">
-        <div className="absolute top-4 right-4">
-          <ThemeToggle />
-        </div>
 
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}

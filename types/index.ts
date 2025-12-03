@@ -11,6 +11,8 @@ export type Recipe = {
     recipe_categories?: RecipeCategory | null;
     recipe_steps?: RecipeStep[];
     recipe_nutrition?: RecipeNutrition[];
+    ratings?: Rating[];
+    average_rating?: AverageRating; // Calculated average rating
 };
 
 export type RecipeCategory = {
@@ -40,3 +42,22 @@ export type RecipeNutrition = {
     amount: string;
     unit?: string;
 };
+
+export type Rating = {
+    id: string;
+    recipe_id: string;
+    user_id: string;
+    rating: number;
+};
+
+export type User = {
+    id: string;
+    email: string;
+    created_at: string;
+};
+
+export type AverageRating = {
+    rating: number;
+    count: number;
+};
+

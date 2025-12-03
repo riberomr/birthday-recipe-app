@@ -1,5 +1,6 @@
 import { supabase } from "./supabase"
 import { Recipe, RecipeCategory } from "@/types"
+import { getAverageRating } from "./utils"
 
 export async function getCategories(): Promise<RecipeCategory[]> {
     const { data, error } = await supabase
@@ -21,7 +22,8 @@ export async function getRecipes(): Promise<Recipe[]> {
         .select(`
       *,
       recipe_ingredients (*),
-      recipe_categories (*)
+      recipe_categories (*),
+      ratings (rating)
     `)
         .order("created_at", { ascending: false })
 
@@ -30,7 +32,11 @@ export async function getRecipes(): Promise<Recipe[]> {
         return []
     }
 
-    return data || []
+    const recipes = data.map((recipe) => {
+        const average_rating = getAverageRating(recipe.ratings)
+        return { ...recipe, average_rating }
+    })
+    return recipes || []
 }
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
@@ -41,7 +47,8 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
       recipe_ingredients (*),
       recipe_steps (*),
       recipe_categories (*),
-      recipe_nutrition (*)
+      recipe_nutrition (*),
+      ratings (rating)
     `)
         .eq("id", id)
         .single()
@@ -51,6 +58,7 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
         return null
     }
 
+    data.average_rating = getAverageRating(data.ratings)
     // Sort steps by order
     if (data && data.recipe_steps) {
         data.recipe_steps.sort((a: any, b: any) => a.step_order - b.step_order)
