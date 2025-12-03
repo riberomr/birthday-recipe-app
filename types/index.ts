@@ -10,6 +10,7 @@ export type Recipe = {
     recipe_ingredients?: RecipeIngredient[];
     recipe_categories?: RecipeCategory | null;
     recipe_steps?: RecipeStep[];
+    recipe_nutrition?: RecipeNutrition[];
 };
 
 export type RecipeCategory = {
@@ -30,4 +31,12 @@ export type RecipeStep = {
     recipe_id: string;
     step_order: number;
     content: string;
+};
+
+export type RecipeNutrition = {
+    id: string;
+    recipe_id: string;
+    name: string;
+    amount: string;
+    unit?: string;
 };

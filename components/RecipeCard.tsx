@@ -1,9 +1,10 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Clock } from "lucide-react"
+import { Clock, ChefHat } from "lucide-react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Recipe } from "@/types"
+import { StarRating } from "@/components/StarRating"
 
 interface RecipeCardProps {
     recipe: Recipe
@@ -37,11 +38,22 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                         {recipe.description}
                     </p>
                 </CardContent>
-                <CardFooter className="p-4 pt-0 text-xs text-gray-500 flex items-center gap-2">
-                    <Clock size={14} />
-                    <span>{recipe.prep_time_minutes + recipe.cook_time_minutes} min</span>
+                <CardFooter className="p-4 pt-0 flex flex-col items-start gap-2">
+                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <Clock size={14} />
+                        <span className="text-xs">{recipe.prep_time_minutes + recipe.cook_time_minutes} min</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <ChefHat size={14} />
+                        <span className="text-xs">{recipe.cook_time_minutes} min cook</span>
+                    </div>
+                    <div className="mt-1 flex justify-between items-center w-full">
+                        <StarRating rating={4} readonly size="sm" />
+                        <span className="text-xs text-gray-400">4.0 (12)</span>
+                    </div>
                 </CardFooter>
             </Card>
         </Link>
     )
 }
+

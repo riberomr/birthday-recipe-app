@@ -40,7 +40,8 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
       *,
       recipe_ingredients (*),
       recipe_steps (*),
-      recipe_categories (*)
+      recipe_categories (*),
+      recipe_nutrition (*)
     `)
         .eq("id", id)
         .single()
