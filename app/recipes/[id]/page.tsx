@@ -66,7 +66,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                             </h1>
                             <div className="flex gap-2">
                                 <ShareButtons title={recipe.title} />
-                                <PrintButton />
+                                {/* <PrintButton /> */}
                                 <DownloadButton />
                             </div>
                         </div>
