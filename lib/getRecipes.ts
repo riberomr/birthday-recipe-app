@@ -24,6 +24,7 @@ export async function getRecipes(): Promise<Recipe[]> {
       recipe_ingredients (*),
       recipe_categories (*),
       ratings (rating)
+      
     `)
         .order("created_at", { ascending: false })
 
