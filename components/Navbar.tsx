@@ -6,9 +6,11 @@ import { LoginButton } from "@/components/LoginButton"
 import { ChefHat, PlusCircle } from "lucide-react"
 import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
+import { useSnackbar } from "@/components/ui/Snackbar"
 
 export function Navbar() {
     const { user } = useAuth()
+    const { showSnackbar } = useSnackbar()
 
     return (
         <nav className="w-full border-b border-pink-100 dark:border-pink-900/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-50">
@@ -23,6 +25,20 @@ export function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-4">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 dark:text-pink-400 dark:hover:bg-pink-950"
+                        onClick={() => {
+                            if (!user) {
+                                showSnackbar("Debes iniciar sesión para ver tus favoritos", "error");
+                            } else {
+                                window.location.href = "/favorites";
+                            }
+                        }}
+                    >
+                        <span className="hidden sm:inline">Favoritos</span>
+                    </Button>
                     {user && (
                         <Link href="/recipes/create">
                             <Button variant="ghost" size="sm" className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 dark:text-pink-400 dark:hover:bg-pink-950">

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { SnackbarProvider } from "@/components/ui/Snackbar";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -27,12 +28,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <div className="flex-1">
-                {children}
+            <SnackbarProvider>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <div className="flex-1">
+                  {children}
+                </div>
               </div>
-            </div>
+            </SnackbarProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

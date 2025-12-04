@@ -23,7 +23,8 @@ export async function getRecipes(): Promise<Recipe[]> {
       *,
       recipe_ingredients (*),
       recipe_categories (*),
-      ratings (rating)
+      ratings (rating),
+      recipe_tags (tags (*))
     `)
         .order("created_at", { ascending: false })
 
@@ -48,7 +49,8 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
       recipe_steps (*),
       recipe_categories (*),
       recipe_nutrition (*),
-      ratings (rating)
+      ratings (rating),
+      recipe_tags (tags (*))
     `)
         .eq("id", id)
         .single()

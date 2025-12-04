@@ -7,12 +7,15 @@ export type Recipe = {
     cook_time_minutes: number;
     category_id: string | null;
     created_at: string;
+    difficulty?: string | null; // 'easy', 'medium', 'hard'
+    servings?: number;
     recipe_ingredients?: RecipeIngredient[];
     recipe_categories?: RecipeCategory | null;
     recipe_steps?: RecipeStep[];
     recipe_nutrition?: RecipeNutrition[];
     ratings?: Rating[];
     average_rating?: AverageRating; // Calculated average rating
+    tags?: Tag[];
 };
 
 export type RecipeCategory = {
@@ -59,5 +62,17 @@ export type User = {
 export type AverageRating = {
     rating: number;
     count: number;
+};
+
+export type Tag = {
+    id: string;
+    name: string;
+    type?: string;
+};
+
+export type Favorite = {
+    user_id: string;
+    recipe_id: string;
+    created_at: string;
 };
 

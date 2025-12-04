@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -8,22 +8,36 @@ import { Plus, Trash2, ChefHat, Clock, Save, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthContext"
+import { useSnackbar } from "@/components/ui/Snackbar"
 
 export function RecipeForm() {
     const router = useRouter()
     const { user } = useAuth()
+    const { showSnackbar } = useSnackbar()
     const [loading, setLoading] = useState(false)
 
+    const [tags, setTags] = useState<{ id: string, name: string }[]>([])
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         prep_time: "",
         cook_time: "",
         image_url: "",
+        difficulty: "medium",
+        servings: "4",
+        selectedTags: [] as string[],
         ingredients: [{ name: "", amount: "", optional: false }],
         steps: [{ content: "" }],
         nutrition: [{ name: "", amount: "", unit: "" }]
     })
+
+    useEffect(() => {
+        const fetchTags = async () => {
+            const { data } = await supabase.from("tags").select("*")
+            if (data) setTags(data)
+        }
+        fetchTags()
+    }, [])
 
     const addIngredient = () => {
         setFormData({
@@ -67,7 +81,7 @@ export function RecipeForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user) {
-            alert("Debes iniciar sesión para crear una receta")
+            showSnackbar("Debes iniciar sesión para crear una receta", "error")
             return
         }
 
@@ -83,6 +97,8 @@ export function RecipeForm() {
                     prep_time_minutes: parseInt(formData.prep_time) || 0,
                     cook_time_minutes: parseInt(formData.cook_time) || 0,
                     image_url: formData.image_url || null,
+                    difficulty: formData.difficulty,
+                    servings: parseInt(formData.servings) || 4,
                     user_id: user.id
                 })
                 .select()
@@ -143,10 +159,24 @@ export function RecipeForm() {
                 if (nutritionError) throw nutritionError
             }
 
+            // Insert tags
+            if (formData.selectedTags.length > 0) {
+                const tagsToInsert = formData.selectedTags.map(tagId => ({
+                    recipe_id: recipe.id,
+                    tag_id: tagId
+                }))
+
+                const { error: tagsError } = await supabase
+                    .from("recipe_tags")
+                    .insert(tagsToInsert)
+
+                if (tagsError) throw tagsError
+            }
+
             router.push(`/recipes/${recipe.id}`)
         } catch (error) {
             console.error("Error creating recipe:", error)
-            alert("Error al crear la receta. Por favor intenta de nuevo.")
+            showSnackbar("Error al crear la receta. Por favor intenta de nuevo.", "error")
         } finally {
             setLoading(false)
         }
@@ -214,6 +244,54 @@ export function RecipeForm() {
                         placeholder="https://..."
                         className="border-pink-200 focus-visible:ring-pink-400"
                     />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dificultad</label>
+                        <select
+                            value={formData.difficulty || "medium"}
+                            onChange={e => setFormData({ ...formData, difficulty: e.target.value })}
+                            className="w-full rounded-md border border-pink-200 p-2 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:bg-zinc-800 dark:border-pink-900"
+                        >
+                            <option value="easy">Fácil</option>
+                            <option value="medium">Media</option>
+                            <option value="hard">Difícil</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Porciones</label>
+                        <Input
+                            type="number"
+                            value={formData.servings}
+                            onChange={e => setFormData({ ...formData, servings: e.target.value })}
+                            className="border-pink-200 focus-visible:ring-pink-400"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Etiquetas</label>
+                    <div className="flex flex-wrap gap-2">
+                        {tags.map(tag => (
+                            <button
+                                key={tag.id}
+                                type="button"
+                                onClick={() => {
+                                    const newTags = formData.selectedTags.includes(tag.id)
+                                        ? formData.selectedTags.filter(id => id !== tag.id)
+                                        : [...formData.selectedTags, tag.id]
+                                    setFormData({ ...formData, selectedTags: newTags })
+                                }}
+                                className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.selectedTags.includes(tag.id)
+                                        ? "bg-pink-500 text-white"
+                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400"
+                                    }`}
+                            >
+                                {tag.name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 

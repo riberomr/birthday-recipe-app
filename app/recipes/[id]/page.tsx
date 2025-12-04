@@ -7,6 +7,9 @@ import { notFound } from "next/navigation"
 import { StarRating } from "@/components/StarRating"
 import { CommentSection } from "@/components/CommentSection"
 import { DownloadButton } from "@/components/DownloadButton"
+import { ShareButtons } from "@/components/ShareButtons"
+import { PrintButton } from "@/components/PrintButton"
+import { IngredientScaler } from "@/components/IngredientScaler"
 
 export const dynamic = "force-dynamic"
 
@@ -62,6 +65,8 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 {recipe.title}
                             </h1>
                             <div className="flex gap-2">
+                                <ShareButtons title={recipe.title} />
+                                {/* <PrintButton /> */}
                                 <DownloadButton />
                             </div>
                         </div>
@@ -91,25 +96,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 print:text-black print:border-b print:border-black print:pb-2">
                                     Ingredientes
                                 </h2>
-                                <ul className="space-y-2">
-                                    {recipe.recipe_ingredients?.map((ingredient) => (
-                                        <li
-                                            key={ingredient.id}
-                                            className="flex items-start gap-3 p-3 rounded-lg bg-pink-50/50 dark:bg-zinc-800/50 print:bg-transparent print:p-0 print:border-b print:border-gray-100"
-                                        >
-                                            <div className="h-2 w-2 mt-2 rounded-full bg-pink-400 flex-shrink-0 print:bg-black" />
-                                            <span className="text-gray-700 dark:text-gray-300 print:text-black">
-                                                <span className="font-medium">{ingredient.amount}</span>{" "}
-                                                {ingredient.name}
-                                                {ingredient.optional && (
-                                                    <span className="text-gray-400 text-sm ml-2 print:text-gray-600">
-                                                        (Opcional)
-                                                    </span>
-                                                )}
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <IngredientScaler
+                                    initialServings={recipe.servings || 4}
+                                    ingredients={recipe.recipe_ingredients || []}
+                                />
                             </div>
 
                             <div className="space-y-4">
