@@ -17,6 +17,7 @@ export function RecipeForm() {
     const [loading, setLoading] = useState(false)
 
     const [tags, setTags] = useState<{ id: string, name: string }[]>([])
+    const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -78,6 +79,12 @@ export function RecipeForm() {
         setFormData({ ...formData, nutrition: newNutrition })
     }
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setSelectedImage(e.target.files[0])
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user) {
@@ -88,95 +95,46 @@ export function RecipeForm() {
         setLoading(true)
 
         try {
-            // Insert recipe
-            const { data: recipe, error: recipeError } = await supabase
-                .from("recipes")
-                .insert({
-                    title: formData.title,
-                    description: formData.description,
-                    prep_time_minutes: parseInt(formData.prep_time) || 0,
-                    cook_time_minutes: parseInt(formData.cook_time) || 0,
-                    image_url: formData.image_url || null,
-                    difficulty: formData.difficulty,
-                    servings: parseInt(formData.servings) || 4,
-                    user_id: user.id
-                })
-                .select()
-                .single()
+            const submitData = new FormData()
+            submitData.append('title', formData.title)
+            submitData.append('description', formData.description)
+            submitData.append('prep_time', formData.prep_time)
+            submitData.append('cook_time', formData.cook_time)
+            submitData.append('difficulty', formData.difficulty)
+            submitData.append('servings', formData.servings)
+            submitData.append('user_id', user.id)
 
-            if (recipeError) throw recipeError
-
-            // Insert ingredients
-            const ingredientsToInsert = formData.ingredients
-                .filter(ing => ing.name.trim())
-                .map(ing => ({
-                    recipe_id: recipe.id,
-                    name: ing.name,
-                    amount: ing.amount || null,
-                    optional: ing.optional
-                }))
-
-            if (ingredientsToInsert.length > 0) {
-                const { error: ingredientsError } = await supabase
-                    .from("recipe_ingredients")
-                    .insert(ingredientsToInsert)
-
-                if (ingredientsError) throw ingredientsError
+            // Append optional image URL if no file selected (backward compatibility)
+            if (formData.image_url) {
+                submitData.append('image_url', formData.image_url)
             }
 
-            // Insert steps
-            const stepsToInsert = formData.steps
-                .filter(step => step.content.trim())
-                .map((step, index) => ({
-                    recipe_id: recipe.id,
-                    step_order: index + 1,
-                    content: step.content
-                }))
-
-            if (stepsToInsert.length > 0) {
-                const { error: stepsError } = await supabase
-                    .from("recipe_steps")
-                    .insert(stepsToInsert)
-
-                if (stepsError) throw stepsError
+            // Append file if selected
+            if (selectedImage) {
+                submitData.append('file', selectedImage)
             }
 
-            // Insert nutrition
-            const nutritionToInsert = formData.nutrition
-                .filter(item => item.name.trim() && item.amount.trim())
-                .map(item => ({
-                    recipe_id: recipe.id,
-                    name: item.name,
-                    amount: item.amount,
-                    unit: item.unit || null
-                }))
+            // Append complex objects as JSON strings
+            submitData.append('ingredients', JSON.stringify(formData.ingredients.filter(ing => ing.name.trim())))
+            submitData.append('steps', JSON.stringify(formData.steps.filter(step => step.content.trim())))
+            submitData.append('nutrition', JSON.stringify(formData.nutrition.filter(item => item.name.trim() && item.amount.trim())))
+            submitData.append('tags', JSON.stringify(formData.selectedTags))
 
-            if (nutritionToInsert.length > 0) {
-                const { error: nutritionError } = await supabase
-                    .from("recipe_nutrition")
-                    .insert(nutritionToInsert)
+            const response = await fetch('/api/create-recipe-with-image', {
+                method: 'POST',
+                body: submitData,
+            })
 
-                if (nutritionError) throw nutritionError
+            const result = await response.json()
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Error desconocido al crear la receta')
             }
 
-            // Insert tags
-            if (formData.selectedTags.length > 0) {
-                const tagsToInsert = formData.selectedTags.map(tagId => ({
-                    recipe_id: recipe.id,
-                    tag_id: tagId
-                }))
-
-                const { error: tagsError } = await supabase
-                    .from("recipe_tags")
-                    .insert(tagsToInsert)
-
-                if (tagsError) throw tagsError
-            }
-
-            router.push(`/recipes/${recipe.id}`)
-        } catch (error) {
+            router.push(`/recipes/${result.recipeId}`)
+        } catch (error: any) {
             console.error("Error creating recipe:", error)
-            showSnackbar("Error al crear la receta. Por favor intenta de nuevo.", "error")
+            showSnackbar(error.message || "Error al crear la receta. Por favor intenta de nuevo.", "error")
         } finally {
             setLoading(false)
         }
@@ -237,13 +195,22 @@ export function RecipeForm() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL de la Imagen</label>
-                    <Input
-                        value={formData.image_url}
-                        onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                        placeholder="https://..."
-                        className="border-pink-200 focus-visible:ring-pink-400"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imagen de la Receta</label>
+                    <div className="space-y-2">
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="border-pink-200 focus-visible:ring-pink-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                        />
+                        <p className="text-xs text-gray-500 text-center">- O -</p>
+                        <Input
+                            value={formData.image_url}
+                            onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                            placeholder="URL de imagen (opcional si subes archivo)"
+                            className="border-pink-200 focus-visible:ring-pink-400"
+                        />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -284,8 +251,8 @@ export function RecipeForm() {
                                     setFormData({ ...formData, selectedTags: newTags })
                                 }}
                                 className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.selectedTags.includes(tag.id)
-                                        ? "bg-pink-500 text-white"
-                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400"
+                                    ? "bg-pink-500 text-white"
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400"
                                     }`}
                             >
                                 {tag.name}
