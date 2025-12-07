@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { supabase } from "@/lib/supabase"
 import { Send, Camera, X } from "lucide-react"
 import { useSnackbar } from "@/components/ui/Snackbar"
+import { compressImage } from "@/lib/utils"
 
 type Comment = {
     id: string
@@ -93,8 +94,10 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
             formData.append('recipe_id', recipeId)
             formData.append('user_id', user.id)
 
+            let finalFile = selectedImage
             if (selectedImage) {
-                formData.append('file', selectedImage)
+                finalFile = await compressImage(selectedImage)
+                formData.append('file', finalFile)
             }
 
             const response = await fetch('/api/comments/create', {

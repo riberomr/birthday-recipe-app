@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthContext"
 import { useSnackbar } from "@/components/ui/Snackbar"
+import { compressImage } from "@/lib/utils"
 
 export function RecipeForm() {
     const router = useRouter()
@@ -127,9 +128,13 @@ export function RecipeForm() {
                 submitData.append('image_url', formData.image_url)
             }
 
+            let finalFile = selectedImage
             // Append file if selected
             if (selectedImage) {
-                submitData.append('file', selectedImage)
+
+                finalFile = await compressImage(selectedImage)
+
+                submitData.append('file', finalFile)
             }
 
             // Append complex objects as JSON strings

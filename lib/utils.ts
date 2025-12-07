@@ -1,6 +1,7 @@
 import { AverageRating, Rating } from "@/types"
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import imageCompression from 'browser-image-compression'
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -37,4 +38,16 @@ export function scaleAmount(amount: string | null, factor: number): string {
     const formattedValue = parseFloat(scaledValue.toFixed(2)).toString();
 
     return `${formattedValue}${rest}`;
+}
+
+
+export async function compressImage(file: File) {
+    const options = {
+        maxSizeMB: 1,              // Target max size (1 MB)
+        maxWidthOrHeight: 1080,    // Resize to 1080px if larger
+        useWebWorker: true
+    }
+
+    const compressedFile = await imageCompression(file, options)
+    return compressedFile
 }
