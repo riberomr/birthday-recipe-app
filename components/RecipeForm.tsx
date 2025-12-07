@@ -18,6 +18,7 @@ export function RecipeForm() {
 
     const [tags, setTags] = useState<{ id: string, name: string }[]>([])
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -39,6 +40,15 @@ export function RecipeForm() {
         }
         fetchTags()
     }, [])
+
+    // Cleanup preview URL on unmount or when image changes
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl)
+            }
+        }
+    }, [previewUrl])
 
     const addIngredient = () => {
         setFormData({
@@ -81,7 +91,15 @@ export function RecipeForm() {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setSelectedImage(e.target.files[0])
+            const file = e.target.files[0]
+            setSelectedImage(file)
+
+            // Create preview URL
+            const url = URL.createObjectURL(file)
+            setPreviewUrl(url)
+        } else {
+            setSelectedImage(null)
+            setPreviewUrl(null)
         }
     }
 
@@ -120,7 +138,7 @@ export function RecipeForm() {
             submitData.append('nutrition', JSON.stringify(formData.nutrition.filter(item => item.name.trim() && item.amount.trim())))
             submitData.append('tags', JSON.stringify(formData.selectedTags))
 
-            const response = await fetch('/api/create-recipe-with-image', {
+            const response = await fetch('/app/api/create-recipe-with-image', {
                 method: 'POST',
                 body: submitData,
             })
@@ -196,20 +214,49 @@ export function RecipeForm() {
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imagen de la Receta</label>
-                    <div className="space-y-2">
-                        <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="border-pink-200 focus-visible:ring-pink-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
-                        />
-                        <p className="text-xs text-gray-500 text-center">- O -</p>
-                        <Input
-                            value={formData.image_url}
-                            onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                            placeholder="URL de imagen (opcional si subes archivo)"
-                            className="border-pink-200 focus-visible:ring-pink-400"
-                        />
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex-1">
+                                <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="border-pink-200 focus-visible:ring-pink-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                                />
+                            </div>
+                            {previewUrl && (
+                                <div className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-pink-200">
+                                    <img
+                                        src={previewUrl}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedImage(null)
+                                            setPreviewUrl(null)
+                                            // Reset file input if possible, or let user select new one
+                                        }}
+                                        className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl-lg hover:bg-red-600"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {!previewUrl && (
+                            <>
+                                <p className="text-xs text-gray-500 text-center">- O -</p>
+                                <Input
+                                    value={formData.image_url}
+                                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                                    placeholder="URL de imagen (opcional si subes archivo)"
+                                    className="border-pink-200 focus-visible:ring-pink-400"
+                                />
+                            </>
+                        )}
                     </div>
                 </div>
 

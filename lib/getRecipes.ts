@@ -68,3 +68,25 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
 
     return data
 }
+
+type RecipeCommunityPhoto = {
+    image_url: string
+}
+export async function getRecipeCommunityPhotos(recipeId: string): Promise<RecipeCommunityPhoto[] | null> {
+    const { data, error } = await supabase
+        .from("comments")
+        .select(`
+                image_url
+            `)
+        .eq("recipe_id", recipeId)
+        .not("image_url", "is", null)
+        .neq("image_url", "")
+        .order("created_at", { ascending: false })
+
+    if (error) {
+        console.error("Error fetching community photos:", error)
+        return null
+    }
+
+    return data
+}   
