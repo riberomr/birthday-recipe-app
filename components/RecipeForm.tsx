@@ -4,12 +4,13 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, ChefHat, Clock, Save, X } from "lucide-react"
+import { Plus, Trash2, ChefHat, Clock, Save, X, Camera, Image as ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/components/AuthContext"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
+import { createRecipe } from "@/lib/api/recipes"
 
 export function RecipeForm() {
     const router = useRouter()
@@ -25,7 +26,6 @@ export function RecipeForm() {
         description: "",
         prep_time: "",
         cook_time: "",
-        image_url: "",
         difficulty: "medium",
         servings: "4",
         selectedTags: [] as string[],
@@ -98,16 +98,31 @@ export function RecipeForm() {
             // Create preview URL
             const url = URL.createObjectURL(file)
             setPreviewUrl(url)
-        } else {
-            setSelectedImage(null)
-            setPreviewUrl(null)
         }
+    }
+
+    const clearImage = () => {
+        setSelectedImage(null)
+        setPreviewUrl(null)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user) {
             showSnackbar("Debes iniciar sesión para crear una receta", "error")
+            return
+        }
+
+        // Custom Validation
+        const validIngredients = formData.ingredients.filter(ing => ing.name.trim() !== "")
+        if (validIngredients.length === 0) {
+            showSnackbar("Agrega al menos un ingrediente", "error")
+            return
+        }
+
+        const validSteps = formData.steps.filter(step => step.content.trim() !== "")
+        if (validSteps.length === 0) {
+            showSnackbar("Agrega al menos un paso de preparación", "error")
             return
         }
 
@@ -123,17 +138,10 @@ export function RecipeForm() {
             submitData.append('servings', formData.servings)
             submitData.append('user_id', user.id)
 
-            // Append optional image URL if no file selected (backward compatibility)
-            if (formData.image_url) {
-                submitData.append('image_url', formData.image_url)
-            }
-
             let finalFile = selectedImage
             // Append file if selected
             if (selectedImage) {
-
                 finalFile = await compressImage(selectedImage)
-
                 submitData.append('file', finalFile)
             }
 
@@ -143,16 +151,7 @@ export function RecipeForm() {
             submitData.append('nutrition', JSON.stringify(formData.nutrition.filter(item => item.name.trim() && item.amount.trim())))
             submitData.append('tags', JSON.stringify(formData.selectedTags))
 
-            const response = await fetch('/app/api/create-recipe-with-image', {
-                method: 'POST',
-                body: submitData,
-            })
-
-            const result = await response.json()
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Error desconocido al crear la receta')
-            }
+            const result = await createRecipe(submitData)
 
             router.push(`/recipes/${result.recipeId}`)
         } catch (error: any) {
@@ -185,6 +184,7 @@ export function RecipeForm() {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
                     <Textarea
+                        required
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Cuéntanos un poco sobre esta delicia..."
@@ -198,6 +198,7 @@ export function RecipeForm() {
                             <Clock className="inline w-4 h-4 mr-1" /> Prep (min)
                         </label>
                         <Input
+                            required
                             type="number"
                             value={formData.prep_time}
                             onChange={e => setFormData({ ...formData, prep_time: e.target.value })}
@@ -209,6 +210,7 @@ export function RecipeForm() {
                             <ChefHat className="inline w-4 h-4 mr-1" /> Cocción (min)
                         </label>
                         <Input
+                            required
                             type="number"
                             value={formData.cook_time}
                             onChange={e => setFormData({ ...formData, cook_time: e.target.value })}
@@ -218,49 +220,43 @@ export function RecipeForm() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Imagen de la Receta</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen de la Receta</label>
                     <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex-1">
-                                <Input
+                        {!previewUrl ? (
+                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-pink-200 border-dashed rounded-2xl cursor-pointer bg-pink-50 hover:bg-pink-100 dark:bg-zinc-800 dark:border-pink-900 dark:hover:bg-zinc-700/50 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-pink-500">
+                                    <Camera className="w-12 h-12 mb-3" />
+                                    <p className="mb-2 text-sm font-semibold">
+                                        <span className="font-bold">Haz clic para subir</span> o arrastra y suelta
+                                    </p>
+                                    <p className="text-xs text-pink-400">SVG, PNG, JPG or GIF</p>
+                                </div>
+                                <input
                                     type="file"
+                                    className="hidden"
                                     accept="image/*"
                                     onChange={handleImageChange}
-                                    className="border-pink-200 focus-visible:ring-pink-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
                                 />
-                            </div>
-                            {previewUrl && (
-                                <div className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-pink-200">
-                                    <img
-                                        src={previewUrl}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <button
+                            </label>
+                        ) : (
+                            <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-pink-200 shadow-md group">
+                                <img
+                                    src={previewUrl}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Button
                                         type="button"
-                                        onClick={() => {
-                                            setSelectedImage(null)
-                                            setPreviewUrl(null)
-                                            // Reset file input if possible, or let user select new one
-                                        }}
-                                        className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl-lg hover:bg-red-600"
+                                        variant="destructive"
+                                        onClick={clearImage}
+                                        className="rounded-full"
                                     >
-                                        <X className="w-3 h-3" />
-                                    </button>
+                                        <Trash2 className="w-5 h-5 mr-2" />
+                                        Eliminar Imagen
+                                    </Button>
                                 </div>
-                            )}
-                        </div>
-
-                        {!previewUrl && (
-                            <>
-                                <p className="text-xs text-gray-500 text-center">- O -</p>
-                                <Input
-                                    value={formData.image_url}
-                                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                                    placeholder="URL de imagen (opcional si subes archivo)"
-                                    className="border-pink-200 focus-visible:ring-pink-400"
-                                />
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -425,17 +421,21 @@ export function RecipeForm() {
                 ))}
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-4 pt-6 mt-8 border-t border-pink-100 dark:border-pink-900/50">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="flex-1 border-gray-300 text-gray-500 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-zinc-800"
+                    className="h-14 text-lg border-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-zinc-700 dark:text-gray-400 dark:hover:bg-zinc-800"
                 >
                     <X className="w-5 h-5 mr-2" />
                     Cancelar
                 </Button>
-                <Button type="submit" className="flex-[2] bg-pink-500 hover:bg-pink-600 text-white text-lg py-6 rounded-xl" disabled={loading}>
+                <Button
+                    type="submit"
+                    className="h-14 text-lg bg-pink-500 hover:bg-pink-600 text-white shadow-lg shadow-pink-200 dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={loading}
+                >
                     {loading ? "Guardando..." : (
                         <>
                             <Save className="w-5 h-5 mr-2" />

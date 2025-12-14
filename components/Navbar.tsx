@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LoginButton } from "@/components/LoginButton"
-import { ChefHat, PlusCircle } from "lucide-react"
+import { ChefHat, Heart, PlusCircle } from "lucide-react"
 import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
 import { useSnackbar } from "@/components/ui/Snackbar"
@@ -37,6 +37,7 @@ export function Navbar() {
                             }
                         }}
                     >
+                        <Heart className="h-4 w-4 mr-2" />
                         <span className="hidden sm:inline">Favoritos</span>
                     </Button>
                     {user && (

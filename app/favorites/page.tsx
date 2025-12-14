@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { useSnackbar } from "@/components/ui/Snackbar";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { getFavorites } from "@/lib/api/favorites";
 import { Recipe } from "@/types";
 import { RecipeCard } from "@/components/RecipeCard";
 import { Loader2 } from "lucide-react";
@@ -24,20 +24,13 @@ export default function FavoritesPage() {
     }, [user, authLoading, showSnackbar, router]);
 
     useEffect(() => {
-        async function fetchFavorites() {
+        async function fetchFavoritesData() {
             if (!user) return;
 
             try {
-                const { data, error } = await supabase
-                    .from("favorites")
-                    .select("recipe_id, recipes(*)")
-                    .eq("user_id", user.id);
+                const data = await getFavorites(user.id);
 
-                if (error) throw error;
-
-                // Transform data to match Recipe type (handling the join)
-                const recipes = data.map((item: any) => item.recipes) as Recipe[];
-                setFavorites(recipes);
+                setFavorites(data);
             } catch (error) {
                 console.error("Error fetching favorites:", error);
                 showSnackbar("Error al cargar favoritos", "error");
@@ -47,9 +40,9 @@ export default function FavoritesPage() {
         }
 
         if (user) {
-            fetchFavorites();
+            fetchFavoritesData();
         }
-    }, [user, supabase, showSnackbar]);
+    }, [user, showSnackbar]);
 
     if (authLoading || (loading && user)) {
         return (

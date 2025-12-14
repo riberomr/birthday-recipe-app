@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Recipe } from "@/types"
 import { StarRating } from "@/components/StarRating"
+import { FavoriteButton } from "@/components/FavoriteButton"
 
 interface RecipeCardProps {
     recipe: Recipe
@@ -27,6 +28,9 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             🥘
                         </div>
                     )}
+                    <div className="absolute top-2 right-2 z-10">
+                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-white/80 backdrop-blur-sm hover:bg-white dark:bg-black/50 dark:hover:bg-black/70" />
+                    </div>
                 </div>
                 <CardHeader className="p-4 pb-2">
                     <h3 className="font-bold text-lg text-pink-600 dark:text-pink-400 line-clamp-1">

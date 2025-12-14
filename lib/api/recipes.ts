@@ -1,6 +1,6 @@
-import { supabase } from "./supabase"
+import { supabase } from "../supabase"
 import { Recipe, RecipeCategory } from "@/types"
-import { getAverageRating } from "./utils"
+import { getAverageRating } from "../utils"
 
 export async function getCategories(): Promise<RecipeCategory[]> {
     const { data, error } = await supabase
@@ -89,4 +89,20 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
     }
 
     return data
-}   
+}
+
+export async function createRecipe(formData: FormData) {
+    const response = await fetch('/app/api/create-recipe-with-image', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido al crear la receta');
+    }
+
+    return result;
+}
+

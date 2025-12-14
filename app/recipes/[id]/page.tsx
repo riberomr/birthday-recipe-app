@@ -1,4 +1,4 @@
-import { getRecipe, getRecipeCommunityPhotos } from "@/lib/getRecipes"
+import { getRecipe, getRecipeCommunityPhotos } from "@/lib/api/recipes"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
@@ -8,9 +8,9 @@ import { StarRating } from "@/components/StarRating"
 import { CommentSection } from "@/components/CommentSection"
 import { DownloadButton } from "@/components/DownloadButton"
 import { ShareButtons } from "@/components/ShareButtons"
-import { PrintButton } from "@/components/PrintButton"
 import { IngredientScaler } from "@/components/IngredientScaler"
 import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel"
+import { FavoriteButton } from "@/components/FavoriteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -69,6 +69,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 {recipe.title}
                             </h1>
                             <div className="flex gap-2">
+                                <FavoriteButton recipeId={recipe.id} />
                                 <ShareButtons title={recipe.title} />
                                 {/* <PrintButton /> */}
                                 <DownloadButton />
@@ -151,16 +152,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                     {communityPhotos && communityPhotos.length > 0 &&
                                         <CommunityPhotosCarousel photos={communityPhotos} />
                                     }
-                                    {/* <Button variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50">
-                                        <Camera className="mr-2 h-4 w-4" />
-                                        Subir Foto
-                                    </Button> */}
                                 </div>
-                                {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                    <div className="aspect-square rounded-xl bg-pink-50 dark:bg-zinc-800 flex items-center justify-center text-pink-200">
-                                        <Camera size={32} />
-                                    </div>
-                                </div> */}
                             </div>
 
                             <div className="border-t border-pink-100 dark:border-pink-900/50 pt-8">
