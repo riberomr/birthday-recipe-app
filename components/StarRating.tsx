@@ -48,20 +48,31 @@ export function StarRating({
     const handleRatingClick = async (newRating: number) => {
         if (readonly || !user || !recipeId) return
 
+        // Optimistic update
+        const previousRating = rating
         setRating(newRating)
 
-        const { error } = await supabase
-            .from("ratings")
-            .upsert({
-                recipe_id: recipeId,
-                user_id: user.id,
-                rating: newRating
-            })
+        try {
+            const { error } = await supabase
+                .from("ratings")
+                .upsert(
+                    {
+                        recipe_id: recipeId,
+                        user_id: user.id,
+                        rating: newRating
+                    },
+                    {
+                        onConflict: 'recipe_id,user_id'
+                    }
+                )
 
-        if (error) {
-            console.error("Error saving rating:", error)
-        } else {
+            if (error) throw error
+
             onRatingChange?.(newRating)
+        } catch (error) {
+            console.error("Error saving rating:", error)
+            // Revert on error
+            setRating(previousRating)
         }
     }
 

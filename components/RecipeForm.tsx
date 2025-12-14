@@ -111,6 +111,19 @@ export function RecipeForm() {
             return
         }
 
+        // Custom Validation
+        const validIngredients = formData.ingredients.filter(ing => ing.name.trim() !== "")
+        if (validIngredients.length === 0) {
+            showSnackbar("Agrega al menos un ingrediente", "error")
+            return
+        }
+
+        const validSteps = formData.steps.filter(step => step.content.trim() !== "")
+        if (validSteps.length === 0) {
+            showSnackbar("Agrega al menos un paso de preparación", "error")
+            return
+        }
+
         setLoading(true)
 
         try {
@@ -185,6 +198,7 @@ export function RecipeForm() {
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
                     <Textarea
+                        required
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Cuéntanos un poco sobre esta delicia..."
@@ -198,6 +212,7 @@ export function RecipeForm() {
                             <Clock className="inline w-4 h-4 mr-1" /> Prep (min)
                         </label>
                         <Input
+                            required
                             type="number"
                             value={formData.prep_time}
                             onChange={e => setFormData({ ...formData, prep_time: e.target.value })}
@@ -209,6 +224,7 @@ export function RecipeForm() {
                             <ChefHat className="inline w-4 h-4 mr-1" /> Cocción (min)
                         </label>
                         <Input
+                            required
                             type="number"
                             value={formData.cook_time}
                             onChange={e => setFormData({ ...formData, cook_time: e.target.value })}
@@ -425,17 +441,21 @@ export function RecipeForm() {
                 ))}
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-4 pt-6 mt-8 border-t border-pink-100 dark:border-pink-900/50">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="flex-1 border-gray-300 text-gray-500 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-zinc-800"
+                    className="h-14 text-lg border-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-zinc-700 dark:text-gray-400 dark:hover:bg-zinc-800"
                 >
                     <X className="w-5 h-5 mr-2" />
                     Cancelar
                 </Button>
-                <Button type="submit" className="flex-[2] bg-pink-500 hover:bg-pink-600 text-white text-lg py-6 rounded-xl" disabled={loading}>
+                <Button
+                    type="submit"
+                    className="h-14 text-lg bg-pink-500 hover:bg-pink-600 text-white shadow-lg shadow-pink-200 dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={loading}
+                >
                     {loading ? "Guardando..." : (
                         <>
                             <Save className="w-5 h-5 mr-2" />

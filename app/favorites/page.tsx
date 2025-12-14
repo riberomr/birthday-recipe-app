@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { Recipe } from "@/types";
 import { RecipeCard } from "@/components/RecipeCard";
 import { Loader2 } from "lucide-react";
+import { getAverageRating } from "@/lib/utils";
 
 export default function FavoritesPage() {
     const { user, isLoading: authLoading } = useAuth();
@@ -30,13 +31,25 @@ export default function FavoritesPage() {
             try {
                 const { data, error } = await supabase
                     .from("favorites")
-                    .select("recipe_id, recipes(*)")
+                    .select(`
+                        recipe_id,
+                        recipes (
+                        *,
+                        ratings (rating)
+                        )
+                    `)
                     .eq("user_id", user.id);
 
                 if (error) throw error;
-
+                console.log(data)
                 // Transform data to match Recipe type (handling the join)
-                const recipes = data.map((item: any) => item.recipes) as Recipe[];
+                const recipes = data.map((item: any) => {
+                    const average_rating = getAverageRating(item.recipes.ratings)
+                    return {
+                        ...item.recipes,
+                        average_rating
+                    }
+                }) as Recipe[];
                 setFavorites(recipes);
             } catch (error) {
                 console.error("Error fetching favorites:", error);

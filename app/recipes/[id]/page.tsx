@@ -11,6 +11,7 @@ import { ShareButtons } from "@/components/ShareButtons"
 import { PrintButton } from "@/components/PrintButton"
 import { IngredientScaler } from "@/components/IngredientScaler"
 import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel"
+import { FavoriteButton } from "@/components/FavoriteButton"
 
 export const dynamic = "force-dynamic"
 
@@ -69,6 +70,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 {recipe.title}
                             </h1>
                             <div className="flex gap-2">
+                                <FavoriteButton recipeId={recipe.id} />
                                 <ShareButtons title={recipe.title} />
                                 {/* <PrintButton /> */}
                                 <DownloadButton />
