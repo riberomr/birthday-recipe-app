@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { supabase } from "@/lib/supabase"
+import { getComments, postComment } from "@/lib/api/comments"
 import { Send, Camera, X } from "lucide-react"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
@@ -35,7 +35,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
     useEffect(() => {
-        fetchComments()
+        fetchCommentsData()
     }, [recipeId])
 
     // Cleanup preview URL
@@ -47,25 +47,15 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
         }
     }, [previewUrl])
 
-    const fetchComments = async () => {
-        const { data, error } = await supabase
-            .from("comments")
-            .select(`
-                *,
-                profiles (
-                    full_name,
-                    avatar_url
-                )
-            `)
-            .eq("recipe_id", recipeId)
-            .order("created_at", { ascending: false })
-
-        if (error) {
+    const fetchCommentsData = async () => {
+        try {
+            const data = await getComments(recipeId)
+            setComments(data as any[])
+        } catch (error) {
             console.error("Error fetching comments:", error)
-        } else {
-            setComments(data || [])
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,20 +90,11 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                 formData.append('file', finalFile)
             }
 
-            const response = await fetch('/api/comments/create', {
-                method: 'POST',
-                body: formData,
-            })
-
-            const result = await response.json()
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Error al publicar comentario')
-            }
+            await postComment(formData)
 
             setComment("")
             clearImage()
-            fetchComments()
+            fetchCommentsData()
             showSnackbar("¡Comentario publicado!", "success")
         } catch (error: any) {
             console.error("Error saving comment:", error)

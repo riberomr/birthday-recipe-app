@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { checkIsFavorite, toggleFavorite } from "@/lib/api/favorites";
 import { useAuth } from "@/components/AuthContext";
 import { useSnackbar } from "@/components/ui/Snackbar";
 import { cn } from "@/lib/utils";
@@ -28,22 +28,14 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
 
     const checkIfFavorite = async () => {
         try {
-            const { data, error } = await supabase
-                .from("favorites")
-                .select("*")
-                .eq("user_id", user?.id)
-                .eq("recipe_id", recipeId)
-                .single();
-
-            if (data) {
-                setIsFavorite(true);
-            }
+            const isFav = await checkIsFavorite(user!.id, recipeId);
+            setIsFavorite(isFav);
         } catch (error) {
-            // Ignore error if not found (it just means it's not a favorite)
+            // Ignore error
         }
     };
 
-    const toggleFavorite = async (e: React.MouseEvent) => {
+    const handleToggleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -56,25 +48,9 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
         setLoading(true);
 
         try {
-            if (isFavorite) {
-                const { error } = await supabase
-                    .from("favorites")
-                    .delete()
-                    .eq("user_id", user.id)
-                    .eq("recipe_id", recipeId);
-
-                if (error) throw error;
-                setIsFavorite(false);
-                showSnackbar("Eliminado de favoritos", "success");
-            } else {
-                const { error } = await supabase
-                    .from("favorites")
-                    .insert([{ user_id: user.id, recipe_id: recipeId }]);
-
-                if (error) throw error;
-                setIsFavorite(true);
-                showSnackbar("Agregado a favoritos", "success");
-            }
+            const newStatus = await toggleFavorite(user.id, recipeId, isFavorite);
+            setIsFavorite(newStatus);
+            showSnackbar(newStatus ? "Agregado a favoritos" : "Eliminado de favoritos", "success");
         } catch (error) {
             console.error("Error toggling favorite:", error);
             showSnackbar("Error al actualizar favoritos", "error");
@@ -105,7 +81,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
                 sizeClasses[size],
                 className
             )}
-            onClick={toggleFavorite}
+            onClick={handleToggleFavorite}
             disabled={loading}
         >
             <Heart

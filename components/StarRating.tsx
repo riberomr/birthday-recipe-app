@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { supabase } from "@/lib/supabase"
+import { getUserRating, upsertRating } from "@/lib/api/ratings"
 import { useAuth } from "./AuthContext"
 
 interface StarRatingProps {
@@ -33,15 +33,11 @@ export function StarRating({
     const fetchUserRating = async () => {
         if (!recipeId || !user) return
 
-        const { data } = await supabase
-            .from("ratings")
-            .select("rating")
-            .eq("recipe_id", recipeId)
-            .eq("user_id", user.id)
-            .single()
-
-        if (data) {
-            setRating(data.rating)
+        try {
+            const userRating = await getUserRating(user.id, recipeId)
+            setRating(userRating)
+        } catch (error) {
+            console.error("Error fetching rating:", error)
         }
     }
 
@@ -53,21 +49,7 @@ export function StarRating({
         setRating(newRating)
 
         try {
-            const { error } = await supabase
-                .from("ratings")
-                .upsert(
-                    {
-                        recipe_id: recipeId,
-                        user_id: user.id,
-                        rating: newRating
-                    },
-                    {
-                        onConflict: 'recipe_id,user_id'
-                    }
-                )
-
-            if (error) throw error
-
+            await upsertRating(user.id, recipeId, newRating)
             onRatingChange?.(newRating)
         } catch (error) {
             console.error("Error saving rating:", error)

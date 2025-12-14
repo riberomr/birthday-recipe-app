@@ -1,4 +1,4 @@
-import { getRecipe } from "@/lib/getRecipes"
+import { getRecipe } from "@/lib/api/recipes"
 import { CookingModeClient } from "@/components/CookingModeClient"
 import { notFound } from "next/navigation"
 

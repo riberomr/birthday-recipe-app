@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { getRecipes, getCategories } from "@/lib/getRecipes"
+import { getRecipes, getCategories } from "@/lib/api/recipes"
 import { RecipeListClient } from "@/components/RecipeListClient"
 
 export const dynamic = "force-dynamic"
