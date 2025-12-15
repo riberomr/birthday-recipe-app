@@ -9,8 +9,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Birthday Recipe App",
-  description: "A kawaii birthday recipe collection",
+  title: "Recetario La María",
+  description: "Recetas de mi cocina a la tuya",
 };
 
 export default function RootLayout({
