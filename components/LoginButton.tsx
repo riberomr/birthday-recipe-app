@@ -21,12 +21,12 @@ export function LoginButton() {
                     <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900 overflow-hidden border-2 border-pink-200 dark:border-pink-800">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                            src={user.user_metadata.avatar_url}
-                            alt={user.user_metadata.full_name}
+                            src={user.photoURL || ''}
+                            alt={user.displayName || 'User'}
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <span className="hidden sm:inline">{user.user_metadata.full_name}</span>
+                    <span className="hidden sm:inline">{user.displayName}</span>
                 </div>
                 <Button
                     variant="ghost"

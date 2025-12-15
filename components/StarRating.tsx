@@ -34,7 +34,7 @@ export function StarRating({
         if (!recipeId || !user) return
 
         try {
-            const userRating = await getUserRating(user.id, recipeId)
+            const userRating = await getUserRating(user.uid, recipeId)
             setRating(userRating)
         } catch (error) {
             console.error("Error fetching rating:", error)
@@ -49,7 +49,7 @@ export function StarRating({
         setRating(newRating)
 
         try {
-            await upsertRating(user.id, recipeId, newRating)
+            await upsertRating(user.uid, recipeId, newRating)
             onRatingChange?.(newRating)
         } catch (error) {
             console.error("Error saving rating:", error)

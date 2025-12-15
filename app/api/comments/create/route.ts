@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth'
 
 export async function POST(request: Request) {
     // Initialize Supabase client with Service Role Key for backend operations
@@ -18,14 +19,30 @@ export async function POST(request: Request) {
     let uploadedImagePath: string | null = null
 
     try {
+        // 1. Verify Authentication
+        const decodedToken = await getUserFromRequest(request);
+        if (!decodedToken) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        // 2. Get User from Supabase (sync if needed)
+        const user = await getSupabaseUserFromFirebaseUid(
+            decodedToken.uid,
+            decodedToken.email,
+            decodedToken.name,
+            decodedToken.picture
+        );
+
         const formData = await request.formData()
 
         const content = formData.get('content') as string
         const recipeId = formData.get('recipe_id') as string
-        const userId = formData.get('user_id') as string
         const file = formData.get('file') as File | null
 
-        if (!content || !recipeId || !userId) {
+        if (!content || !recipeId) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
@@ -72,7 +89,7 @@ export async function POST(request: Request) {
             .insert({
                 content,
                 recipe_id: recipeId,
-                user_id: userId,
+                user_id: user.uid, // Use the verified user ID
                 image_url: imageUrl
             })
             .select(`

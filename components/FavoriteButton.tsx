@@ -28,7 +28,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
 
     const checkIfFavorite = async () => {
         try {
-            const isFav = await checkIsFavorite(user!.id, recipeId);
+            const isFav = await checkIsFavorite(user!.uid, recipeId);
             setIsFavorite(isFav);
         } catch (error) {
             // Ignore error
@@ -48,7 +48,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
         setLoading(true);
 
         try {
-            const newStatus = await toggleFavorite(user.id, recipeId, isFavorite);
+            const newStatus = await toggleFavorite(user.uid, recipeId, isFavorite);
             setIsFavorite(newStatus);
             showSnackbar(newStatus ? "Agregado a favoritos" : "Eliminado de favoritos", "success");
         } catch (error) {
