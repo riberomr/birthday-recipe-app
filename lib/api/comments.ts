@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { auth } from "@/lib/firebase/client";
 
 export async function getComments(recipeId: string) {
