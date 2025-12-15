@@ -28,7 +28,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
 
     const checkIfFavorite = async () => {
         try {
-            const isFav = await checkIsFavorite(user!.id, recipeId);
+            const isFav = await checkIsFavorite(user!.uid, recipeId);
             setIsFavorite(isFav);
         } catch (error) {
             // Ignore error
