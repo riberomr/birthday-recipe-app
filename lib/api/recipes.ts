@@ -1,4 +1,4 @@
-import { supabase } from "../supabase"
+import { supabase } from "../supabase/client"
 import { Recipe, RecipeCategory } from "@/types"
 import { getAverageRating } from "../utils"
 

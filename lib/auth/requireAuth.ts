@@ -1,5 +1,5 @@
 import { adminAuth } from "@/lib/firebase/admin";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function getUserFromRequest(req: Request) {
     const authHeader = req.headers.get("authorization");
@@ -17,7 +17,7 @@ export async function getUserFromRequest(req: Request) {
 
 export async function getSupabaseUserFromFirebaseUid(firebaseUid: string, email?: string, name?: string, avatarUrl?: string) {
     // 1. Try to find the user in profiles by firebase_uid
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseAdmin
         .from("profiles")
         .select("*")
         .eq("firebase_uid", firebaseUid)
@@ -31,7 +31,7 @@ export async function getSupabaseUserFromFirebaseUid(firebaseUid: string, email?
 
     if (!email) throw new Error("Email is required to create a user");
 
-    const { data: newUser, error: createError } = await supabase
+    const { data: newUser, error: createError } = await supabaseAdmin
         .from("profiles")
         .insert({
             firebase_uid: firebaseUid,

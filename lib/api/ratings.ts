@@ -1,5 +1,5 @@
 import { auth } from "@/lib/firebase/client";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 
 export async function getUserRating(userId: string, recipeId: string) {
     // Reading public/user data via Supabase client is fine if RLS allows it.
