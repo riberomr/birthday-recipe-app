@@ -1,57 +1,37 @@
-import { supabase } from "@/lib/supabase";
+import { auth } from "@/lib/firebase/client";
 import { Recipe } from "@/types";
-import { getAverageRating } from "../utils";
 
 export async function getFavorites(userId: string) {
-    const { data, error } = await supabase
-        .from("favorites")
-        .select(`
-                recipe_id,
-                recipes (
-                *,
-                ratings (rating)
-                )
-        `)
-        .eq("user_id", userId);
-    console.log(data)
-    const recipes = data?.map((item: any) => {
-        const average_rating = getAverageRating(item.recipes.ratings)
-        return {
-            ...item.recipes,
-            average_rating
-        }
-    }) as Recipe[];
-    if (error) throw error;
-
-    return recipes;
+    const response = await fetch(`/api/favorites?userId=${userId}`);
+    if (!response.ok) throw new Error("Error fetching favorites");
+    return await response.json() as Recipe[];
 }
 
 export async function checkIsFavorite(userId: string, recipeId: string) {
-    const { data, error } = await supabase
-        .from("favorites")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("recipe_id", recipeId)
-        .single();
-
-    if (error && error.code !== 'PGRST116') throw error; // Ignore not found error
-    return !!data;
+    // This optimization (checking local cache or simple query) might be tricky via API 
+    // without fetching all favorites. For now, let's fetch all and check.
+    // Or better, we can assume the UI handles this state via the list of favorites.
+    // But to keep API consistent, we might need a specific endpoint or just fetch all.
+    // Let's fetch all for now as it's simpler and lists aren't huge.
+    const favorites = await getFavorites(userId);
+    return favorites.some(r => r.id === recipeId);
 }
 
 export async function toggleFavorite(userId: string, recipeId: string, isFavorite: boolean) {
-    if (isFavorite) {
-        const { error } = await supabase
-            .from("favorites")
-            .delete()
-            .eq("user_id", userId)
-            .eq("recipe_id", recipeId);
-        if (error) throw error;
-        return false; // Now it's not a favorite
-    } else {
-        const { error } = await supabase
-            .from("favorites")
-            .insert([{ user_id: userId, recipe_id: recipeId }]);
-        if (error) throw error;
-        return true; // Now it is a favorite
-    }
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+    const token = await user.getIdToken();
+
+    const response = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ recipeId })
+    });
+
+    if (!response.ok) throw new Error("Error toggling favorite");
+    const result = await response.json();
+    return result.isFavorite;
 }

@@ -1,6 +1,9 @@
+import { auth } from "@/lib/firebase/client";
 import { supabase } from "@/lib/supabase";
 
 export async function getUserRating(userId: string, recipeId: string) {
+    // Reading public/user data via Supabase client is fine if RLS allows it.
+    // Ratings are generally public or at least readable.
     const { data, error } = await supabase
         .from("ratings")
         .select("rating")
@@ -13,18 +16,18 @@ export async function getUserRating(userId: string, recipeId: string) {
 }
 
 export async function upsertRating(userId: string, recipeId: string, rating: number) {
-    const { error } = await supabase
-        .from("ratings")
-        .upsert(
-            {
-                recipe_id: recipeId,
-                user_id: userId,
-                rating: rating
-            },
-            {
-                onConflict: 'recipe_id,user_id'
-            }
-        );
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+    const token = await user.getIdToken();
 
-    if (error) throw error;
+    const response = await fetch('/api/ratings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ recipeId, rating })
+    });
+
+    if (!response.ok) throw new Error("Error saving rating");
 }
