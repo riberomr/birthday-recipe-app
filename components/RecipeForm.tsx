@@ -136,7 +136,7 @@ export function RecipeForm() {
             submitData.append('cook_time', formData.cook_time)
             submitData.append('difficulty', formData.difficulty)
             submitData.append('servings', formData.servings)
-            submitData.append('user_id', user.id)
+            submitData.append('user_id', user.uid)
 
             let finalFile = selectedImage
             // Append file if selected

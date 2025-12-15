@@ -89,7 +89,7 @@ export async function POST(request: Request) {
             .insert({
                 content,
                 recipe_id: recipeId,
-                user_id: user.id, // Use the verified user ID
+                user_id: user.uid, // Use the verified user ID
                 image_url: imageUrl
             })
             .select(`

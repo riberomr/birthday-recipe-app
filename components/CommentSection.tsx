@@ -82,7 +82,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
             const formData = new FormData()
             formData.append('content', comment)
             formData.append('recipe_id', recipeId)
-            formData.append('user_id', user.id)
+            formData.append('user_id', user.uid)
 
             let finalFile = selectedImage
             if (selectedImage) {
