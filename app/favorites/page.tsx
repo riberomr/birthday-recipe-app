@@ -28,7 +28,7 @@ export default function FavoritesPage() {
             if (!user) return;
 
             try {
-                const data = await getFavorites(user.id);
+                const data = await getFavorites(user.uid);
 
                 setFavorites(data);
             } catch (error) {
