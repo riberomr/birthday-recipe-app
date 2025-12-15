@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { auth } from "@/lib/firebase/client";
 
 export async function getComments(recipeId: string) {
     const { data, error } = await supabase
@@ -18,8 +19,18 @@ export async function getComments(recipeId: string) {
 }
 
 export async function postComment(formData: FormData) {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Usuario no autenticado");
+    }
+
+    const token = await user.getIdToken();
+
     const response = await fetch('/api/comments/create', {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
         body: formData,
     });
 

@@ -1,8 +1,8 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
+import React, { createContext, useContext } from 'react';
+import { User } from 'firebase/auth';
+import { useFirebaseAuth } from '@/features/auth/hooks/useAuth';
 
 type AuthContextType = {
     user: User | null;
@@ -14,50 +14,10 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-        };
-
-        getUser();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
-            setUser(session?.user ?? null);
-            setIsLoading(false);
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [supabase]);
-
-    const login = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            },
-        });
-
-        if (error) {
-            console.error("Error logging in with Google:", error);
-        }
-    };
-
-    const logout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error("Error logging out:", error);
-        }
-    };
+    const { user, loading, loginWithGoogle, logout } = useFirebaseAuth();
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, login: loginWithGoogle, logout, isLoading: loading }}>
             {children}
         </AuthContext.Provider>
     );
