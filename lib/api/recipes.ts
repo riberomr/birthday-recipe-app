@@ -91,9 +91,18 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
     return data
 }
 
+import { auth } from "@/lib/firebase/client";
+
 export async function createRecipe(formData: FormData) {
-    const response = await fetch('/app/api/create-recipe-with-image', {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+    const token = await user.getIdToken();
+
+    const response = await fetch('/api/create-recipe-with-image', {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
         body: formData,
     });
 

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth'
 
 export async function POST(request: Request) {
     // Initialize Supabase client with Service Role Key for backend operations
@@ -19,6 +20,23 @@ export async function POST(request: Request) {
     let uploadedImagePath: string | null = null
 
     try {
+        // 1. Verify Authentication
+        const decodedToken = await getUserFromRequest(request);
+        if (!decodedToken) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        // 2. Get User from Supabase (sync if needed)
+        const user = await getSupabaseUserFromFirebaseUid(
+            decodedToken.uid,
+            decodedToken.email,
+            decodedToken.name,
+            decodedToken.picture
+        );
+
         const formData = await request.formData()
 
         // Extract fields
@@ -28,7 +46,7 @@ export async function POST(request: Request) {
         const cookTime = parseInt(formData.get('cook_time') as string) || 0
         const difficulty = formData.get('difficulty') as string
         const servings = parseInt(formData.get('servings') as string) || 4
-        const userId = formData.get('user_id') as string
+        // const userId = formData.get('user_id') as string // IGNORE client provided ID
 
         // Extract JSON fields
         const ingredients = JSON.parse(formData.get('ingredients') as string)
@@ -70,13 +88,6 @@ export async function POST(request: Request) {
 
             imageUrl = publicUrl
         } else {
-            // Allow creating without image if user didn't select one, or handle as error if mandatory
-            // For now, we'll allow it but the prompt implies we are adding support for it.
-            // If the user sends a URL string (e.g. from previous logic), we could handle it, 
-            // but the prompt focuses on file upload. 
-            // Let's check if there's an 'image_url' string passed as fallback?
-            // The prompt says "Enviar esa imagen... usando FormData".
-            // We'll assume if no file, no image, or maybe an existing URL string.
             const existingUrl = formData.get('image_url') as string
             if (existingUrl) imageUrl = existingUrl
         }
@@ -92,7 +103,7 @@ export async function POST(request: Request) {
                 image_url: imageUrl,
                 difficulty,
                 servings,
-                user_id: userId
+                user_id: user.id // Use verified user ID
             })
             .select()
             .single()
