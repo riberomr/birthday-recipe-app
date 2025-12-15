@@ -20,7 +20,7 @@ export function Navbar() {
                         <ChefHat className="h-5 w-5 text-pink-500" />
                     </div>
                     <span className="font-bold text-lg bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent hidden sm:block">
-                        Kawaii Recipes
+                        Recetario La María
                     </span>
                 </Link>
 

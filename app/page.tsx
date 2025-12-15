@@ -4,7 +4,6 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Cake, ChefHat, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
   return (

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { RecipeIngredient } from "@/types";
-import { Users } from "lucide-react";
+import { Minus, Plus, Users } from "lucide-react";
 import { scaleAmount } from "@/lib/utils";
 
 interface IngredientScalerProps {
@@ -30,6 +30,23 @@ export function IngredientScaler({ initialServings, ingredients }: IngredientSca
                     onChange={(e) => setServings(Math.max(1, parseInt(e.target.value) || 1))}
                     className="w-20 border-pink-200 focus-visible:ring-pink-400 bg-white dark:bg-zinc-900"
                 />
+                <div className="flex items-center gap-2 print:hidden">
+                    <button
+                        type="button"
+                        onClick={() => setServings(servings + 1)}
+                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
+                    >
+                        <Plus />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setServings(servings - 1)}
+                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors disabled:opacity-50"
+                        disabled={servings === 1}
+                    >
+                        <Minus />
+                    </button>
+                </div>
             </div>
 
             <ul className="space-y-2">
