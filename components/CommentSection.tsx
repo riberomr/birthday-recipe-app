@@ -112,8 +112,8 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                 <form onSubmit={handleSubmit} className="flex gap-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={user.user_metadata.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                        alt={user.user_metadata.full_name || 'User'}
+                        src={user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                        alt={user.displayName || 'User'}
                         className="w-10 h-10 rounded-full border border-pink-200 shrink-0"
                     />
                     <div className="flex-1 space-y-2">
