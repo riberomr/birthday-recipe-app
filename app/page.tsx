@@ -50,7 +50,7 @@ export default function Home() {
           <Link href="/fotos" className="w-full">
             <Button variant="outline" size="lg" className="w-full text-xl py-8 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600">
               <Camera className="mr-2 h-6 w-6" />
-              Fotos (Próximamente)
+              Fotos
             </Button>
           </Link>
         </div>

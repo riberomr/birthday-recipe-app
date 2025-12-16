@@ -14,8 +14,8 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe }: RecipeCardProps) {
     return (
         <Link href={`/recipes/${recipe.id}`}>
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow border-pink-100 dark:border-pink-900/50 h-full flex flex-col">
-                <div className="relative h-48 w-full bg-pink-100 dark:bg-zinc-800">
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow border-border h-full flex flex-col bg-card">
+                <div className="relative h-48 w-full bg-muted">
                     {recipe.image_url ? (
                         <Image
                             src={recipe.image_url}
@@ -28,8 +28,14 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             🥘
                         </div>
                     )}
-                    <div className="absolute top-2 right-2 z-10">
-                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-white/80 backdrop-blur-sm hover:bg-white dark:bg-black/50 dark:hover:bg-black/70" />
+                    <div
+                        className="absolute top-2 right-2 z-10"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }}
+                    >
+                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-white/80 backdrop-blur-sm hover:bg-white dark:bg-black/50 dark:hover:bg-black/70 min-h-[44px] min-w-[44px]" />
                     </div>
                 </div>
                 <CardHeader className="p-4 pb-2">
