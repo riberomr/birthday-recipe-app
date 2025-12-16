@@ -8,6 +8,7 @@ import { getComments, postComment } from "@/lib/api/comments"
 import { Send, Camera, X } from "lucide-react"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
+import { CommentSkeleton } from "@/components/CommentSkeleton"
 
 type Comment = {
     id: string
@@ -29,7 +30,10 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     const { showSnackbar } = useSnackbar()
     const [comment, setComment] = useState("")
     const [comments, setComments] = useState<Comment[]>([])
+    const [total, setTotal] = useState(0)
+    const [page, setPage] = useState(1)
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
     const [submitting, setSubmitting] = useState(false)
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -49,12 +53,31 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
 
     const fetchCommentsData = async () => {
         try {
-            const data = await getComments(recipeId)
+            setLoading(true)
+            const { comments: data, total: count } = await getComments(recipeId, 1, 5)
             setComments(data as any[])
+            setTotal(count)
+            setPage(1)
         } catch (error) {
             console.error("Error fetching comments:", error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const loadMoreComments = async () => {
+        if (loadingMore || comments.length >= total) return
+
+        setLoadingMore(true)
+        try {
+            const nextPage = page + 1
+            const { comments: newComments } = await getComments(recipeId, nextPage, 5)
+            setComments(prev => [...prev, ...newComments as any[]])
+            setPage(nextPage)
+        } catch (error) {
+            console.error("Error loading more comments:", error)
+        } finally {
+            setLoadingMore(false)
         }
     }
 
@@ -106,7 +129,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
 
     return (
         <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">Comentarios</h3>
+            <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">Comentarios ({total})</h3>
 
             {user ? (
                 <form onSubmit={handleSubmit} className="flex gap-4">
@@ -171,42 +194,61 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                 </div>
             )}
 
-            <div className="space-y-4 mt-8">
+            <div className="space-y-4 mt-8 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 {loading ? (
-                    <p className="text-center text-gray-500">Cargando comentarios...</p>
+                    <>
+                        <CommentSkeleton />
+                        <CommentSkeleton />
+                        <CommentSkeleton />
+                    </>
                 ) : comments.length === 0 ? (
-                    <p className="text-center text-gray-500">No hay comentarios aún. ¡Sé el primero!</p>
+                    <p className="text-center text-gray-500 py-8">No hay comentarios aún. ¡Sé el primero!</p>
                 ) : (
-                    comments.map((comment: any) => (
-                        <div key={comment.id} className="flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-pink-100 dark:border-pink-900/50 shadow-sm">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={comment.profiles?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                                alt={comment.profiles?.full_name || 'User'}
-                                className="w-10 h-10 rounded-full border border-pink-100 shrink-0"
-                            />
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-bold text-gray-900 dark:text-gray-100">
-                                        {comment.profiles?.full_name || 'Usuario'}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        {new Date(comment.created_at).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comment.content}</p>
-                                {comment.image_url && (
-                                    <div className="mt-3">
-                                        <img
-                                            src={comment.image_url}
-                                            alt="Foto del comentario"
-                                            className="max-h-64 rounded-lg border border-pink-100 object-contain"
-                                        />
+                    <>
+                        {comments.map((comment: any) => (
+                            <div key={comment.id} className="flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-pink-100 dark:border-pink-900/50 shadow-sm">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                    src={comment.profiles?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                    alt={comment.profiles?.full_name || 'User'}
+                                    className="w-10 h-10 rounded-full border border-pink-100 shrink-0"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-bold text-gray-900 dark:text-gray-100">
+                                            {comment.profiles?.full_name || 'Usuario'}
+                                        </span>
+                                        <span className="text-xs text-gray-500">
+                                            {new Date(comment.created_at).toLocaleDateString()}
+                                        </span>
                                     </div>
-                                )}
+                                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+                                    {comment.image_url && (
+                                        <div className="mt-3">
+                                            <img
+                                                src={comment.image_url}
+                                                alt="Foto del comentario"
+                                                className="max-h-64 rounded-lg border border-pink-100 object-contain"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        ))}
+
+                        {comments.length < total && (
+                            <div className="flex justify-center pt-2 pb-4">
+                                <Button
+                                    variant="outline"
+                                    onClick={loadMoreComments}
+                                    disabled={loadingMore}
+                                    className="text-pink-500 border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                                >
+                                    {loadingMore ? "Cargando..." : "Cargar más comentarios"}
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

@@ -1,8 +1,11 @@
 import { supabase } from "@/lib/supabase/client";
 import { auth } from "@/lib/firebase/client";
 
-export async function getComments(recipeId: string) {
-    const { data, error } = await supabase
+export async function getComments(recipeId: string, page: number = 1, limit: number = 5) {
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    const { data, error, count } = await supabase
         .from("comments")
         .select(`
             *,
@@ -10,12 +13,14 @@ export async function getComments(recipeId: string) {
                 full_name,
                 avatar_url
             )
-        `)
+        `, { count: 'exact' })
         .eq("recipe_id", recipeId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to)
 
     if (error) throw error;
-    return data || [];
+
+    return { comments: data || [], total: count || 0 };
 }
 
 export async function postComment(formData: FormData) {

@@ -2,7 +2,7 @@ import { getRecipe, getRecipeCommunityPhotos } from "@/lib/api/recipes"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, Clock, ChefHat, Play, Camera } from "lucide-react"
+import { ArrowLeft, Clock, ChefHat, Play } from "lucide-react"
 import { notFound } from "next/navigation"
 import { StarRating } from "@/components/StarRating"
 import { CommentSection } from "@/components/CommentSection"
@@ -11,6 +11,7 @@ import { ShareButtons } from "@/components/ShareButtons"
 import { IngredientScaler } from "@/components/IngredientScaler"
 import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel"
 import { FavoriteButton } from "@/components/FavoriteButton"
+import { RatingSection } from "@/components/RatingSection"
 
 export const dynamic = "force-dynamic"
 
@@ -156,12 +157,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                             </div>
 
                             <div className="border-t border-pink-100 dark:border-pink-900/50 pt-8">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-                                        Calificar Receta
-                                    </h3>
-                                    <StarRating recipeId={id} size="lg" />
-                                </div>
+                                <RatingSection recipeId={id} />
                                 <CommentSection recipeId={id} />
                             </div>
                         </div>

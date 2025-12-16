@@ -7,8 +7,8 @@ import { RecipeListClient } from "@/components/RecipeListClient"
 export const dynamic = "force-dynamic"
 
 export default async function RecipesPage() {
-    const [recipes, categories] = await Promise.all([
-        getRecipes(),
+    const [{ recipes, total }, categories] = await Promise.all([
+        getRecipes(1, 6), // Initial fetch
         getCategories(),
     ])
 
@@ -24,7 +24,7 @@ export default async function RecipesPage() {
                     <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">Recetas</h1>
                 </div>
 
-                <RecipeListClient initialRecipes={recipes} categories={categories} />
+                <RecipeListClient initialRecipes={recipes} initialTotal={total} categories={categories} />
             </div>
         </div>
     )
