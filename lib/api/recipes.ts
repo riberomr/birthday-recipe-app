@@ -30,7 +30,7 @@ export async function getRecipes(
     filters: RecipeFilters = {}
 ): Promise<{ recipes: Recipe[]; total: number }> {
 
-    const hasTagsFilter = filters.tags && filters.tags.length > 0
+    const hasTagsFilter = !!(filters.tags && filters.tags.length > 0)
 
     let query = supabase
         .from("recipes")
@@ -42,7 +42,7 @@ export async function getRecipes(
       recipe_tags${hasTagsFilter ? '!inner' : ''} (
       tag_id,
       tags (*)
-    )
+        )
     `, { count: 'exact' })
 
     // Apply filters

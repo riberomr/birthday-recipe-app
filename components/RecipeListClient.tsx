@@ -31,26 +31,13 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
         tags: []
     })
 
-    // Debounce search to avoid too many requests
-    const [debouncedFilters, setDebouncedFilters] = useState(filters)
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedFilters(filters)
-        }, 500)
-        return () => clearTimeout(timer)
-    }, [filters])
-
     // Reset when filters change
     useEffect(() => {
-        // Skip initial load
-        if (debouncedFilters === filters && page === 1 && recipes === initialRecipes) return
-
         const fetchFilteredRecipes = async () => {
             setLoading(true)
             setPage(1)
             try {
-                const { recipes: newRecipes, total: newTotal } = await getRecipes(1, 6, debouncedFilters)
+                const { recipes: newRecipes, total: newTotal } = await getRecipes(1, 6, filters)
                 setRecipes(newRecipes)
                 setTotal(newTotal)
                 setHasMore(newRecipes.length < newTotal)
@@ -63,7 +50,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
 
         fetchFilteredRecipes()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedFilters])
+    }, [filters])
 
     const loadMore = async () => {
         if (loading || !hasMore) return
@@ -71,7 +58,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
         setLoading(true)
         const nextPage = page + 1
         try {
-            const { recipes: newRecipes, total: newTotal } = await getRecipes(nextPage, 6, debouncedFilters)
+            const { recipes: newRecipes, total: newTotal } = await getRecipes(nextPage, 6, filters)
             setRecipes(prev => [...prev, ...newRecipes])
             setPage(nextPage)
             setHasMore(recipes.length + newRecipes.length < newTotal)

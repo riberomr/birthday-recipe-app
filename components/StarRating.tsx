@@ -22,19 +22,19 @@ export function StarRating({
 }: StarRatingProps) {
     const [rating, setRating] = useState(initialRating)
     const [hoverRating, setHoverRating] = useState(0)
-    const { user } = useAuth()
+    const { supabaseUser } = useAuth()
 
     useEffect(() => {
-        if (recipeId && user && !readonly) {
+        if (recipeId && supabaseUser && !readonly) {
             fetchUserRating()
         }
-    }, [recipeId, user])
+    }, [recipeId, supabaseUser])
 
     const fetchUserRating = async () => {
-        if (!recipeId || !user) return
+        if (!recipeId || !supabaseUser) return
 
         try {
-            const userRating = await getUserRating(user.uid, recipeId)
+            const userRating = await getUserRating(supabaseUser.id, recipeId)
             setRating(userRating)
         } catch (error) {
             console.error("Error fetching rating:", error)
@@ -42,14 +42,14 @@ export function StarRating({
     }
 
     const handleRatingClick = async (newRating: number) => {
-        if (readonly || !user || !recipeId) return
+        if (readonly || !supabaseUser || !recipeId) return
 
         // Optimistic update
         const previousRating = rating
         setRating(newRating)
 
         try {
-            await upsertRating(user.uid, recipeId, newRating)
+            await upsertRating(supabaseUser.id, recipeId, newRating)
             onRatingChange?.(newRating)
         } catch (error) {
             console.error("Error saving rating:", error)
@@ -70,13 +70,13 @@ export function StarRating({
                 <button
                     key={star}
                     type="button"
-                    disabled={readonly || !user}
+                    disabled={readonly || !supabaseUser}
                     onClick={() => handleRatingClick(star)}
-                    onMouseEnter={() => !readonly && user && setHoverRating(star)}
-                    onMouseLeave={() => !readonly && user && setHoverRating(0)}
+                    onMouseEnter={() => !readonly && supabaseUser && setHoverRating(star)}
+                    onMouseLeave={() => !readonly && supabaseUser && setHoverRating(0)}
                     className={cn(
                         "transition-all duration-200 focus:outline-none",
-                        readonly || !user ? "cursor-default" : "cursor-pointer hover:scale-110"
+                        readonly || !supabaseUser ? "cursor-default" : "cursor-pointer hover:scale-110"
                     )}
                 >
                     <Star

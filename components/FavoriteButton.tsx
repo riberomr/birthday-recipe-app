@@ -15,20 +15,20 @@ interface FavoriteButtonProps {
 }
 
 export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteButtonProps) {
-    const { user } = useAuth();
+    const { supabaseUser } = useAuth();
     const { showSnackbar } = useSnackbar();
     const [isFavorite, setIsFavorite] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (user) {
+        if (supabaseUser) {
             checkIfFavorite();
         }
-    }, [user, recipeId]);
+    }, [supabaseUser, recipeId]);
 
     const checkIfFavorite = async () => {
         try {
-            const isFav = await checkIsFavorite(user!.uid, recipeId);
+            const isFav = await checkIsFavorite(supabaseUser!.id, recipeId);
             setIsFavorite(isFav);
         } catch (error) {
             // Ignore error
@@ -39,7 +39,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
         e.preventDefault();
         e.stopPropagation();
 
-        if (!user) {
+        if (!supabaseUser) {
             showSnackbar("Debes iniciar sesión para agregar a favoritos", "error");
             return;
         }
@@ -48,7 +48,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
         setLoading(true);
 
         try {
-            const newStatus = await toggleFavorite(user.uid, recipeId, isFavorite);
+            const newStatus = await toggleFavorite(supabaseUser.id, recipeId, isFavorite);
             setIsFavorite(newStatus);
             showSnackbar(newStatus ? "Agregado a favoritos" : "Eliminado de favoritos", "success");
         } catch (error) {
