@@ -13,7 +13,7 @@ export function Navbar() {
     const { showSnackbar } = useSnackbar()
 
     return (
-        <nav className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <nav className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 print:hidden">
             <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <div className="bg-pink-100 dark:bg-pink-900/50 p-2 rounded-full">
