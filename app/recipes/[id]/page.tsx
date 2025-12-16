@@ -27,7 +27,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
     const communityPhotos = await getRecipeCommunityPhotos(id)
 
-    console.log(communityPhotos, 'communityPhotos')
     if (!recipe) {
         notFound()
     }
@@ -37,7 +36,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {/* Print Header - Only visible when printing */}
             <div className="hidden print:block text-center mb-8 pt-8">
                 <h1 className="text-4xl font-bold text-black mb-2">{recipe.title}</h1>
-                <p className="text-gray-600 italic">Una receta de Kawaii Recipes</p>
+                <p className="text-gray-600 italic">Una receta de La María</p>
             </div>
 
             {/* Hero Image */}
