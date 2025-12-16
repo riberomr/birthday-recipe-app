@@ -33,7 +33,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-zinc-950 pb-20 print:bg-white print:pb-0">
+        <div className="min-h-screen bg-white dark:bg-zinc-950 pb-32 print:bg-white print:pb-0">
             {/* Print Header - Only visible when printing */}
             <div className="hidden print:block text-center mb-8 pt-8">
                 <h1 className="text-4xl font-bold text-black mb-2">{recipe.title}</h1>
@@ -55,9 +55,10 @@ export default async function RecipePage({ params }: RecipePageProps) {
                         🥘
                     </div>
                 )}
-                <Link href="/recipes" className="absolute top-4 left-4">
-                    <Button variant="secondary" size="icon" className="rounded-full shadow-md">
+                <Link href="/recipes" className="absolute top-4 left-4 z-20">
+                    <Button variant="secondary" size="icon" className="rounded-full shadow-md bg-white/80 backdrop-blur-md hover:bg-white dark:bg-black/50 dark:hover:bg-black/70 min-h-[44px] min-w-[44px]">
                         <ArrowLeft className="h-5 w-5" />
+                        <span className="sr-only">Volver a recetas</span>
                     </Button>
                 </Link>
             </div>
@@ -82,14 +83,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
                             {recipe.description}
                         </p>
 
-                        <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 py-4 border-t border-b border-gray-100 dark:border-gray-800 print:border-gray-300 print:text-black">
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                <span>Prep: {recipe.prep_time_minutes}m</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <ChefHat className="h-4 w-4" />
-                                <span>Cocción: {recipe.cook_time_minutes}m</span>
+                        <div className="flex sm:flex-row flex-col justify-between gap-6 text-sm text-gray-500 dark:text-gray-400 py-4 border-t border-b border-gray-100 dark:border-gray-800 print:border-gray-300 print:text-black">
+                            <div className="flex gap-4">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4" />
+                                    <span>Prep: {recipe.prep_time_minutes}m</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <ChefHat className="h-4 w-4" />
+                                    <span>Cocción: {recipe.cook_time_minutes}m</span>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 print:hidden">
                                 <StarRating recipeId={id} rating={recipe.average_rating?.rating || 0} readonly size="sm" />

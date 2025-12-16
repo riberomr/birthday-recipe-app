@@ -111,32 +111,32 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
             </div>
 
             {/* Controls */}
-            <div className="p-6 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-gray-800 flex gap-4">
+            <div className="p-4 bg-white dark:bg-zinc-900 border-t border-border flex flex-wrap gap-2 justify-center">
                 <Button
                     variant="outline"
                     size="lg"
                     onClick={handlePrev}
                     disabled={isFirstStep}
-                    className="flex-1 h-16 text-lg rounded-xl"
+                    className="flex-1 min-w-[120px] h-14 text-base rounded-xl"
                 >
-                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Anterior
                 </Button>
                 <Button
                     variant="kawaii"
                     size="lg"
                     onClick={handleNext}
-                    className="flex-1 h-16 text-lg rounded-xl"
+                    className="flex-1 min-w-[120px] h-14 text-base rounded-xl"
                 >
                     {isLastStep ? (
                         <>
-                            <Check className="mr-2 h-5 w-5" />
+                            <Check className="mr-2 h-4 w-4" />
                             ¡Terminé!
                         </>
                     ) : (
                         <>
                             Siguiente
-                            <ArrowRight className="ml-2 h-5 w-5" />
+                            <ArrowRight className="ml-2 h-4 w-4" />
                         </>
                     )}
                 </Button>
