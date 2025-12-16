@@ -10,25 +10,24 @@ import { RecipeCard } from "@/components/RecipeCard";
 import { Loader2 } from "lucide-react";
 
 export default function FavoritesPage() {
-    const { user, isLoading: authLoading } = useAuth();
+    const { supabaseUser, isLoading: authLoading } = useAuth();
     const { showSnackbar } = useSnackbar();
     const router = useRouter();
     const [favorites, setFavorites] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && !user) {
+        if (!authLoading && !supabaseUser) {
             showSnackbar("Debes iniciar sesión para ver tus favoritos", "error");
             router.push("/");
         }
-    }, [user, authLoading, showSnackbar, router]);
-
+    }, [supabaseUser, authLoading, showSnackbar, router]);
     useEffect(() => {
         async function fetchFavoritesData() {
-            if (!user) return;
+            if (!supabaseUser) return;
 
             try {
-                const data = await getFavorites(user.uid);
+                const data = await getFavorites(supabaseUser.id);
 
                 setFavorites(data);
             } catch (error) {
@@ -39,12 +38,12 @@ export default function FavoritesPage() {
             }
         }
 
-        if (user) {
+        if (supabaseUser) {
             fetchFavoritesData();
         }
-    }, [user, showSnackbar]);
+    }, [supabaseUser, showSnackbar]);
 
-    if (authLoading || (loading && user)) {
+    if (authLoading || (loading && supabaseUser)) {
         return (
             <div className="flex justify-center items-center min-h-[50vh]">
                 <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
@@ -52,7 +51,7 @@ export default function FavoritesPage() {
         );
     }
 
-    if (!user) return null;
+    if (!supabaseUser) return null;
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">

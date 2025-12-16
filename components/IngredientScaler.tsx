@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { RecipeIngredient } from "@/types";
 import { Minus, Plus, Users } from "lucide-react";
 import { scaleAmount } from "@/lib/utils";
@@ -23,21 +22,7 @@ export function IngredientScaler({ initialServings, ingredients }: IngredientSca
                     <Users className="h-5 w-5" />
                     <span className="font-medium">Porciones:</span>
                 </div>
-                <Input
-                    type="number"
-                    min="1"
-                    value={servings}
-                    onChange={(e) => setServings(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-20 border-pink-200 focus-visible:ring-pink-400 bg-white dark:bg-zinc-900"
-                />
-                <div className="flex items-center gap-2 print:hidden">
-                    <button
-                        type="button"
-                        onClick={() => setServings(servings + 1)}
-                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
-                    >
-                        <Plus />
-                    </button>
+                <div className="flex items-center gap-2">
                     <button
                         type="button"
                         onClick={() => setServings(servings - 1)}
@@ -45,6 +30,18 @@ export function IngredientScaler({ initialServings, ingredients }: IngredientSca
                         disabled={servings === 1}
                     >
                         <Minus />
+                    </button>
+                    <span
+                        className="h-10 w-10 border-pink-200 focus-visible:ring-pink-400 bg-white dark:bg-zinc-900 flex items-center justify-center rounded-full"
+                    >
+                        {servings}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setServings(servings + 1)}
+                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors"
+                    >
+                        <Plus />
                     </button>
                 </div>
             </div>

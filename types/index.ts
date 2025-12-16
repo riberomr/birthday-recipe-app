@@ -53,7 +53,7 @@ export type Rating = {
     rating: number;
 };
 
-export type User = {
+export type SupabaseUser = {
     id: string;
     email: string;
     created_at: string;
