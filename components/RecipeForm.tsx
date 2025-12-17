@@ -10,28 +10,45 @@ import { supabase } from "@/lib/supabase/client"
 import { useAuth } from "@/components/AuthContext"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
-import { createRecipe } from "@/lib/api/recipes"
+import { createRecipe, updateRecipe } from "@/lib/api/recipes"
+import { Recipe } from "@/types"
 
-export function RecipeForm() {
+interface RecipeFormProps {
+    initialData?: Recipe
+    isEditing?: boolean
+}
+
+export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) {
     const router = useRouter()
-    const { user } = useAuth()
+    const { user, supabaseUser } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [loading, setLoading] = useState(false)
 
     const [tags, setTags] = useState<{ id: string, name: string }[]>([])
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.image_url || null)
+
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        prep_time: "",
-        cook_time: "",
-        difficulty: "medium",
-        servings: "4",
-        selectedTags: [] as string[],
-        ingredients: [{ name: "", amount: "", optional: false }],
-        steps: [{ content: "" }],
-        nutrition: [{ name: "", amount: "", unit: "" }]
+        title: initialData?.title || "",
+        description: initialData?.description || "",
+        prep_time: initialData?.prep_time_minutes?.toString() || "",
+        cook_time: initialData?.cook_time_minutes?.toString() || "",
+        difficulty: initialData?.difficulty || "medium",
+        servings: initialData?.servings?.toString() || "4",
+        selectedTags: initialData?.tags?.map(t => t.id) || [] as string[],
+        ingredients: initialData?.recipe_ingredients?.map(ing => ({
+            name: ing.name,
+            amount: ing.amount || "",
+            optional: ing.optional
+        })) || [{ name: "", amount: "", optional: false }],
+        steps: initialData?.recipe_steps?.map(step => ({
+            content: step.content
+        })) || [{ content: "" }],
+        nutrition: initialData?.recipe_nutrition?.map(nut => ({
+            name: nut.name,
+            amount: nut.amount,
+            unit: nut.unit || ""
+        })) || [{ name: "", amount: "", unit: "" }]
     })
 
     useEffect(() => {
@@ -42,14 +59,22 @@ export function RecipeForm() {
         fetchTags()
     }, [])
 
+    // Protect Edit Route
+    useEffect(() => {
+        if (isEditing && initialData && supabaseUser && supabaseUser.id !== initialData.user_id) {
+            router.push("/")
+            showSnackbar("No tienes permiso para editar esta receta", "error")
+        }
+    }, [supabaseUser, initialData, isEditing, router, showSnackbar])
+
     // Cleanup preview URL on unmount or when image changes
     useEffect(() => {
         return () => {
-            if (previewUrl) {
+            if (previewUrl && previewUrl !== initialData?.image_url) {
                 URL.revokeObjectURL(previewUrl)
             }
         }
-    }, [previewUrl])
+    }, [previewUrl, initialData])
 
     const addIngredient = () => {
         setFormData({
@@ -136,13 +161,16 @@ export function RecipeForm() {
             submitData.append('cook_time', formData.cook_time)
             submitData.append('difficulty', formData.difficulty)
             submitData.append('servings', formData.servings)
-            submitData.append('user_id', user.uid)
+            submitData.append('user_id', supabaseUser?.id!)
 
             let finalFile = selectedImage
             // Append file if selected
             if (selectedImage) {
                 finalFile = await compressImage(selectedImage)
                 submitData.append('file', finalFile)
+            } else if (isEditing && previewUrl === initialData?.image_url) {
+                // If editing and image hasn't changed, we don't send file, but we might need to signal to keep existing
+                submitData.append('keep_image', 'true')
             }
 
             // Append complex objects as JSON strings
@@ -151,50 +179,62 @@ export function RecipeForm() {
             submitData.append('nutrition', JSON.stringify(formData.nutrition.filter(item => item.name.trim() && item.amount.trim())))
             submitData.append('tags', JSON.stringify(formData.selectedTags))
 
-            const result = await createRecipe(submitData)
+            let result;
+            if (isEditing && initialData) {
+                result = await updateRecipe(initialData.id, submitData)
+                showSnackbar("Receta actualizada con éxito", "success")
+            } else {
+                result = await createRecipe(submitData)
+                showSnackbar("Receta creada con éxito", "success")
+            }
 
             router.push(`/recipes/${result.recipeId}`)
+            router.refresh()
         } catch (error: any) {
-            console.error("Error creating recipe:", error)
-            showSnackbar(error.message || "Error al crear la receta. Por favor intenta de nuevo.", "error")
+            console.error("Error saving recipe:", error)
+            showSnackbar(error.message || "Error al guardar la receta. Por favor intenta de nuevo.", "error")
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto p-6 bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border-4 border-pink-100 dark:border-pink-900">
+        <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto p-6 bg-card rounded-3xl shadow-xl border-4 border-border">
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-pink-500 mb-2">Nueva Receta Mágica ✨</h2>
-                <p className="text-gray-500">Comparte tu dulzura con el mundo</p>
+                <h2 className="text-3xl font-bold text-primary mb-2">
+                    {isEditing ? "Editar Receta ✏️" : "Nueva Receta Mágica ✨"}
+                </h2>
+                <p className="text-muted-foreground">
+                    {isEditing ? "Actualiza tu creación" : "Comparte tu dulzura con el mundo"}
+                </p>
             </div>
 
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título de la Receta</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Título de la Receta</label>
                     <Input
                         required
                         value={formData.title}
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
                         placeholder="Ej: Pastel de Fresas Kawaii"
-                        className="text-lg border-pink-200 focus-visible:ring-pink-400"
+                        className="text-lg border-input focus-visible:ring-ring"
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Descripción</label>
                     <Textarea
                         required
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Cuéntanos un poco sobre esta delicia..."
-                        className="border-pink-200 focus-visible:ring-pink-400"
+                        className="border-input focus-visible:ring-ring"
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-medium text-foreground mb-1">
                             <Clock className="inline w-4 h-4 mr-1" /> Prep (min)
                         </label>
                         <Input
@@ -202,11 +242,11 @@ export function RecipeForm() {
                             type="number"
                             value={formData.prep_time}
                             onChange={e => setFormData({ ...formData, prep_time: e.target.value })}
-                            className="border-pink-200 focus-visible:ring-pink-400"
+                            className="border-input focus-visible:ring-ring"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label className="block text-sm font-medium text-foreground mb-1">
                             <ChefHat className="inline w-4 h-4 mr-1" /> Cocción (min)
                         </label>
                         <Input
@@ -214,22 +254,22 @@ export function RecipeForm() {
                             type="number"
                             value={formData.cook_time}
                             onChange={e => setFormData({ ...formData, cook_time: e.target.value })}
-                            className="border-pink-200 focus-visible:ring-pink-400"
+                            className="border-input focus-visible:ring-ring"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen de la Receta</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Imagen de la Receta</label>
                     <div className="space-y-4">
                         {!previewUrl ? (
-                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-pink-200 border-dashed rounded-2xl cursor-pointer bg-pink-50 hover:bg-pink-100 dark:bg-zinc-800 dark:border-pink-900 dark:hover:bg-zinc-700/50 transition-colors">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-pink-500">
+                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-input border-dashed rounded-2xl cursor-pointer bg-muted hover:bg-accent transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                     <Camera className="w-12 h-12 mb-3" />
                                     <p className="mb-2 text-sm font-semibold">
                                         <span className="font-bold">Haz clic para subir</span> o arrastra y suelta
                                     </p>
-                                    <p className="text-xs text-pink-400">SVG, PNG, JPG or GIF</p>
+                                    <p className="text-xs">SVG, PNG, JPG or GIF</p>
                                 </div>
                                 <input
                                     type="file"
@@ -239,7 +279,7 @@ export function RecipeForm() {
                                 />
                             </label>
                         ) : (
-                            <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-pink-200 shadow-md group">
+                            <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-border shadow-md group">
                                 <img
                                     src={previewUrl}
                                     alt="Preview"
@@ -263,11 +303,11 @@ export function RecipeForm() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dificultad</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Dificultad</label>
                         <select
                             value={formData.difficulty || "medium"}
                             onChange={e => setFormData({ ...formData, difficulty: e.target.value })}
-                            className="w-full rounded-md border border-pink-200 p-2 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:bg-zinc-800 dark:border-pink-900"
+                            className="w-full rounded-md border border-input bg-background p-2 focus:outline-none focus:ring-2 focus:ring-ring"
                         >
                             <option value="easy">Fácil</option>
                             <option value="medium">Media</option>
@@ -275,18 +315,18 @@ export function RecipeForm() {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Porciones</label>
+                        <label className="block text-sm font-medium text-foreground mb-1">Porciones</label>
                         <Input
                             type="number"
                             value={formData.servings}
                             onChange={e => setFormData({ ...formData, servings: e.target.value })}
-                            className="border-pink-200 focus-visible:ring-pink-400"
+                            className="border-input focus-visible:ring-ring"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Etiquetas</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Etiquetas</label>
                     <div className="flex flex-wrap gap-2">
                         {tags.map(tag => (
                             <button
@@ -299,8 +339,8 @@ export function RecipeForm() {
                                     setFormData({ ...formData, selectedTags: newTags })
                                 }}
                                 className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.selectedTags.includes(tag.id)
-                                    ? "bg-pink-500 text-white"
-                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-zinc-800 dark:text-gray-400"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground hover:bg-accent"
                                     }`}
                             >
                                 {tag.name}
@@ -312,8 +352,8 @@ export function RecipeForm() {
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-pink-500">Ingredientes</h3>
-                    <Button type="button" onClick={addIngredient} variant="outline" size="sm" className="text-pink-500 border-pink-200 hover:bg-pink-50">
+                    <h3 className="text-xl font-bold text-primary">Ingredientes</h3>
+                    <Button type="button" onClick={addIngredient} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
@@ -327,7 +367,7 @@ export function RecipeForm() {
                                 newIngs[idx].name = e.target.value
                                 setFormData({ ...formData, ingredients: newIngs })
                             }}
-                            className="flex-1 border-pink-200"
+                            className="flex-1 border-input"
                         />
                         <Input
                             placeholder="Cant."
@@ -337,9 +377,9 @@ export function RecipeForm() {
                                 newIngs[idx].amount = e.target.value
                                 setFormData({ ...formData, ingredients: newIngs })
                             }}
-                            className="w-24 border-pink-200"
+                            className="w-24 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-red-400 hover:text-red-500 hover:bg-red-50">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -348,14 +388,14 @@ export function RecipeForm() {
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-pink-500">Pasos</h3>
-                    <Button type="button" onClick={addStep} variant="outline" size="sm" className="text-pink-500 border-pink-200 hover:bg-pink-50">
+                    <h3 className="text-xl font-bold text-primary">Pasos</h3>
+                    <Button type="button" onClick={addStep} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
                 {formData.steps.map((step, idx) => (
                     <div key={idx} className="flex gap-2">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-pink-100 text-pink-600 font-bold shrink-0">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold shrink-0">
                             {idx + 1}
                         </span>
                         <Textarea
@@ -366,9 +406,9 @@ export function RecipeForm() {
                                 newSteps[idx].content = e.target.value
                                 setFormData({ ...formData, steps: newSteps })
                             }}
-                            className="flex-1 border-pink-200"
+                            className="flex-1 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-red-400 hover:text-red-500 hover:bg-red-50">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -377,8 +417,8 @@ export function RecipeForm() {
 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-pink-500">Información Nutricional</h3>
-                    <Button type="button" onClick={addNutrition} variant="outline" size="sm" className="text-pink-500 border-pink-200 hover:bg-pink-50">
+                    <h3 className="text-xl font-bold text-primary">Información Nutricional</h3>
+                    <Button type="button" onClick={addNutrition} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
@@ -392,7 +432,7 @@ export function RecipeForm() {
                                 newNut[idx].name = e.target.value
                                 setFormData({ ...formData, nutrition: newNut })
                             }}
-                            className="flex-1 border-pink-200"
+                            className="flex-1 border-input"
                         />
                         <Input
                             placeholder="Valor"
@@ -402,7 +442,7 @@ export function RecipeForm() {
                                 newNut[idx].amount = e.target.value
                                 setFormData({ ...formData, nutrition: newNut })
                             }}
-                            className="w-24 border-pink-200"
+                            className="w-24 border-input"
                         />
                         <Input
                             placeholder="Unidad"
@@ -412,34 +452,34 @@ export function RecipeForm() {
                                 newNut[idx].unit = e.target.value
                                 setFormData({ ...formData, nutrition: newNut })
                             }}
-                            className="w-20 border-pink-200"
+                            className="w-20 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="text-red-400 hover:text-red-500 hover:bg-red-50">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-6 mt-8 border-t border-pink-100 dark:border-pink-900/50">
+            <div className="grid grid-cols-2 gap-4 pt-6 mt-8 border-t border-border">
                 <Button
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="h-14 text-lg border-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:border-zinc-700 dark:text-gray-400 dark:hover:bg-zinc-800"
+                    className="h-14 text-lg border-2 border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                     <X className="w-5 h-5 mr-2" />
                     Cancelar
                 </Button>
                 <Button
                     type="submit"
-                    className="h-14 text-lg bg-pink-500 hover:bg-pink-600 text-white shadow-lg shadow-pink-200 dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     disabled={loading}
                 >
                     {loading ? "Guardando..." : (
                         <>
                             <Save className="w-5 h-5 mr-2" />
-                            Guardar Receta
+                            {isEditing ? "Actualizar Receta" : "Guardar Receta"}
                         </>
                     )}
                 </Button>

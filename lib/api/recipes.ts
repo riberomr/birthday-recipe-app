@@ -189,3 +189,28 @@ export async function createRecipe(formData: FormData) {
     return result;
 }
 
+export async function updateRecipe(recipeId: string, formData: FormData) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+    const token = await user.getIdToken();
+
+    // Append recipe_id to formData
+    formData.append('recipe_id', recipeId);
+
+    const response = await fetch('/api/update-recipe-with-image', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido al actualizar la receta');
+    }
+
+    return result;
+}
+
