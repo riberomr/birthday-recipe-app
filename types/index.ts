@@ -1,5 +1,6 @@
 export type Recipe = {
     id: string;
+    user_id: string;
     title: string;
     description: string | null;
     image_url: string | null;
@@ -7,6 +8,7 @@ export type Recipe = {
     cook_time_minutes: number;
     category_id: string | null;
     created_at: string;
+    updated_at?: string;
     difficulty?: string | null; // 'easy', 'medium', 'hard'
     servings?: number;
     recipe_ingredients?: RecipeIngredient[];
