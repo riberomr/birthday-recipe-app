@@ -14,7 +14,7 @@ interface RecipeCardProps {
 export function RecipeCard({ recipe }: RecipeCardProps) {
     return (
         <Link href={`/recipes/${recipe.id}`}>
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow border-border h-full flex flex-col bg-card">
+            <Card className="overflow-hidden [@media(hover:hover)]:hover:shadow-lg transition-shadow border-border h-full flex flex-col bg-card">
                 <div className="relative h-48 w-full bg-muted">
                     {recipe.image_url ? (
                         <Image
@@ -35,7 +35,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             e.stopPropagation();
                         }}
                     >
-                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-white/80 backdrop-blur-sm hover:bg-white dark:bg-black/50 dark:hover:bg-black/70 min-h-[44px] min-w-[44px]" />
+                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-white/80 backdrop-blur-sm [@media(hover:hover)]:hover:bg-white dark:bg-black/50 dark:[@media(hover:hover)]:hover:bg-black/70 min-h-[44px] min-w-[44px]" />
                     </div>
                 </div>
                 <CardHeader className="p-4 pb-2">

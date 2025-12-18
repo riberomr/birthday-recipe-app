@@ -76,7 +76,7 @@ export function StarRating({
                     onMouseLeave={() => !readonly && supabaseUser && setHoverRating(0)}
                     className={cn(
                         "transition-all duration-200 focus:outline-none",
-                        readonly || !supabaseUser ? "cursor-default" : "cursor-pointer hover:scale-110"
+                        readonly || !supabaseUser ? "cursor-default" : "cursor-pointer [@media(hover:hover)]:hover:scale-110"
                     )}
                 >
                     <Star

@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { SnackbarProvider } from "@/components/ui/Snackbar";
+import { ModalProvider } from "@/lib/contexts/ModalContext";
+import { ModalRegistry } from "@/components/ModalRegistry";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,12 +31,15 @@ export default function RootLayout({
         >
           <AuthProvider>
             <SnackbarProvider>
-              <div className="min-h-screen flex flex-col">
-                <Navbar />
-                <div className="flex-1">
-                  {children}
+              <ModalProvider>
+                <div className="min-h-screen flex flex-col">
+                  <Navbar />
+                  <div className="flex-1">
+                    {children}
+                  </div>
                 </div>
-              </div>
+                <ModalRegistry />
+              </ModalProvider>
             </SnackbarProvider>
           </AuthProvider>
         </ThemeProvider>

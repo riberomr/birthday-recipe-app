@@ -5,10 +5,11 @@ import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { getComments, postComment } from "@/lib/api/comments"
-import { Send, Camera, X } from "lucide-react"
+import { Send, Camera, X, LogIn } from "lucide-react"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
 import { CommentSkeleton } from "@/components/CommentSkeleton"
+import { useModal } from "@/hooks/useModal"
 
 type Comment = {
     id: string
@@ -26,7 +27,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ recipeId }: CommentSectionProps) {
-    const { user } = useAuth()
+    const { user, login } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [comment, setComment] = useState("")
     const [comments, setComments] = useState<Comment[]>([])
@@ -37,6 +38,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     const [submitting, setSubmitting] = useState(false)
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+    const { open } = useModal('login-confirmation')
 
     useEffect(() => {
         fetchCommentsData()
@@ -127,6 +129,14 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
         }
     }
 
+    const handleLoginClick = () => {
+        open({
+            onConfirm: async () => {
+                await login()
+            }
+        })
+    }
+
     return (
         <div className="space-y-6">
             <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">Comentarios ({total})</h3>
@@ -148,7 +158,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                 className="min-h-[80px] bg-white dark:bg-zinc-900 border-pink-200 dark:border-pink-900 focus-visible:ring-pink-400 pr-12"
                             />
                             <div className="absolute bottom-2 right-2">
-                                <label className="cursor-pointer p-2 hover:bg-pink-50 dark:hover:bg-pink-900/30 rounded-full transition-colors inline-flex items-center justify-center text-pink-400 hover:text-pink-500">
+                                <label className="cursor-pointer p-2 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/30 rounded-full transition-colors inline-flex items-center justify-center text-pink-400 [@media(hover:hover)]:hover:text-pink-500">
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -170,7 +180,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                 <button
                                     type="button"
                                     onClick={clearImage}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white p-0.5 rounded-full hover:bg-red-600 shadow-sm"
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white p-0.5 rounded-full [@media(hover:hover)]:hover:bg-red-600 shadow-sm"
                                 >
                                     <X className="w-3 h-3" />
                                 </button>
@@ -181,7 +191,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                             <Button
                                 type="submit"
                                 disabled={(!comment.trim() && !selectedImage) || submitting}
-                                className="bg-pink-500 hover:bg-pink-600 text-white"
+                                className="bg-pink-500 [@media(hover:hover)]:hover:bg-pink-600 text-white"
                             >
                                 {submitting ? "Publicando..." : <Send className="w-4 h-4" />}
                             </Button>
@@ -189,8 +199,18 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                     </div>
                 </form>
             ) : (
-                <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-xl text-center text-pink-600 dark:text-pink-400">
-                    Inicia sesión para dejar un comentario ✨
+                <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-xl text-center">
+                    <p className="text-pink-600 dark:text-pink-400 mb-3">
+                        Para dejar un comentario necesitás iniciar sesión ✨
+                    </p>
+                    <Button
+                        onClick={handleLoginClick}
+                        variant="outline"
+                        className="border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:[@media(hover:hover)]:hover:bg-pink-950 dark:text-pink-400"
+                    >
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Iniciar Sesión
+                    </Button>
                 </div>
             )}
 
@@ -242,7 +262,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                     variant="outline"
                                     onClick={loadMoreComments}
                                     disabled={loadingMore}
-                                    className="text-pink-500 border-pink-200 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                                    className="text-pink-500 border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20"
                                 >
                                     {loadingMore ? "Cargando..." : "Cargar más comentarios"}
                                 </Button>

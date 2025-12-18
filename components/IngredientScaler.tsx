@@ -26,7 +26,7 @@ export function IngredientScaler({ initialServings, ingredients }: IngredientSca
                     <button
                         type="button"
                         onClick={() => setServings(servings - 1)}
-                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors disabled:opacity-50 print:hidden"
+                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 [@media(hover:hover)]:hover:bg-pink-200 dark:[@media(hover:hover)]:hover:bg-pink-900/50 transition-colors disabled:opacity-50 print:hidden"
                         disabled={servings === 1}
                     >
                         <Minus />
@@ -39,7 +39,7 @@ export function IngredientScaler({ initialServings, ingredients }: IngredientSca
                     <button
                         type="button"
                         onClick={() => setServings(servings + 1)}
-                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/50 transition-colors print:hidden"
+                        className="p-2 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 [@media(hover:hover)]:hover:bg-pink-200 dark:[@media(hover:hover)]:hover:bg-pink-900/50 transition-colors print:hidden"
                     >
                         <Plus />
                     </button>
