@@ -19,7 +19,7 @@ export function EditRecipeButton({ recipeId, ownerId }: EditRecipeButtonProps) {
 
     return (
         <Link href={`/recipes/${recipeId}/edit`}>
-            <Button variant="outline" size="icon" className="rounded-full bg-white/80 backdrop-blur-md hover:bg-white dark:bg-black/50 dark:hover:bg-black/70 border-pink-200 dark:border-pink-900">
+            <Button variant="outline" size="icon" className="rounded-full bg-white/80 backdrop-blur-md [@media(hover:hover)]:hover:bg-white dark:bg-black/50 dark:[@media(hover:hover)]:hover:bg-black/70 border-pink-200 dark:border-pink-900">
                 <Edit className="h-5 w-5 text-pink-600 dark:text-pink-400" />
                 <span className="sr-only">Editar receta</span>
             </Button>

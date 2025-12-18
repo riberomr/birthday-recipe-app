@@ -8,7 +8,7 @@ export function PrintButton() {
         <Button
             variant="outline"
             size="icon"
-            className="rounded-full border-pink-200 text-pink-500 hover:bg-pink-50"
+            className="rounded-full border-pink-200 text-pink-500 [@media(hover:hover)]:hover:bg-pink-50"
             onClick={() => window.print()}
         >
             <Printer className="h-4 w-4" />

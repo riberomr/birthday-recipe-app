@@ -104,7 +104,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                         />
                         <button
                             onClick={applyFilters}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 hover:text-pink-600 dark:hover:text-pink-400"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-400"
                         >
                             <Search className="h-4 w-4" />
                         </button>
@@ -112,7 +112,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                     <Button
                         variant="outline"
                         onClick={openFilters}
-                        className={`border-pink-200 text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 relative ${isOpen ? "bg-pink-50" : "bg-white dark:bg-zinc-900"}`}
+                        className={`border-pink-200 text-pink-500 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20 relative ${isOpen ? "bg-pink-50" : "bg-white dark:bg-zinc-900"}`}
                     >
                         <Filter className="h-4 w-4 mr-2" />
                         Filtros
@@ -135,9 +135,9 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                 setActiveFilters({ ...activeFilters, search: "" });
                                 onFilterChange({ ...activeFilters, search: "" });
                             }}
-                            className="ml-2 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-600 dark:hover:text-pink-500 rounded-full"
+                            className="ml-2 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-500 rounded-full"
                         >
-                            <Trash className="h-4 w-4 text-pink-500 dark:text-pink-600 hover:text-pink-600 dark:hover:text-pink-500" />
+                            <Trash className="h-4 w-4 text-pink-500 dark:text-pink-600 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-500" />
                         </Button>
                     </div>
                 )}
@@ -169,7 +169,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             {/* Header */}
                             <div className="flex justify-between items-center p-4 border-b border-pink-100 dark:border-pink-900/50">
                                 <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Filtros</h3>
-                                <Button variant="ghost" size="icon" onClick={closeFilters} className="rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800">
+                                <Button variant="ghost" size="icon" onClick={closeFilters} className="rounded-full [@media(hover:hover)]:hover:bg-gray-100 dark:[@media(hover:hover)]:hover:bg-zinc-800">
                                     <X className="h-5 w-5" />
                                 </Button>
                             </div>
@@ -183,7 +183,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                             onClick={() => setTempFilters({ ...tempFilters, category: "" })}
                                             className={`p-2 text-sm rounded-lg border transition-all ${!tempFilters.category
                                                 ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                : "border-gray-200 hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
                                                 }`}
                                         >
                                             Todas
@@ -194,7 +194,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 onClick={() => setTempFilters({ ...tempFilters, category: cat.id })}
                                                 className={`p-2 text-sm rounded-lg border transition-all ${tempFilters.category === cat.id
                                                     ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
                                                     }`}
                                             >
                                                 {cat.name}
@@ -212,7 +212,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 onClick={() => setTempFilters({ ...tempFilters, difficulty: tempFilters.difficulty === diff ? "" : diff })}
                                                 className={`flex-1 p-2 text-sm rounded-lg border transition-all capitalize ${tempFilters.difficulty === diff
                                                     ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
                                                     }`}
                                             >
                                                 {diff === 'easy' ? 'Fácil' : diff === 'medium' ? 'Media' : 'Difícil'}
@@ -234,7 +234,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 onClick={() => setTempFilters({ ...tempFilters, time: tempFilters.time === opt.val ? "" : opt.val })}
                                                 className={`w-full p-3 text-left text-sm rounded-lg border transition-all flex justify-between items-center ${tempFilters.time === opt.val
                                                     ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
                                                     }`}
                                             >
                                                 {opt.label}
@@ -253,7 +253,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 onClick={() => toggleTag(tag.id)}
                                                 className={`px-3 py-1.5 rounded-full text-xs transition-colors border ${tempFilters.tags.includes(tag.id)
                                                     ? "bg-pink-500 text-white border-pink-500"
-                                                    : "bg-white text-gray-600 border-gray-200 hover:border-pink-300 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
+                                                    : "bg-white text-gray-600 border-gray-200 [@media(hover:hover)]:hover:border-pink-300 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
                                                     }`}
                                             >
                                                 {tag.name}
@@ -268,13 +268,13 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                 <Button
                                     variant="outline"
                                     onClick={clearFilters}
-                                    className="flex-1 border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-zinc-800 dark:text-gray-400"
+                                    className="flex-1 border-gray-200 text-gray-600 [@media(hover:hover)]:hover:bg-gray-50 dark:border-zinc-800 dark:text-gray-400"
                                 >
                                     Limpiar
                                 </Button>
                                 <Button
                                     onClick={applyFilters}
-                                    className="flex-[2] bg-pink-500 hover:bg-pink-600 text-white"
+                                    className="flex-[2] bg-pink-500 [@media(hover:hover)]:hover:bg-pink-600 text-white"
                                 >
                                     Aplicar Filtros
                                 </Button>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, ChefHat, Clock, Save, X, Camera, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, ChefHat, Clock, Camera } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import { useAuth } from "@/components/AuthContext"
@@ -263,7 +263,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     <label className="block text-sm font-medium text-foreground mb-2">Imagen de la Receta</label>
                     <div className="space-y-4">
                         {!previewUrl ? (
-                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-input border-dashed rounded-2xl cursor-pointer bg-muted hover:bg-accent transition-colors">
+                            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-input border-dashed rounded-2xl cursor-pointer bg-muted [@media(hover:hover)]:hover:bg-accent transition-colors">
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6 text-muted-foreground">
                                     <Camera className="w-12 h-12 mb-3" />
                                     <p className="mb-2 text-sm font-semibold">
@@ -285,7 +285,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                                     alt="Preview"
                                     className="w-full h-full object-cover"
                                 />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="absolute inset-0 bg-black/40 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <Button
                                         type="button"
                                         variant="destructive"
@@ -340,7 +340,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                                 }}
                                 className={`px-3 py-1 rounded-full text-sm transition-colors ${formData.selectedTags.includes(tag.id)
                                     ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground hover:bg-accent"
+                                    : "bg-muted text-muted-foreground [@media(hover:hover)]:hover:bg-accent"
                                     }`}
                             >
                                 {tag.name}
@@ -353,7 +353,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-primary">Ingredientes</h3>
-                    <Button type="button" onClick={addIngredient} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
+                    <Button type="button" onClick={addIngredient} variant="outline" size="sm" className="text-primary border-primary/20 [@media(hover:hover)]:hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
@@ -379,7 +379,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                             }}
                             className="w-24 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -389,7 +389,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-primary">Pasos</h3>
-                    <Button type="button" onClick={addStep} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
+                    <Button type="button" onClick={addStep} variant="outline" size="sm" className="text-primary border-primary/20 [@media(hover:hover)]:hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
@@ -408,7 +408,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                             }}
                             className="flex-1 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -418,12 +418,12 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-xl font-bold text-primary">Información Nutricional</h3>
-                    <Button type="button" onClick={addNutrition} variant="outline" size="sm" className="text-primary border-primary/20 hover:bg-primary/10">
+                    <Button type="button" onClick={addNutrition} variant="outline" size="sm" className="text-primary border-primary/20 [@media(hover:hover)]:hover:bg-primary/10">
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
                 {formData.nutrition.map((item, idx) => (
-                    <div key={idx} className="flex gap-2">
+                    <div key={idx} className="flex gap-2 sm:flex-row flex-col">
                         <Input
                             placeholder="Nombre (ej: Calorías)"
                             value={item.name}
@@ -432,31 +432,35 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                                 newNut[idx].name = e.target.value
                                 setFormData({ ...formData, nutrition: newNut })
                             }}
-                            className="flex-1 border-input"
+                            className="flex-1 border-input "
                         />
-                        <Input
-                            placeholder="Valor"
-                            value={item.amount}
-                            onChange={e => {
-                                const newNut = [...formData.nutrition]
-                                newNut[idx].amount = e.target.value
-                                setFormData({ ...formData, nutrition: newNut })
-                            }}
-                            className="w-24 border-input"
-                        />
-                        <Input
-                            placeholder="Unidad"
-                            value={item.unit}
-                            onChange={e => {
-                                const newNut = [...formData.nutrition]
-                                newNut[idx].unit = e.target.value
-                                setFormData({ ...formData, nutrition: newNut })
-                            }}
-                            className="w-20 border-input"
-                        />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2 justify-between">
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Valor"
+                                    value={item.amount}
+                                    onChange={e => {
+                                        const newNut = [...formData.nutrition]
+                                        newNut[idx].amount = e.target.value
+                                        setFormData({ ...formData, nutrition: newNut })
+                                    }}
+                                    className="w-24 border-input "
+                                />
+                                <Input
+                                    placeholder="Unidad"
+                                    value={item.unit}
+                                    onChange={e => {
+                                        const newNut = [...formData.nutrition]
+                                        newNut[idx].unit = e.target.value
+                                        setFormData({ ...formData, nutrition: newNut })
+                                    }}
+                                    className="w-20 border-input "
+                                />
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="flex-end text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -466,19 +470,17 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="h-14 text-lg border-2 border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    className="h-14 text-sm border-2 border-input text-muted-foreground [@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground"
                 >
-                    <X className="w-5 h-5 mr-2" />
                     Cancelar
                 </Button>
                 <Button
                     type="submit"
-                    className="h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-14 text-sm bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all [@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98]"
                     disabled={loading}
                 >
                     {loading ? "Guardando..." : (
                         <>
-                            <Save className="w-5 h-5 mr-2" />
                             {isEditing ? "Actualizar Receta" : "Guardar Receta"}
                         </>
                     )}

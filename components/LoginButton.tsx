@@ -4,11 +4,21 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/components/AuthContext"
 import { LogIn, LogOut, User as UserIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { useModal } from "@/hooks/useModal"
 
 export function LoginButton() {
     const { user, login, logout, isLoading } = useAuth()
     const pathname = usePathname()
     const isCreatingRecipe = pathname === "/recipes/create"
+    const { open } = useModal('login-confirmation')
+
+    const handleLoginClick = () => {
+        open({
+            onConfirm: async () => {
+                await login()
+            }
+        })
+    }
 
     if (isLoading) {
         return <Button variant="ghost" disabled>Loading...</Button>
@@ -33,7 +43,7 @@ export function LoginButton() {
                     size="sm"
                     onClick={() => logout()}
                     disabled={isCreatingRecipe}
-                    className="text-gray-500 hover:text-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-gray-500 [@media(hover:hover)]:hover:text-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     title={isCreatingRecipe ? "No puedes salir mientras creas una receta" : "Salir"}
                 >
                     <LogOut className="h-4 w-4 mr-2" />
@@ -47,11 +57,11 @@ export function LoginButton() {
         <Button
             variant="outline"
             size="sm"
-            onClick={() => login()}
-            className="border-pink-200 hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:hover:bg-pink-950 dark:text-pink-400"
+            onClick={handleLoginClick}
+            className="border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:[@media(hover:hover)]:hover:bg-pink-950 dark:text-pink-400"
         >
             <LogIn className="h-4 w-4 mr-2" />
-            Entrar con Google
-        </Button>
+            Iniciar Sesión
+        </Button >
     )
 }

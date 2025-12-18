@@ -1,0 +1,10 @@
+{
+  "ignores": [
+    "postcss",
+    "autoprefixer",
+    "tailwindcss",
+    "@types/node",
+    "dotenv",
+    "@types/jest"
+  ]
+}
