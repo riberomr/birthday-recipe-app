@@ -54,8 +54,8 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
         <SnackbarContext.Provider value={{ showSnackbar }}>
             {children}
             {isOpen && (
-                <div className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-full shadow-lg text-white flex items-center gap-4 z-50 min-h-[56px] max-w-[90vw] md:max-w-md ${getBackgroundColor()} transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in`}>
-                    <span className="flex-1 text-center leading-tight sm:w-max">{message}</span>
+                <div className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-4 rounded-full shadow-lg text-white flex items-center gap-4 z-50 min-h-[56px] max-w-[90vw] md:max-w-md sm:max-w-max size-max ${getBackgroundColor()} transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in`}>
+                    <span className="flex-1 text-center leading-tight">{message}</span>
                     <button onClick={closeSnackbar} className="[@media(hover:hover)]:hover:opacity-80 flex-shrink-0">
                         <X size={18} />
                     </button>
