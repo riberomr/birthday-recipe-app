@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Trash2, ChefHat, Clock, Save, X, Camera, Image as ImageIcon } from "lucide-react"
+import { Plus, Trash2, ChefHat, Clock, Camera } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import { useAuth } from "@/components/AuthContext"
@@ -423,7 +423,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     </Button>
                 </div>
                 {formData.nutrition.map((item, idx) => (
-                    <div key={idx} className="flex gap-2">
+                    <div key={idx} className="flex gap-2 sm:flex-row flex-col">
                         <Input
                             placeholder="Nombre (ej: Calorías)"
                             value={item.name}
@@ -432,31 +432,35 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                                 newNut[idx].name = e.target.value
                                 setFormData({ ...formData, nutrition: newNut })
                             }}
-                            className="flex-1 border-input"
+                            className="flex-1 border-input "
                         />
-                        <Input
-                            placeholder="Valor"
-                            value={item.amount}
-                            onChange={e => {
-                                const newNut = [...formData.nutrition]
-                                newNut[idx].amount = e.target.value
-                                setFormData({ ...formData, nutrition: newNut })
-                            }}
-                            className="w-24 border-input"
-                        />
-                        <Input
-                            placeholder="Unidad"
-                            value={item.unit}
-                            onChange={e => {
-                                const newNut = [...formData.nutrition]
-                                newNut[idx].unit = e.target.value
-                                setFormData({ ...formData, nutrition: newNut })
-                            }}
-                            className="w-20 border-input"
-                        />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
-                            <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2 justify-between">
+                            <div className="flex gap-2">
+                                <Input
+                                    placeholder="Valor"
+                                    value={item.amount}
+                                    onChange={e => {
+                                        const newNut = [...formData.nutrition]
+                                        newNut[idx].amount = e.target.value
+                                        setFormData({ ...formData, nutrition: newNut })
+                                    }}
+                                    className="w-24 border-input "
+                                />
+                                <Input
+                                    placeholder="Unidad"
+                                    value={item.unit}
+                                    onChange={e => {
+                                        const newNut = [...formData.nutrition]
+                                        newNut[idx].unit = e.target.value
+                                        setFormData({ ...formData, nutrition: newNut })
+                                    }}
+                                    className="w-20 border-input "
+                                />
+                            </div>
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="flex-end text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -466,19 +470,17 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
-                    className="h-14 text-lg border-2 border-input text-muted-foreground [@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground"
+                    className="h-14 text-sm border-2 border-input text-muted-foreground [@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground"
                 >
-                    <X className="w-5 h-5 mr-2" />
                     Cancelar
                 </Button>
                 <Button
                     type="submit"
-                    className="h-14 text-lg bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all [@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98]"
+                    className="h-14 text-sm bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all [@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98]"
                     disabled={loading}
                 >
                     {loading ? "Guardando..." : (
                         <>
-                            <Save className="w-5 h-5 mr-2" />
                             {isEditing ? "Actualizar Receta" : "Guardar Receta"}
                         </>
                     )}

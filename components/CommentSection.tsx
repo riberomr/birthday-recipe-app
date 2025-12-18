@@ -152,9 +152,10 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                     <div className="flex-1 space-y-2">
                         <div className="relative">
                             <Textarea
+                                required
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                placeholder="Escribe un comentario kawaii..."
+                                placeholder="Escribe un comentario..."
                                 className="min-h-[80px] bg-white dark:bg-zinc-900 border-pink-200 dark:border-pink-900 focus-visible:ring-pink-400 pr-12"
                             />
                             <div className="absolute bottom-2 right-2">
