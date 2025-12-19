@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { UserMenu } from '../UserMenu'
 import { useAuth } from '../AuthContext'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 // Mock dependencies
 jest.mock('../AuthContext', () => ({

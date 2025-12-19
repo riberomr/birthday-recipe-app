@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { Navbar } from '../Navbar'
 import { useAuth } from '../AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
-import { useRouter } from 'next/navigation'
 
 // Mock dependencies
 jest.mock('../AuthContext', () => ({

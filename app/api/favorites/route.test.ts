@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { NextResponse } from 'next/server'
 
 // Mock env vars
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost'
@@ -131,7 +130,6 @@ describe('/api/favorites', () => {
 
             const request = new Request('http://localhost/api/favorites?userId=123')
             const response = await GET(request)
-            const data = await response.json()
 
             expect(response.status).toBe(500)
             // Error comes from getAverageRating throwing on undefined

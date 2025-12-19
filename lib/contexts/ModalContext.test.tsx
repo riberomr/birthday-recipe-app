@@ -1,6 +1,5 @@
-import { render, screen, fireEvent, renderHook, act } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { ModalProvider, useModalContext } from './ModalContext'
-import { useEffect } from 'react'
 
 const TestComponent = () => {
     const { openModal, closeModal, isModalOpen, getModalData } = useModalContext()

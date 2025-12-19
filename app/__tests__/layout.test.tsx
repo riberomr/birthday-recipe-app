@@ -30,7 +30,7 @@ describe('RootLayout', () => {
     it('renders children with all providers', () => {
         const testContent = <div>Test Content</div>
 
-        const { container } = render(
+        render(
             <RootLayout>{testContent}</RootLayout>
         )
 

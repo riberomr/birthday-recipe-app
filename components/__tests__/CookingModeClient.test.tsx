@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { CookingModeClient } from '../CookingModeClient'
-import { useRouter } from 'next/navigation'
 
 // Mock dependencies
 const mockPush = jest.fn()

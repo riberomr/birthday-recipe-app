@@ -4,7 +4,6 @@ import { RecipeForm } from '../RecipeForm'
 import { useAuth } from '@/components/AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
 import { useRouter } from 'next/navigation'
-import { createRecipe, updateRecipe } from '@/lib/api/recipes'
 import { supabase } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/utils'
 
@@ -333,7 +332,6 @@ describe('RecipeForm', () => {
     })
 
     it('handles tag selection', async () => {
-        const user = userEvent.setup()
         render(<RecipeForm />)
         expect(screen.getByText('Etiquetas')).toBeInTheDocument()
 
@@ -649,7 +647,7 @@ describe('RecipeForm', () => {
         const initialData: any = {
             image_url: 'http://example.com/img.jpg'
         }
-        const { unmount, rerender } = render(<RecipeForm initialData={initialData} isEditing={true} />)
+        const { unmount } = render(<RecipeForm initialData={initialData} isEditing={true} />)
 
         // Unmount with initial image (should not revoke)
         unmount()

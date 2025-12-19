@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { GET } from './route'
-import { NextResponse } from 'next/server'
 import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth'
 
 // Mock dependencies

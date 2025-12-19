@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { ModalRegistry } from '../ModalRegistry'
-import { LoginConfirmationModal } from '@/components/LoginConfirmationModal'
 
 // Mock dependencies
 jest.mock('@/components/LoginConfirmationModal', () => ({
