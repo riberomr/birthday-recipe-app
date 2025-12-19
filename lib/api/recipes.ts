@@ -119,12 +119,12 @@ export async function getRecipes(
         return { recipes: [], total: 0 }
     }
 
-    const recipes = data.map((recipe) => {
+    const recipes = (data || []).map((recipe) => {
         const average_rating = getAverageRating(recipe.ratings)
         return { ...recipe, average_rating }
     })
 
-    return { recipes: recipes || [], total: count || 0 }
+    return { recipes: recipes, total: count || 0 }
 }
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
@@ -153,6 +153,8 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
         console.error("Error fetching recipe:", error)
         return null
     }
+
+    if (!data) return null
 
     data.average_rating = getAverageRating(data.ratings)
     // Sort steps by order

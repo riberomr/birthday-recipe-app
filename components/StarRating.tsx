@@ -25,10 +25,10 @@ export function StarRating({
     const { supabaseUser } = useAuth()
 
     useEffect(() => {
-        if (recipeId && supabaseUser && !readonly) {
+        if (!readonly) {
             fetchUserRating()
         }
-    }, [recipeId, supabaseUser])
+    }, [recipeId, supabaseUser, readonly])
 
     const fetchUserRating = async () => {
         if (!recipeId || !supabaseUser) return

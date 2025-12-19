@@ -31,7 +31,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
     if (!recipe) {
         notFound()
     }
-    console.log(recipe)
+
     return (
         <div className="min-h-screen bg-background pb-32 print:bg-white print:pb-0">
             {/* Print Header - Only visible when printing */}
@@ -131,7 +131,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                     Preparación
                                 </h2>
                                 <div className="space-y-4 text-muted-foreground print:text-black">
-                                    {recipe.recipe_steps?.map((step) => (
+                                    {(recipe.recipe_steps || []).map((step) => (
                                         <div key={step.id} className="flex gap-4">
                                             <div className="flex-shrink-0 h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold print:bg-gray-100 print:text-black print:border print:border-gray-300">
                                                 {step.step_order}

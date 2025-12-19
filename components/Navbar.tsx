@@ -8,9 +8,12 @@ import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
 import { useSnackbar } from "@/components/ui/Snackbar"
 
+import { useRouter } from "next/navigation"
+
 export function Navbar() {
     const { user } = useAuth()
     const { showSnackbar } = useSnackbar()
+    const router = useRouter()
 
     return (
         <nav className="nav-glass print:hidden">
@@ -34,7 +37,7 @@ export function Navbar() {
                             if (!user) {
                                 showSnackbar("Debes iniciar sesión para ver tus favoritos", "error");
                             } else {
-                                window.location.href = "/favorites";
+                                router.push("/favorites");
                             }
                         }}
                     >

@@ -23,11 +23,9 @@ export default function FavoritesPage() {
         }
     }, [supabaseUser, authLoading, showSnackbar, router]);
     useEffect(() => {
-        async function fetchFavoritesData() {
-            if (!supabaseUser) return;
-
+        async function fetchFavoritesData(userId: string) {
             try {
-                const data = await getFavorites(supabaseUser.id);
+                const data = await getFavorites(userId);
 
                 setFavorites(data);
             } catch (error) {
@@ -39,7 +37,7 @@ export default function FavoritesPage() {
         }
 
         if (supabaseUser) {
-            fetchFavoritesData();
+            fetchFavoritesData(supabaseUser.id);
         }
     }, [supabaseUser, showSnackbar]);
 

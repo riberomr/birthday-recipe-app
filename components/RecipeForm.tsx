@@ -305,7 +305,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1">Dificultad</label>
                         <select
-                            value={formData.difficulty || "medium"}
+                            value={formData.difficulty}
                             onChange={e => setFormData({ ...formData, difficulty: e.target.value })}
                             className="w-full rounded-md border border-input bg-background p-2 focus:outline-none focus:ring-2 focus:ring-ring"
                         >
@@ -379,7 +379,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                             }}
                             className="w-24 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10" data-testid={`remove-ingredient-${idx}`}>
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -408,7 +408,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                             }}
                             className="flex-1 border-input"
                         />
-                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => removeStep(idx)} className="text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10" data-testid={`remove-step-${idx}`}>
                             <Trash2 className="w-4 h-4" />
                         </Button>
                     </div>
@@ -457,7 +457,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                                     className="w-20 border-input "
                                 />
                             </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="flex-end text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10">
+                            <Button type="button" variant="ghost" size="icon" onClick={() => removeNutrition(idx)} className="flex-end text-destructive [@media(hover:hover)]:hover:text-destructive [@media(hover:hover)]:hover:bg-destructive/10" data-testid={`remove-nutrition-${idx}`}>
                                 <Trash2 className="w-4 h-4" />
                             </Button>
                         </div>

@@ -54,7 +54,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
     }, [filters])
 
     const loadMore = async () => {
-        if (loading || !hasMore) return
+
 
         setLoading(true)
         const nextPage = page + 1
