@@ -241,7 +241,6 @@ describe('RecipeForm', () => {
         // Mock update success
         mockUpdateRecipe.mockResolvedValue({ recipeId: 'recipe1' })
 
-        console.log("Clicking update button")
         await user.click(screen.getByText('Actualizar Receta'))
 
         await waitFor(() => {

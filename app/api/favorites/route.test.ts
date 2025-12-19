@@ -134,7 +134,6 @@ describe('/api/favorites', () => {
                 body: JSON.stringify({ recipeId: 'rec1' }),
             })
             const response = await POST(request)
-            console.log(response)
             const data = await response.json()
 
             expect(response.status).toBe(200)

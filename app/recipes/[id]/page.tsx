@@ -31,7 +31,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
     if (!recipe) {
         notFound()
     }
-    console.log(recipe)
+
     return (
         <div className="min-h-screen bg-background pb-32 print:bg-white print:pb-0">
             {/* Print Header - Only visible when printing */}

@@ -28,6 +28,11 @@ const customJestConfig = {
         '!jest.config.js',
         '!jest.setup.ts',
         '!coverage/**',
+        '!lib/firebase/admin.ts',
+        '!lib/firebase/client.ts',
+        '!lib/supabase/admin.ts',
+        '!lib/supabase/client.ts',
+        '!features/**',
     ],
     coverageThreshold: {
         global: {

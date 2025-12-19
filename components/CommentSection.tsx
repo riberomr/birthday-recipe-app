@@ -190,6 +190,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
 
                         <div className="flex justify-end">
                             <Button
+                                data-testid="submit-button"
                                 type="submit"
                                 disabled={(!comment.trim() && !selectedImage) || submitting}
                                 className="bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground"
