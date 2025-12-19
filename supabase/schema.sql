@@ -1,5 +1,12 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+
+-- ===========================================
+-- TODO:
+-- add ON DELETE CASCADE in some tables, check that
+-- check created_at and updated_at in all tables
+-- check missing foreign keys
+-- check missing indexes
+-- check missing unique constraints
+-- ===========================================
 
 CREATE TABLE public.profiles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
