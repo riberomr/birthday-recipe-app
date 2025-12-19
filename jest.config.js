@@ -18,6 +18,7 @@ const customJestConfig = {
         'components/**/*.{js,jsx,ts,tsx}',
         'lib/**/*.{js,jsx,ts,tsx}',
         'hooks/**/*.{js,jsx,ts,tsx}',
+        'features/**/*.{js,jsx,ts,tsx}',
         '!**/*.d.ts',
         '!**/node_modules/**',
         '!**/.next/**',
@@ -31,8 +32,7 @@ const customJestConfig = {
         '!lib/firebase/admin.ts',
         '!lib/firebase/client.ts',
         '!lib/supabase/admin.ts',
-        '!lib/supabase/client.ts',
-        '!features/**',
+        '!lib/supabase/client.ts'
     ],
     coverageThreshold: {
         global: {

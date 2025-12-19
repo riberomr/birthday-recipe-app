@@ -5,7 +5,7 @@ import { RecipeIngredient } from "@/types";
 import { Minus, Plus, Users } from "lucide-react";
 import { scaleAmount } from "@/lib/utils";
 
-interface IngredientScalerProps {
+export interface IngredientScalerProps {
     initialServings: number;
     ingredients: RecipeIngredient[];
 }
