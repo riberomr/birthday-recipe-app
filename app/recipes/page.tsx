@@ -13,15 +13,15 @@ export default async function RecipesPage() {
     ])
 
     return (
-        <div className="min-h-screen p-4 bg-pink-50 dark:bg-zinc-950">
+        <div className="page-container p-4">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center gap-4 mb-6">
                     <Link href="/">
                         <Button variant="ghost" size="icon" className="rounded-full">
-                            <ArrowLeft className="h-6 w-6 text-pink-600 dark:text-white" />
+                            <ArrowLeft className="h-6 w-6 text-primary dark:text-foreground" />
                         </Button>
                     </Link>
-                    <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">Recetas</h1>
+                    <h1 className="text-3xl font-bold text-primary">Recetas</h1>
                 </div>
 
                 <RecipeListClient initialRecipes={recipes} initialTotal={total} categories={categories} />

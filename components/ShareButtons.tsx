@@ -26,24 +26,24 @@ export function ShareButtons({ title }: { title: string }) {
             <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full border-pink-200 text-pink-500 [@media(hover:hover)]:hover:bg-pink-50"
+                className="rounded-full border-primary/20 text-primary [@media(hover:hover)]:hover:bg-primary/10"
                 onClick={() => setIsOpen(!isOpen)}
             >
                 <Share2 className="h-4 w-4" />
             </Button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-pink-100 dark:border-pink-900 p-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="absolute right-0 mt-2 w-48 bg-card rounded-xl shadow-lg border border-border p-2 z-50 animate-in fade-in zoom-in-95">
                     <button
                         onClick={handleCopyLink}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground [@media(hover:hover)]:hover:bg-primary/10 rounded-lg transition-colors"
                     >
                         <LinkIcon className="h-4 w-4" />
                         Copiar enlace
                     </button>
                     <button
                         onClick={handleWhatsApp}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-zinc-800 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground [@media(hover:hover)]:hover:bg-primary/10 rounded-lg transition-colors"
                     >
                         <Phone className="h-4 w-4" />
                         WhatsApp

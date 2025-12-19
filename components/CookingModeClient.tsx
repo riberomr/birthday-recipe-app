@@ -60,19 +60,19 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
     }
 
     return (
-        <div className="fixed inset-0 bg-pink-50 dark:bg-zinc-950 z-50 flex flex-col">
+        <div className="fixed inset-0 bg-background z-50 flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-900 shadow-sm">
+            <div className="flex items-center justify-between p-4 bg-card shadow-sm">
                 <Link href={`/recipes/${recipeId}`}>
                     <Button variant="ghost" size="icon">
                         <X className="h-6 w-6" />
                     </Button>
                 </Link>
                 <div className="text-center">
-                    <h2 className="font-bold text-pink-600 dark:text-pink-400 text-sm uppercase tracking-wider">
+                    <h2 className="font-bold text-primary text-sm uppercase tracking-wider">
                         Modo Cocina
                     </h2>
-                    <p className="text-xs text-gray-500 truncate max-w-[200px]">
+                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {recipeTitle}
                     </p>
                 </div>
@@ -80,9 +80,9 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
             </div>
 
             {/* Progress Bar */}
-            <div className="h-2 bg-gray-200 dark:bg-zinc-800 w-full">
+            <div className="h-2 bg-muted w-full">
                 <div
-                    className="h-full bg-pink-500 transition-all duration-300"
+                    className="h-full bg-primary transition-all duration-300"
                     style={{
                         width: `${((currentStepIndex + 1) / steps.length) * 100}%`,
                     }}
@@ -100,10 +100,10 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
                         transition={{ duration: 0.3 }}
                         className="max-w-md w-full"
                     >
-                        <div className="text-8xl font-black text-pink-100 dark:text-pink-900/20 mb-6">
+                        <div className="text-8xl font-black text-primary/10 mb-6">
                             {currentStep.step_order}
                         </div>
-                        <p className="text-2xl md:text-3xl font-medium text-gray-800 dark:text-gray-100 leading-relaxed">
+                        <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed">
                             {currentStep.content}
                         </p>
                     </motion.div>
@@ -111,7 +111,7 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
             </div>
 
             {/* Controls */}
-            <div className="p-4 bg-white dark:bg-zinc-900 border-t border-border flex flex-wrap gap-2 justify-center">
+            <div className="p-4 bg-card border-t border-border flex flex-wrap gap-2 justify-center">
                 <Button
                     variant="outline"
                     size="lg"

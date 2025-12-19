@@ -3,8 +3,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function RecipeCardSkeleton() {
     return (
-        <Card className="overflow-hidden border-pink-100 dark:border-pink-900/50 h-full flex flex-col">
-            <div className="relative h-48 w-full bg-pink-50 dark:bg-zinc-800">
+        <Card className="card-base overflow-hidden h-full flex flex-col">
+            <div className="relative h-48 w-full bg-muted">
                 <Skeleton className="h-full w-full" />
             </div>
             <CardHeader className="p-4 pb-2">

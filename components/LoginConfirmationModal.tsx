@@ -24,11 +24,11 @@ export function LoginConfirmationModal() {
 
             {/* Modal */}
             <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-[calc(100%-2rem)] max-w-md animate-in zoom-in-95 fade-in duration-200">
-                <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-pink-100 dark:border-pink-900/50 p-6 relative">
+                <div className="bg-card rounded-3xl shadow-2xl border border-primary/10 dark:border-primary/20 p-6 relative">
                     {/* Close button */}
                     <button
                         onClick={close}
-                        className="absolute top-4 right-4 p-2 rounded-full [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/30 transition-colors text-gray-500 [@media(hover:hover)]:hover:text-gray-700 dark:text-gray-400 dark:[@media(hover:hover)]:hover:text-gray-200"
+                        className="absolute top-4 right-4 p-2 rounded-full [@media(hover:hover)]:hover:bg-primary/10 transition-colors text-muted-foreground [@media(hover:hover)]:hover:text-foreground"
                         aria-label="Cerrar"
                     >
                         <X className="w-5 h-5" />
@@ -37,13 +37,13 @@ export function LoginConfirmationModal() {
                     {/* Content */}
                     <div className="space-y-6">
                         <div className="space-y-2">
-                            <h2 className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+                            <h2 className="text-2xl font-bold text-primary">
                                 Iniciar Sesión
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                            <p className="text-muted-foreground leading-relaxed">
                                 Estás por iniciar sesión con tu cuenta de Google.
                             </p>
-                            <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                            <p className="text-muted-foreground leading-relaxed">
                                 La aplicación sólo accederá a tu <strong>nombre</strong> y <strong>foto de perfil</strong>.
                             </p>
                         </div>
@@ -53,13 +53,13 @@ export function LoginConfirmationModal() {
                             <Button
                                 variant="outline"
                                 onClick={close}
-                                className="flex-1 border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:[@media(hover:hover)]:hover:bg-pink-950 dark:text-pink-400"
+                                className="flex-1 border-primary/20 [@media(hover:hover)]:hover:bg-primary/10 text-primary"
                             >
                                 Cancelar
                             </Button>
                             <Button
                                 onClick={handleConfirm}
-                                className="flex-1 bg-pink-500 [@media(hover:hover)]:hover:bg-pink-600 text-white"
+                                className="flex-1 bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground"
                             >
                                 Continuar
                             </Button>

@@ -76,8 +76,8 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
             variant="ghost"
             size="icon"
             className={cn(
-                "rounded-full [@media(hover:hover)]:hover:bg-pink-100 dark:[@media(hover:hover)]:hover:bg-pink-900/30 transition-colors",
-                isFavorite ? "text-red-500 [@media(hover:hover)]:hover:text-red-600" : "text-gray-400 [@media(hover:hover)]:hover:text-pink-500",
+                "rounded-full [@media(hover:hover)]:hover:bg-primary/10 transition-colors",
+                isFavorite ? "text-destructive [@media(hover:hover)]:hover:text-destructive/90" : "text-muted-foreground [@media(hover:hover)]:hover:text-primary",
                 sizeClasses[size],
                 className
             )}

@@ -13,13 +13,13 @@ export function Navbar() {
     const { showSnackbar } = useSnackbar()
 
     return (
-        <nav className="w-full border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50 print:hidden">
+        <nav className="nav-glass print:hidden">
             <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 [@media(hover:hover)]:hover:opacity-80 transition-opacity">
-                    <div className="bg-pink-100 dark:bg-pink-900/50 p-2 rounded-full">
-                        <ChefHat className="h-5 w-5 text-pink-500" />
+                    <div className="bg-primary/10 p-2 rounded-full">
+                        <ChefHat className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="font-bold text-lg bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent hidden sm:block">
+                    <span className="font-bold text-lg bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent hidden sm:block">
                         Recetario La María
                     </span>
                 </Link>
@@ -28,7 +28,7 @@ export function Navbar() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-pink-600 [@media(hover:hover)]:hover:text-pink-700 [@media(hover:hover)]:hover:bg-pink-50 dark:text-pink-400 dark:[@media(hover:hover)]:hover:bg-pink-950 min-h-[44px] min-w-[44px]"
+                        className="text-primary [@media(hover:hover)]:hover:text-primary/80 [@media(hover:hover)]:hover:bg-primary/10 min-h-[44px] min-w-[44px]"
                         aria-label="Ver favoritos"
                         onClick={() => {
                             if (!user) {
@@ -46,7 +46,7 @@ export function Navbar() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-pink-600 [@media(hover:hover)]:hover:text-pink-700 [@media(hover:hover)]:hover:bg-pink-50 dark:text-pink-400 dark:[@media(hover:hover)]:hover:bg-pink-950 min-h-[44px] min-w-[44px]"
+                                className="text-primary [@media(hover:hover)]:hover:text-primary/80 [@media(hover:hover)]:hover:bg-primary/10 min-h-[44px] min-w-[44px]"
                                 aria-label="Crear nueva receta"
                             >
                                 <PlusCircle className="h-5 w-5 sm:mr-2" />
@@ -55,7 +55,7 @@ export function Navbar() {
                         </Link>
                     )}
                     <ThemeToggle />
-                    <div className="w-px h-6 bg-gray-200 dark:bg-gray-800" />
+                    <div className="w-px h-6 bg-border" />
                     <LoginButton />
                 </div>
             </div>

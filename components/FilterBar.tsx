@@ -102,7 +102,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
 
     return (
         <>
-            <div className="sticky top-0 z-30 bg-pink-50/95 dark:bg-zinc-950/95 backdrop-blur-sm py-4 mb-6 -mx-4 px-4 border-b border-pink-100 dark:border-pink-900/50 transition-all">
+            <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm py-4 mb-6 -mx-4 px-4 border-b border-primary/10 dark:border-primary/20 transition-all">
                 <div className="flex gap-2 max-w-6xl mx-auto w-full">
                     <div className="relative flex-1">
                         <Input
@@ -110,11 +110,11 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             value={tempFilters.search}
                             onChange={handleSearchChange}
                             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-                            className="border-pink-200 focus-visible:ring-pink-400 bg-white dark:bg-zinc-900"
+                            className="border-primary/20 focus-visible:ring-primary bg-card"
                         />
                         <button
                             onClick={applyFilters}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-pink-500 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-400"
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary [@media(hover:hover)]:hover:text-primary/80"
                         >
                             <Search className="h-4 w-4" />
                         </button>
@@ -122,21 +122,21 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                     <Button
                         variant="outline"
                         onClick={openFilters}
-                        className={`border-pink-200 text-pink-500 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20 relative ${isOpen ? "bg-pink-50" : "bg-white dark:bg-zinc-900"}`}
+                        className={`border-primary/20 text-primary [@media(hover:hover)]:hover:bg-primary/10 relative ${isOpen ? "bg-primary/10" : "bg-card"}`}
                     >
                         <Filter className="h-4 w-4 mr-2" />
                         Filtros
                         {activeCount > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
+                            <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
                                 {activeCount}
                             </span>
                         )}
                     </Button>
                 </div>
                 {activeFilters.search && (
-                    <div className="flex items-center gap-2 sticky top-16 z-20 bg-pink-50/95 dark:bg-zinc-950/95 backdrop-blur-sm py-2 mb-6 -mx-4 px-4 border-b border-pink-100 dark:border-pink-900/50 transition-all">
+                    <div className="flex items-center gap-2 sticky top-16 z-20 bg-background/95 backdrop-blur-sm py-2 mb-6 -mx-4 px-4 border-b border-primary/10 dark:border-primary/20 transition-all">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-500">Búsqueda:</span>
+                            <span className="text-sm text-muted-foreground">Búsqueda:</span>
                             <span className="text-sm font-semibold">{activeFilters.search}</span>
                         </div>
                         <Button
@@ -145,9 +145,9 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                 setActiveFilters({ ...activeFilters, search: "" });
                                 onFilterChange({ ...activeFilters, search: "" });
                             }}
-                            className="ml-2 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-500 rounded-full"
+                            className="ml-2 [@media(hover:hover)]:hover:bg-primary/10 [@media(hover:hover)]:hover:text-primary rounded-full"
                         >
-                            <Trash className="h-4 w-4 text-pink-500 dark:text-pink-600 [@media(hover:hover)]:hover:text-pink-600 dark:[@media(hover:hover)]:hover:text-pink-500" />
+                            <Trash className="h-4 w-4 text-primary [@media(hover:hover)]:hover:text-primary" />
                         </Button>
                     </div>
                 )}
@@ -172,14 +172,14 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             transition={{ duration: 0.2 }}
                             className={`
-                                fixed inset-0 z-50 bg-white dark:bg-zinc-900 flex flex-col
-                                md:absolute md:inset-auto md:top-20 md:right-0 md:w-96 md:h-auto md:max-h-[80vh] md:rounded-xl md:border md:border-pink-100 md:dark:border-pink-900 md:shadow-xl
+                                fixed inset-0 z-50 bg-card flex flex-col
+                                md:absolute md:inset-auto md:top-20 md:right-0 md:w-96 md:h-auto md:max-h-[80vh] md:rounded-xl md:border md:border-primary/10 md:dark:border-primary/20 md:shadow-xl
                             `}
                         >
                             {/* Header */}
-                            <div className="flex justify-between items-center p-4 border-b border-pink-100 dark:border-pink-900/50">
-                                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Filtros</h3>
-                                <Button variant="ghost" size="icon" onClick={closeFilters} className="rounded-full [@media(hover:hover)]:hover:bg-gray-100 dark:[@media(hover:hover)]:hover:bg-zinc-800">
+                            <div className="flex justify-between items-center p-4 border-b border-primary/10 dark:border-primary/20">
+                                <h3 className="font-bold text-lg text-foreground">Filtros</h3>
+                                <Button variant="ghost" size="icon" onClick={closeFilters} className="rounded-full [@media(hover:hover)]:hover:bg-muted">
                                     <X className="h-5 w-5" />
                                 </Button>
                             </div>
@@ -187,13 +187,13 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             {/* Content - Scrollable */}
                             <div className="flex-1 overflow-y-auto p-4 space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Categoría</label>
+                                    <label className="block text-sm font-bold text-foreground mb-3">Categoría</label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
                                             onClick={() => setTempFilters({ ...tempFilters, category: "" })}
                                             className={`p-2 text-sm rounded-lg border transition-all ${!tempFilters.category
-                                                ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                ? "bg-primary/10 border-primary text-primary"
+                                                : "border-border [@media(hover:hover)]:hover:border-primary/30 text-muted-foreground"
                                                 }`}
                                         >
                                             Todas
@@ -203,8 +203,8 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 key={cat.id}
                                                 onClick={() => setTempFilters({ ...tempFilters, category: cat.id })}
                                                 className={`p-2 text-sm rounded-lg border transition-all ${tempFilters.category === cat.id
-                                                    ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    ? "bg-primary/10 border-primary text-primary"
+                                                    : "border-border [@media(hover:hover)]:hover:border-primary/30 text-muted-foreground"
                                                     }`}
                                             >
                                                 {cat.name}
@@ -215,7 +215,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
 
                                 {users.length > 0 &&
                                     <div className="flex items-left gap-2 flex-col">
-                                        <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Usuario</label>
+                                        <label className="block text-sm font-bold text-foreground mb-3">Usuario</label>
                                         <UserSelect
                                             className="w-full"
                                             users={users}
@@ -224,15 +224,15 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                         />
                                     </div>}
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Dificultad</label>
+                                    <label className="block text-sm font-bold text-foreground mb-3">Dificultad</label>
                                     <div className="flex gap-2">
                                         {['easy', 'medium', 'hard'].map((diff) => (
                                             <button
                                                 key={diff}
                                                 onClick={() => setTempFilters({ ...tempFilters, difficulty: tempFilters.difficulty === diff ? "" : diff })}
                                                 className={`flex-1 p-2 text-sm rounded-lg border transition-all capitalize ${tempFilters.difficulty === diff
-                                                    ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    ? "bg-primary/10 border-primary text-primary"
+                                                    : "border-border [@media(hover:hover)]:hover:border-primary/30 text-muted-foreground"
                                                     }`}
                                             >
                                                 {diff === 'easy' ? 'Fácil' : diff === 'medium' ? 'Media' : 'Difícil'}
@@ -242,7 +242,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Tiempo</label>
+                                    <label className="block text-sm font-bold text-foreground mb-3">Tiempo</label>
                                     <div className="space-y-2">
                                         {[
                                             { val: 'fast', label: 'Rápidas (< 20 min)' },
@@ -253,8 +253,8 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                                 key={opt.val}
                                                 onClick={() => setTempFilters({ ...tempFilters, time: tempFilters.time === opt.val ? "" : opt.val })}
                                                 className={`w-full p-3 text-left text-sm rounded-lg border transition-all flex justify-between items-center ${tempFilters.time === opt.val
-                                                    ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                                    : "border-gray-200 [@media(hover:hover)]:hover:border-pink-200 text-gray-600 dark:border-zinc-800 dark:text-gray-400"
+                                                    ? "bg-primary/10 border-primary text-primary"
+                                                    : "border-border [@media(hover:hover)]:hover:border-primary/30 text-muted-foreground"
                                                     }`}
                                             >
                                                 {opt.label}
@@ -265,15 +265,15 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Etiquetas</label>
+                                    <label className="block text-sm font-bold text-foreground mb-3">Etiquetas</label>
                                     <div className="flex flex-wrap gap-2">
                                         {tags.map((tag) => (
                                             <button
                                                 key={tag.id}
                                                 onClick={() => toggleTag(tag.id)}
                                                 className={`px-3 py-1.5 rounded-full text-xs transition-colors border ${tempFilters.tags.includes(tag.id)
-                                                    ? "bg-pink-500 text-white border-pink-500"
-                                                    : "bg-white text-gray-600 border-gray-200 [@media(hover:hover)]:hover:border-pink-300 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
+                                                    ? "bg-primary text-primary-foreground border-primary"
+                                                    : "bg-card text-muted-foreground border-border [@media(hover:hover)]:hover:border-primary/30"
                                                     }`}
                                             >
                                                 {tag.name}
@@ -284,17 +284,17 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             </div>
 
                             {/* Footer */}
-                            <div className="p-4 border-t border-pink-100 dark:border-pink-900/50 flex gap-3 bg-white dark:bg-zinc-900 md:rounded-b-xl">
+                            <div className="p-4 border-t border-primary/10 dark:border-primary/20 flex gap-3 bg-card md:rounded-b-xl">
                                 <Button
                                     variant="outline"
                                     onClick={clearFilters}
-                                    className="flex-1 border-gray-200 text-gray-600 [@media(hover:hover)]:hover:bg-gray-50 dark:border-zinc-800 dark:text-gray-400"
+                                    className="flex-1 border-border text-muted-foreground [@media(hover:hover)]:hover:bg-muted"
                                 >
                                     Limpiar
                                 </Button>
                                 <Button
                                     onClick={applyFilters}
-                                    className="flex-[2] bg-pink-500 [@media(hover:hover)]:hover:bg-pink-600 text-white"
+                                    className="flex-[2] bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground"
                                 >
                                     Aplicar Filtros
                                 </Button>

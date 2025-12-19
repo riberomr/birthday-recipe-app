@@ -31,7 +31,7 @@ export function LoginButton() {
             variant="outline"
             size="sm"
             onClick={handleLoginClick}
-            className="border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:[@media(hover:hover)]:hover:bg-pink-950 dark:text-pink-400"
+            className="border-primary/20 [@media(hover:hover)]:hover:bg-primary/10 text-primary"
         >
             <LogIn className="h-4 w-4 mr-2" />
             Iniciar Sesión
