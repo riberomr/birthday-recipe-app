@@ -10,8 +10,14 @@ const customJestConfig = {
     setupFiles: ['<rootDir>/jest.setup.console.ts'],
     setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
     testEnvironment: 'jest-environment-jsdom',
+    testEnvironmentOptions: {
+        customExportConditions: [''],
+    },
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/$1',
+    },
+    globals: {
+        'process.env.NODE_ENV': 'test',
     },
     collectCoverage: true,
     collectCoverageFrom: [

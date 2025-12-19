@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom'
 
+// Force React to use development mode in tests (required for React.act)
+// @ts-ignore - NODE_ENV is read-only in types but writable at runtime in Jest
+process.env.NODE_ENV = 'test'
+
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
     useRouter: () => ({
