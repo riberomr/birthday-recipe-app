@@ -22,6 +22,7 @@ export type RecipeFilters = {
     difficulty?: string
     time?: string
     tags?: string[]
+    user_id?: string
 }
 
 export async function getRecipes(
@@ -42,7 +43,14 @@ export async function getRecipes(
       recipe_tags${hasTagsFilter ? '!inner' : ''} (
       tag_id,
       tags (*)
-        )
+        ),
+      profile:profiles (
+        id,
+        email,
+        full_name,
+        avatar_url,
+        updated_at
+      )
     `, { count: 'exact' })
 
     // Apply filters
@@ -94,6 +102,11 @@ export async function getRecipes(
         query = query.in("recipe_tags.tag_id", filters.tags)
     }
 
+    // User filter
+    if (filters.user_id) {
+        query = query.eq("user_id", filters.user_id)
+    }
+
     // Pagination
     const from = (page - 1) * limit
     const to = from + limit - 1
@@ -124,7 +137,14 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
       recipe_categories (*),
       recipe_nutrition (*),
       ratings (rating),
-      recipe_tags (tags (*))
+      recipe_tags (tags (*)),
+      profile:profiles (
+        id,
+        email,
+        full_name,
+        avatar_url,
+        updated_at
+      )
     `)
         .eq("id", id)
         .single()

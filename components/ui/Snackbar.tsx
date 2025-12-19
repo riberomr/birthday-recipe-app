@@ -34,7 +34,7 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({ children }) 
         setIsOpen(true);
         setTimeout(() => {
             setIsOpen(false);
-        }, 1000000);
+        }, 3000);
     }, []);
 
     const closeSnackbar = () => setIsOpen(false);

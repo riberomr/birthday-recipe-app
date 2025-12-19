@@ -28,7 +28,8 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
         category: "",
         difficulty: "",
         time: "",
-        tags: []
+        tags: [],
+        user_id: ""
     })
 
     // Reset when filters change
