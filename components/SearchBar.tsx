@@ -11,12 +11,12 @@ interface SearchBarProps {
 export function SearchBar({ value, onChange }: SearchBarProps) {
     return (
         <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder="Buscar recetas..."
-                className="pl-10 bg-white dark:bg-zinc-900 border-pink-200 dark:border-pink-900 focus-visible:ring-pink-400"
+                className="pl-10 bg-background border-input focus-visible:ring-primary"
             />
         </div>
     )

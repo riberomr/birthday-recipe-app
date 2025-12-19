@@ -17,7 +17,7 @@ const buttonVariants = cva(
                     "bg-secondary text-secondary-foreground [@media(hover:hover)]:hover:bg-secondary/80",
                 ghost: "[@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground",
                 link: "text-primary underline-offset-4 [@media(hover:hover)]:hover:underline",
-                kawaii: "bg-primary text-primary-foreground border-b-4 border-pink-700 active:border-b-0 active:translate-y-1 [@media(hover:hover)]:hover:bg-primary/90 font-bold uppercase tracking-wide",
+                kawaii: "bg-primary text-primary-foreground border-b-4 border-primary-foreground/20 active:border-b-0 active:translate-y-1 [@media(hover:hover)]:hover:bg-primary/90 font-bold uppercase tracking-wide",
             },
             size: {
                 default: "h-10 px-4 py-2",

@@ -86,7 +86,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
             <FilterBar categories={categories} onFilterChange={(newFilters: any) => setFilters(prev => ({ ...prev, ...newFilters }))} />
 
             {recipes.length === 0 && !loading ? (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-12 text-muted-foreground">
                     <p className="text-lg">No se encontraron recetas 🍰</p>
                     <p className="text-sm">Intenta con otra búsqueda</p>
                 </div>
@@ -116,7 +116,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
             {/* Loader element for intersection observer */}
             <div ref={loaderRef} className="h-10 w-full flex justify-center items-center">
                 {hasMore && !loading && (
-                    <button onClick={loadMore} className="text-sm text-pink-500 [@media(hover:hover)]:hover:underline">
+                    <button onClick={loadMore} className="text-sm text-primary [@media(hover:hover)]:hover:underline">
                         Cargar más
                     </button>
                 )}

@@ -139,7 +139,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
 
     return (
         <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">Comentarios ({total})</h3>
+            <h3 className="text-2xl font-bold text-primary">Comentarios ({total})</h3>
 
             {user ? (
                 <form onSubmit={handleSubmit} className="flex gap-4">
@@ -147,7 +147,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                     <img
                         src={user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                         alt={user.displayName || 'User'}
-                        className="w-10 h-10 rounded-full border border-pink-200 shrink-0"
+                        className="w-10 h-10 rounded-full border border-primary/20 shrink-0"
                     />
                     <div className="flex-1 space-y-2">
                         <div className="relative">
@@ -156,10 +156,10 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
                                 placeholder="Escribe un comentario..."
-                                className="min-h-[80px] bg-white dark:bg-zinc-900 border-pink-200 dark:border-pink-900 focus-visible:ring-pink-400 pr-12"
+                                className="min-h-[80px] bg-card border-primary/20 focus-visible:ring-primary pr-12"
                             />
                             <div className="absolute bottom-2 right-2">
-                                <label className="cursor-pointer p-2 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/30 rounded-full transition-colors inline-flex items-center justify-center text-pink-400 [@media(hover:hover)]:hover:text-pink-500">
+                                <label className="cursor-pointer p-2 [@media(hover:hover)]:hover:bg-primary/10 rounded-full transition-colors inline-flex items-center justify-center text-primary/60 [@media(hover:hover)]:hover:text-primary">
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -176,12 +176,12 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                 <img
                                     src={previewUrl}
                                     alt="Preview"
-                                    className="h-20 w-20 object-cover rounded-lg border border-pink-200"
+                                    className="h-20 w-20 object-cover rounded-lg border border-primary/20"
                                 />
                                 <button
                                     type="button"
                                     onClick={clearImage}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white p-0.5 rounded-full [@media(hover:hover)]:hover:bg-red-600 shadow-sm"
+                                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground p-0.5 rounded-full [@media(hover:hover)]:hover:bg-destructive/90 shadow-sm"
                                 >
                                     <X className="w-3 h-3" />
                                 </button>
@@ -192,7 +192,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                             <Button
                                 type="submit"
                                 disabled={(!comment.trim() && !selectedImage) || submitting}
-                                className="bg-pink-500 [@media(hover:hover)]:hover:bg-pink-600 text-white"
+                                className="bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground"
                             >
                                 {submitting ? "Publicando..." : <Send className="w-4 h-4" />}
                             </Button>
@@ -200,14 +200,14 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                     </div>
                 </form>
             ) : (
-                <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-xl text-center">
-                    <p className="text-pink-600 dark:text-pink-400 mb-3">
+                <div className="p-4 bg-primary/10 rounded-xl text-center">
+                    <p className="text-primary mb-3">
                         Para dejar un comentario necesitás iniciar sesión ✨
                     </p>
                     <Button
                         onClick={handleLoginClick}
                         variant="outline"
-                        className="border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 text-pink-600 dark:border-pink-800 dark:[@media(hover:hover)]:hover:bg-pink-950 dark:text-pink-400"
+                        className="border-primary/20 [@media(hover:hover)]:hover:bg-primary/10 text-primary"
                     >
                         <LogIn className="h-4 w-4 mr-2" />
                         Iniciar Sesión
@@ -223,33 +223,33 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                         <CommentSkeleton />
                     </>
                 ) : comments.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8">No hay comentarios aún. ¡Sé el primero!</p>
+                    <p className="text-center text-muted-foreground py-8">No hay comentarios aún. ¡Sé el primero!</p>
                 ) : (
                     <>
                         {comments.map((comment: any) => (
-                            <div key={comment.id} className="flex gap-4 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-pink-100 dark:border-pink-900/50 shadow-sm">
+                            <div key={comment.id} className="flex gap-4 p-4 bg-card rounded-xl border border-primary/10 dark:border-primary/20 shadow-sm">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={comment.profiles?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
                                     alt={comment.profiles?.full_name || 'User'}
-                                    className="w-10 h-10 rounded-full border border-pink-100 shrink-0"
+                                    className="w-10 h-10 rounded-full border border-primary/10 shrink-0"
                                 />
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-bold text-gray-900 dark:text-gray-100">
+                                        <span className="font-bold text-foreground">
                                             {comment.profiles?.full_name || 'Usuario'}
                                         </span>
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-muted-foreground">
                                             {new Date(comment.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+                                    <p className="text-muted-foreground whitespace-pre-wrap">{comment.content}</p>
                                     {comment.image_url && (
                                         <div className="mt-3">
                                             <img
                                                 src={comment.image_url}
                                                 alt="Foto del comentario"
-                                                className="max-h-64 rounded-lg border border-pink-100 object-contain"
+                                                className="max-h-64 rounded-lg border border-primary/10 object-contain"
                                             />
                                         </div>
                                     )}
@@ -263,7 +263,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                     variant="outline"
                                     onClick={loadMoreComments}
                                     disabled={loadingMore}
-                                    className="text-pink-500 border-pink-200 [@media(hover:hover)]:hover:bg-pink-50 dark:[@media(hover:hover)]:hover:bg-pink-900/20"
+                                    className="text-primary border-primary/20 [@media(hover:hover)]:hover:bg-primary/10"
                                 >
                                     {loadingMore ? "Cargando..." : "Cargar más comentarios"}
                                 </Button>

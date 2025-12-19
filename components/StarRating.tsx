@@ -84,7 +84,7 @@ export function StarRating({
                             sizeClasses[size],
                             (hoverRating || rating) >= star
                                 ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300 dark:text-gray-600"
+                                : "text-muted-foreground/30"
                         )}
                     />
                 </button>
