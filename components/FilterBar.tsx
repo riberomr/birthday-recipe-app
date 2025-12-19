@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { RecipeCategory } from "@/types";
+import { RecipeCategory, SupabaseUser } from "@/types";
+import { getUsersWithRecipes } from "@/lib/api/users";
+import { UserSelect } from "./UserSelect";
 
 interface FilterBarProps {
     categories: RecipeCategory[];
@@ -16,6 +18,7 @@ interface FilterBarProps {
 export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [tags, setTags] = useState<{ id: string; name: string; type: string }[]>([]);
+    const [users, setUsers] = useState<SupabaseUser[]>([]);
 
     // Active filters (applied)
     const [activeFilters, setActiveFilters] = useState({
@@ -24,6 +27,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
         difficulty: "",
         time: "",
         tags: [] as string[],
+        user_id: "",
     });
 
     // Temp filters (while editing in modal)
@@ -34,6 +38,11 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
             const { data } = await supabase.from("tags").select("*");
             if (data) setTags(data);
         };
+        const fetchUsersWithRecipes = async () => {
+            const usersWithRecipes = await getUsersWithRecipes();
+            if (usersWithRecipes) setUsers(usersWithRecipes);
+        };
+        fetchUsersWithRecipes();
         fetchTags();
     }, []);
 
@@ -71,6 +80,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
             difficulty: "",
             time: "",
             tags: [],
+            user_id: "",
         };
         setTempFilters(cleared);
     };
@@ -203,6 +213,16 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                                     </div>
                                 </div>
 
+                                {users.length > 0 &&
+                                    <div className="flex items-left gap-2 flex-col">
+                                        <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Usuario</label>
+                                        <UserSelect
+                                            className="w-full"
+                                            users={users}
+                                            value={tempFilters.user_id}
+                                            onChange={(value) => setTempFilters({ ...tempFilters, user_id: value === "all" ? "" : value })}
+                                        />
+                                    </div>}
                                 <div>
                                     <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Dificultad</label>
                                     <div className="flex gap-2">
@@ -281,8 +301,9 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
                             </div>
                         </motion.div>
                     </>
-                )}
-            </AnimatePresence>
+                )
+                }
+            </AnimatePresence >
         </>
     );
 }

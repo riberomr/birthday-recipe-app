@@ -18,6 +18,7 @@ export type Recipe = {
     ratings?: Rating[];
     average_rating?: AverageRating; // Calculated average rating
     tags?: Tag[];
+    profile?: SupabaseUser; // Author profile
 };
 
 export type RecipeCategory = {
@@ -58,7 +59,9 @@ export type Rating = {
 export type SupabaseUser = {
     id: string;
     email: string;
-    created_at: string;
+    updated_at: string;
+    full_name?: string;
+    avatar_url?: string;
 };
 
 export type AverageRating = {

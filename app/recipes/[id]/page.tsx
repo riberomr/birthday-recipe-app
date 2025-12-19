@@ -67,9 +67,27 @@ export default async function RecipePage({ params }: RecipePageProps) {
                 <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-xl p-6 border border-pink-100 dark:border-pink-900/50 print:shadow-none print:border-0 print:p-0">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-start justify-between gap-4 print:hidden">
-                            <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">
-                                {recipe.title}
-                            </h1>
+                            <div className="flex-1">
+                                <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">
+                                    {recipe.title}
+                                </h1>
+                                {recipe.profile && (
+                                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span>Receta compartida por</span>
+                                        <div className="w-6 h-6 rounded-full overflow-hidden border border-pink-200 dark:border-pink-800">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={recipe.profile.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                                alt={recipe.profile.full_name || 'Usuario'}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <span className="font-medium text-pink-600 dark:text-pink-400">
+                                            {recipe.profile.full_name || 'Usuario'}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                             <div className="flex gap-2">
                                 <FavoriteButton recipeId={recipe.id} />
                                 <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
