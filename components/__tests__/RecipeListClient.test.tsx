@@ -64,6 +64,8 @@ describe('RecipeListClient', () => {
             expect(getRecipes).toHaveBeenCalledWith(1, 6, expect.objectContaining({ search: 'test' }))
             expect(screen.getByText('Filtered Recipe')).toBeInTheDocument()
         })
+
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles filter error', async () => {
@@ -77,6 +79,8 @@ describe('RecipeListClient', () => {
         await waitFor(() => {
             expect(consoleError).toHaveBeenCalledWith('Error filtering recipes:', expect.any(Error))
         })
+
+        await new Promise(resolve => setTimeout(resolve, 0))
 
         consoleError.mockRestore()
     })
@@ -95,6 +99,8 @@ describe('RecipeListClient', () => {
         await waitFor(() => {
             expect(getRecipes).toHaveBeenCalledWith(2, 6, expect.any(Object))
         })
+
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles load more error', async () => {
@@ -110,6 +116,8 @@ describe('RecipeListClient', () => {
             expect(consoleError).toHaveBeenCalledWith('Error loading more recipes:', expect.any(Error))
         })
 
+        await new Promise(resolve => setTimeout(resolve, 0))
+
         consoleError.mockRestore()
     })
 
@@ -117,9 +125,10 @@ describe('RecipeListClient', () => {
         // Mock useInView to return true
         ; (useInView as jest.Mock).mockReturnValue(true)
 
-            ; (getRecipes as jest.Mock).mockResolvedValue({
-                recipes: [{ id: '3', title: 'Recipe 3' }],
-                total: 3,
+            ; (getRecipes as jest.Mock).mockImplementation((page) => {
+                if (page === 1) return Promise.resolve({ recipes: mockRecipes, total: 3 })
+                if (page === 2) return Promise.resolve({ recipes: [{ id: '3', title: 'Recipe 3' }], total: 3 })
+                return Promise.resolve({ recipes: [], total: 3 })
             })
 
         render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={3} categories={[]} />)
@@ -127,5 +136,10 @@ describe('RecipeListClient', () => {
         await waitFor(() => {
             expect(getRecipes).toHaveBeenCalledWith(2, 6, expect.any(Object))
         })
+
+        // Wait for state update
+        await screen.findByText('Recipe 3')
+
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 })

@@ -59,3 +59,11 @@ jest.mock('firebase/auth', () => ({
     signInWithPopup: jest.fn(),
     onAuthStateChanged: jest.fn(() => jest.fn()),
 }))
+
+beforeAll(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => { })
+})
+
+afterAll(() => {
+    jest.clearAllMocks()
+})

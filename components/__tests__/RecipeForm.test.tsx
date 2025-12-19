@@ -75,6 +75,8 @@ describe('RecipeForm', () => {
         expect(tagBtn).toHaveClass('bg-primary')
         await user.click(tagBtn) // Deselect
         expect(tagBtn).not.toHaveClass('bg-primary')
+
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('renders correctly in edit mode', async () => {
@@ -97,9 +99,14 @@ describe('RecipeForm', () => {
         render(<RecipeForm initialData={initialData} isEditing={true} />)
         expect(screen.getByText('Editar Receta ✏️')).toBeInTheDocument()
         expect(screen.getByDisplayValue('Existing Recipe')).toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('redirects if user is not owner in edit mode', () => {
+    it('redirects if user is not owner in edit mode', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ user: mockUser, supabaseUser: { id: 'otherUser' } })
         const initialData: any = { user_id: 'user1', id: 'recipe1' }
 
@@ -107,6 +114,11 @@ describe('RecipeForm', () => {
 
         expect(mockRouter.push).toHaveBeenCalledWith('/')
         expect(mockShowSnackbar).toHaveBeenCalledWith(expect.stringContaining('No tienes permiso'), 'error')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles form submission for new recipe', async () => {
@@ -139,6 +151,11 @@ describe('RecipeForm', () => {
             expect(mockCreateRecipe).toHaveBeenCalled()
         })
         expect(mockRouter.push).toHaveBeenCalledWith('/recipes/new-id')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('validates required fields', async () => {
@@ -162,6 +179,11 @@ describe('RecipeForm', () => {
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Agrega al menos un ingrediente', 'error')
         })
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles image upload', async () => {
@@ -184,6 +206,11 @@ describe('RecipeForm', () => {
         // Clear image
         await user.click(screen.getByText('Eliminar Imagen'))
         expect(screen.queryByAltText('Preview')).not.toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles dynamic fields (ingredients, steps, nutrition)', async () => {
@@ -212,6 +239,11 @@ describe('RecipeForm', () => {
         await user.click(addNutBtn)
         const nutInputs = screen.getAllByPlaceholderText('Nombre (ej: Calorías)')
         expect(nutInputs).toHaveLength(2)
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles update submission', async () => {
@@ -255,6 +287,11 @@ describe('RecipeForm', () => {
             expect(mockUpdateRecipe).toHaveBeenCalled()
         })
         expect(mockRouter.push).toHaveBeenCalledWith('/recipes/recipe1')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles submission error', async () => {
@@ -288,12 +325,22 @@ describe('RecipeForm', () => {
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith(expect.stringContaining('Submission failed'), 'error')
         })
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles tag selection', async () => {
         const user = userEvent.setup()
         render(<RecipeForm />)
         expect(screen.getByText('Etiquetas')).toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles nutrition fields', async () => {
@@ -313,6 +360,11 @@ describe('RecipeForm', () => {
 
         // Should be back to 1
         expect(screen.getAllByPlaceholderText('Nombre (ej: Calorías)')).toHaveLength(1)
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('validates steps', async () => {
@@ -335,6 +387,11 @@ describe('RecipeForm', () => {
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Agrega al menos un paso de preparación', 'error')
         })
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles keep_image logic', async () => {
@@ -367,6 +424,11 @@ describe('RecipeForm', () => {
         // Check if keep_image was sent
         const formData = mockUpdateRecipe.mock.calls[0][1] as FormData
         expect(formData.get('keep_image')).toBe('true')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('prevents submission if not logged in', async () => {
@@ -387,6 +449,11 @@ describe('RecipeForm', () => {
         await user.click(screen.getByText('Guardar Receta'))
 
         expect(mockShowSnackbar).toHaveBeenCalledWith('Debes iniciar sesión para crear una receta', 'error')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles image selection cancellation', async () => {
@@ -409,6 +476,11 @@ describe('RecipeForm', () => {
         // Should not crash and keep previous or clear? 
         // Code says: if (e.target.files && e.target.files[0])
         // So if no files, it does nothing.
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('validates empty strings in arrays', async () => {
@@ -431,9 +503,14 @@ describe('RecipeForm', () => {
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Agrega al menos un ingrediente', 'error')
         })
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('cleans up preview url on unmount', () => {
+    it('cleans up preview url on unmount', async () => {
         const { unmount } = render(<RecipeForm />)
         // Set preview url
         const file = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' })
@@ -442,6 +519,11 @@ describe('RecipeForm', () => {
 
         unmount()
         expect(global.URL.revokeObjectURL).toHaveBeenCalled()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles image compression and upload', async () => {
@@ -476,6 +558,11 @@ describe('RecipeForm', () => {
 
         const formData = mockCreateRecipe.mock.calls[0][0] as FormData
         expect(formData.get('file')).not.toBeNull()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles cancel button', async () => {
@@ -484,6 +571,11 @@ describe('RecipeForm', () => {
         const cancelBtn = screen.getByText('Cancelar')
         await user.click(cancelBtn)
         expect(mockRouter.back).toHaveBeenCalled()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles difficulty change', async () => {
@@ -492,6 +584,11 @@ describe('RecipeForm', () => {
         const difficultySelect = screen.getByRole('combobox')
         await user.selectOptions(difficultySelect, 'hard')
         expect(difficultySelect).toHaveValue('hard')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles nutrition inputs', async () => {
@@ -505,6 +602,11 @@ describe('RecipeForm', () => {
         await user.type(nutAmountInput, '10g')
         const nutUnitInput = screen.getAllByPlaceholderText('Unidad')[1]
         await user.type(nutUnitInput, 'g')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles step removal via button', async () => {
@@ -520,6 +622,11 @@ describe('RecipeForm', () => {
 
         // Should have 1 step
         expect(screen.getAllByPlaceholderText(/Paso \d/)).toHaveLength(1)
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles null data from fetchTags', async () => {
@@ -535,9 +642,10 @@ describe('RecipeForm', () => {
             expect(mockSelect).toHaveBeenCalled()
         })
         // Should not crash
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('does not revoke object url if preview is null or same as initial', () => {
+    it('does not revoke object url if preview is null or same as initial', async () => {
         const initialData: any = {
             image_url: 'http://example.com/img.jpg'
         }
@@ -552,12 +660,22 @@ describe('RecipeForm', () => {
         render(<RecipeForm />)
         // Default preview is null. Unmount.
         // But we need to capture the unmount of the NEW component.
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('does not revoke object url if preview is null', () => {
+    it('does not revoke object url if preview is null', async () => {
         const { unmount } = render(<RecipeForm />)
         unmount()
         expect(global.URL.revokeObjectURL).not.toHaveBeenCalled()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('filters out empty nutrition fields on submission', async () => {
@@ -589,6 +707,11 @@ describe('RecipeForm', () => {
         const formData = mockCreateRecipe.mock.calls[0][0] as FormData
         const nutrition = JSON.parse(formData.get('nutrition') as string)
         expect(nutrition).toHaveLength(0) // Should be empty array as all were empty
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles submission error without message', async () => {
@@ -611,9 +734,14 @@ describe('RecipeForm', () => {
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Error al guardar la receta. Por favor intenta de nuevo.', 'error')
         })
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('uses default difficulty if undefined in initialData', () => {
+    it('uses default difficulty if undefined in initialData', async () => {
         const initialData: any = {
             id: 'recipe1',
             title: 'Title',
@@ -624,9 +752,14 @@ describe('RecipeForm', () => {
         render(<RecipeForm initialData={initialData} isEditing={true} />)
         const select = screen.getByRole('combobox') as HTMLSelectElement
         expect(select.value).toBe('medium')
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('handles undefined amount and unit in initialData', () => {
+    it('handles undefined amount and unit in initialData', async () => {
         const initialData: any = {
             id: 'recipe1',
             title: 'Title',
@@ -645,9 +778,14 @@ describe('RecipeForm', () => {
 
         const unitInput = screen.getByPlaceholderText('Unidad') as HTMLInputElement
         expect(unitInput.value).toBe('') // unit was null, so ""
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('handles image change with no files', () => {
+    it('handles image change with no files', async () => {
         const { container } = render(<RecipeForm />)
         const input = container.querySelector('input[type="file"]') as HTMLInputElement
 
@@ -656,6 +794,11 @@ describe('RecipeForm', () => {
 
         // Should not crash, preview should remain null (or whatever it was)
         expect(screen.queryByAltText('Preview')).not.toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('filters out partial nutrition fields', async () => {
@@ -693,6 +836,11 @@ describe('RecipeForm', () => {
         const formData = mockCreateRecipe.mock.calls[0][0] as FormData
         const nutrition = JSON.parse(formData.get('nutrition') as string)
         expect(nutrition).toHaveLength(0)
+
+        await waitFor(() => {
+            expect(supabase.from).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 })
 

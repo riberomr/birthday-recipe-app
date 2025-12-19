@@ -74,6 +74,10 @@ describe('CommentSection', () => {
             })
 
             expect(screen.getByRole('button', { name: /iniciar sesión/i })).toBeInTheDocument()
+
+            await waitFor(() => {
+                expect(getComments).toHaveBeenCalled()
+            })
         })
 
         it('opens login modal when clicking login button', async () => {
@@ -117,6 +121,10 @@ describe('CommentSection', () => {
 
             await waitFor(() => {
                 expect(screen.getByPlaceholderText(/escribe un comentario/i)).toBeInTheDocument()
+            })
+
+            await waitFor(() => {
+                expect(getComments).toHaveBeenCalled()
             })
         })
 
@@ -167,9 +175,13 @@ describe('CommentSection', () => {
     })
 
     describe('comment loading and display', () => {
-        it('shows loading skeletons initially', () => {
+        it('shows loading skeletons initially', async () => {
             render(<CommentSection recipeId="1" />)
             expect(screen.getAllByTestId('comment-skeleton')).toHaveLength(3)
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('comment-skeleton')).not.toBeInTheDocument()
+            })
         })
 
         it('displays comments after loading', async () => {
@@ -205,7 +217,7 @@ describe('CommentSection', () => {
             const user = userEvent.setup()
                 ; (getComments as jest.Mock)
                     .mockResolvedValueOnce({ comments: mockComments, total: 10 })
-                    .mockResolvedValueOnce({ comments: [mockComments[0]], total: 10 })
+                    .mockResolvedValueOnce({ comments: [{ ...mockComments[0], id: '3' }], total: 10 })
 
             render(<CommentSection recipeId="1" />)
 

@@ -39,10 +39,15 @@ describe('FilterBar', () => {
         jest.clearAllMocks()
     })
 
-    it('renders correctly', () => {
+    it('renders correctly', async () => {
         render(<FilterBar categories={mockCategories} onFilterChange={mockOnFilterChange} />)
         expect(screen.getByPlaceholderText('Buscar recetas...')).toBeInTheDocument()
         expect(screen.getByText('Filtros')).toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('opens filter modal', async () => {
@@ -67,16 +72,21 @@ describe('FilterBar', () => {
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ category: 'cat1' }))
     })
 
-    it('handles search input', () => {
+    it('handles search input', async () => {
         render(<FilterBar categories={mockCategories} onFilterChange={mockOnFilterChange} />)
         const input = screen.getByPlaceholderText('Buscar recetas...')
         fireEvent.change(input, { target: { value: 'cake' } })
         fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })
 
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ search: 'cake' }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
-    it('clears search filter', () => {
+    it('clears search filter', async () => {
         render(<FilterBar categories={mockCategories} onFilterChange={mockOnFilterChange} />)
         const input = screen.getByPlaceholderText('Buscar recetas...')
         fireEvent.change(input, { target: { value: 'cake' } })
@@ -88,6 +98,11 @@ describe('FilterBar', () => {
         fireEvent.click(allButtons[allButtons.length - 1])
 
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ search: '' }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('toggles tags', async () => {
@@ -106,6 +121,11 @@ describe('FilterBar', () => {
 
         fireEvent.click(screen.getByText('Aplicar Filtros'))
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ tags: [] }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('clears all filters', async () => {
@@ -141,6 +161,11 @@ describe('FilterBar', () => {
             difficulty: '',
             time: ''
         }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('selects user and then all users', async () => {
@@ -158,6 +183,11 @@ describe('FilterBar', () => {
 
         fireEvent.click(screen.getByText('Aplicar Filtros'))
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ user_id: '' }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('locks body scroll on mobile', async () => {
@@ -171,6 +201,11 @@ describe('FilterBar', () => {
 
         fireEvent.click(screen.getByText('Aplicar Filtros')) // Closes modal
         expect(document.body.style.overflow).toBe('unset')
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('toggles category off', async () => {
@@ -186,6 +221,11 @@ describe('FilterBar', () => {
 
         fireEvent.click(screen.getByText('Aplicar Filtros'))
         expect(mockOnFilterChange).toHaveBeenCalledWith(expect.objectContaining({ category: '' }))
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('handles null data from API', async () => {
@@ -198,6 +238,11 @@ describe('FilterBar', () => {
 
         // Should render without crashing
         expect(screen.getByText('Filtros')).toBeInTheDocument()
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('updates badge count correctly', async () => {
@@ -220,6 +265,11 @@ describe('FilterBar', () => {
             const btn = screen.getByRole('button', { name: /filtros/i })
             expect(btn).toHaveTextContent('1')
         })
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     it('counts active tags in badge', async () => {
@@ -247,5 +297,10 @@ describe('FilterBar', () => {
 
         const btn = screen.getByRole('button', { name: /filtros/i })
         expect(btn).toHaveTextContent('1')
+
+        await waitFor(() => {
+            expect(getUsersWithRecipes).toHaveBeenCalled()
+        })
+        await new Promise(resolve => setTimeout(resolve, 0))
     })
 })

@@ -26,6 +26,10 @@ describe('StarRating', () => {
         render(<StarRating recipeId="recipe-1" />)
         // Should render 5 stars
         expect(screen.getAllByRole('button')).toHaveLength(5)
+
+        await waitFor(() => {
+            expect(getUserRating).toHaveBeenCalled()
+        })
     })
 
     it('fetches user rating on mount', async () => {
@@ -40,6 +44,10 @@ describe('StarRating', () => {
     it('handles rating click', async () => {
         render(<StarRating recipeId="recipe-1" />)
 
+        await waitFor(() => {
+            expect(getUserRating).toHaveBeenCalled()
+        })
+
         const stars = screen.getAllByRole('button')
         fireEvent.click(stars[2]) // Click 3rd star (rating 3)
 
@@ -48,7 +56,7 @@ describe('StarRating', () => {
         })
     })
 
-    it('does not allow interaction when readonly', () => {
+    it('does not allow interaction when readonly', async () => {
         render(<StarRating recipeId="recipe-1" readonly rating={3} />)
 
         const stars = screen.getAllByRole('button')
@@ -103,8 +111,12 @@ describe('StarRating', () => {
         consoleError.mockRestore()
     })
 
-    it('handles hover states when logged in', () => {
+    it('handles hover states when logged in', async () => {
         render(<StarRating recipeId="recipe-1" />)
+
+        await waitFor(() => {
+            expect(getUserRating).toHaveBeenCalled()
+        })
 
         const stars = screen.getAllByRole('button')
 
