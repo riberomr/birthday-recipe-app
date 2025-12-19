@@ -37,7 +37,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
             {/* Print Header - Only visible when printing */}
             <div className="hidden print:block text-center mb-8 pt-8">
                 <h1 className="text-4xl font-bold text-black mb-2">{recipe.title}</h1>
-                <p className="text-gray-600 italic">Una receta de La María</p>
             </div>
 
             {/* Hero Image */}
@@ -66,42 +65,39 @@ export default async function RecipePage({ params }: RecipePageProps) {
             <div className="max-w-3xl mx-auto px-4 -mt-8 relative z-10 print:mt-0 print:px-0 print:max-w-none">
                 <div className="bg-white dark:bg-zinc-900 rounded-3xl shadow-xl p-6 border border-pink-100 dark:border-pink-900/50 print:shadow-none print:border-0 print:p-0">
                     <div className="flex flex-col gap-4">
-                        <div className="flex items-start justify-between gap-4 print:hidden">
+                        <div className="flex items-start justify-between gap-4 print:hidden ">
                             <div className="flex-1">
                                 <h1 className="text-3xl font-bold text-pink-600 dark:text-pink-400">
                                     {recipe.title}
                                 </h1>
-                                {recipe.profile && (
-                                    <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        <span>Receta compartida por</span>
-                                        <div className="w-6 h-6 rounded-full overflow-hidden border border-pink-200 dark:border-pink-800">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={recipe.profile.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                                                alt={recipe.profile.full_name || 'Usuario'}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <span className="font-medium text-pink-600 dark:text-pink-400">
-                                            {recipe.profile.full_name || 'Usuario'}
-                                        </span>
-                                    </div>
-                                )}
+
                             </div>
                             <div className="flex gap-2">
-                                <FavoriteButton recipeId={recipe.id} />
                                 <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
-                                <ShareButtons title={recipe.title} />
-                                {/* <PrintButton /> */}
-                                <DownloadButton />
+                                <FavoriteButton recipeId={recipe.id} />
                             </div>
-                        </div>
 
+                        </div>
+                        {recipe.profile && (
+                            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span>Receta compartida por</span>
+                                <div className="w-6 h-6 rounded-full overflow-hidden border border-pink-200 dark:border-pink-800">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={recipe.profile.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                        alt={recipe.profile.full_name || 'Usuario'}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <span className="font-medium text-pink-600 dark:text-pink-400">
+                                    {recipe.profile.full_name || 'Usuario'}
+                                </span>
+                            </div>
+                        )}
                         {/* Print-only description styling */}
                         <p className="text-gray-600 dark:text-gray-300 print:text-black print:text-lg print:mb-6">
                             {recipe.description}
                         </p>
-
                         <div className="flex sm:flex-row flex-col justify-between gap-6 text-sm text-gray-500 dark:text-gray-400 py-4 border-t border-b border-gray-100 dark:border-gray-800 print:border-gray-300 print:text-black">
                             <div className="flex gap-4">
                                 <div className="flex items-center gap-2">
@@ -164,9 +160,16 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 </div>
                             </div>
                         )}
-
+                        <div className="flex gap-2 print:hidden mt-4">
+                            <div className="flex-1">
+                                Puedes compartir o descargar la receta
+                            </div>
+                            <div></div>
+                            <ShareButtons title={recipe.title} />
+                            <DownloadButton />
+                        </div>
                         {/* Social Features - Hidden on Print */}
-                        <div className="mt-12 space-y-8 print:hidden">
+                        <div className="mt-8 space-y-8 print:hidden">
                             <div className="border-t border-pink-100 dark:border-pink-900/50 pt-8">
                                 <div className="flex items-center justify-between mb-6 flex-col">
                                     <h3 className="text-2xl font-bold text-pink-600 dark:text-pink-400">
