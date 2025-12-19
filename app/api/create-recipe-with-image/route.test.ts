@@ -204,4 +204,276 @@ describe('/api/create-recipe-with-image', () => {
         // Check rollback
         expect(mockStorage.from().remove).toHaveBeenCalled()
     })
+
+    it('logs error if rollback fails', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        // Mock recipe insert failure
+        mockInsert.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' } })
+            })
+        })
+
+        mockStorage.from().remove.mockRejectedValue(new Error('Rollback Error'))
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+
+        const formData = new FormData()
+        formData.append('title', 'Rollback Fail')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+        const file = new File(['rollback'], 'rollback.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        await new Promise(resolve => setTimeout(resolve, 0))
+        expect(consoleError).toHaveBeenCalledWith('Error deleting image during rollback:', expect.any(Error))
+        consoleError.mockRestore()
+    })
+
+    it('returns 500 if server config is missing', async () => {
+        const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        delete process.env.NEXT_PUBLIC_SUPABASE_URL
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Server configuration error')
+
+        process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl
+    })
+
+    it('creates recipe successfully without file (using existing url)', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        const formData = new FormData()
+        formData.append('title', 'No File Recipe')
+        formData.append('image_url', 'http://existing.url')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(data.success).toBe(true)
+        expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
+            title: 'No File Recipe',
+            image_url: 'http://existing.url',
+        }))
+        expect(mockStorage.from().upload).not.toHaveBeenCalled()
+    })
+
+    it('rolls back if related data insert fails', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        // Recipe insert succeeds
+        const mockBuilder: any = Promise.resolve({ error: null })
+        mockBuilder.select = jest.fn().mockReturnValue({
+            single: jest.fn().mockResolvedValue({ data: { id: 'recipe1' }, error: null })
+        })
+
+        mockFrom.mockImplementation((table) => {
+            if (table === 'recipes') {
+                return { insert: jest.fn().mockReturnValue(mockBuilder) }
+            }
+            if (table === 'recipe_ingredients') {
+                return { insert: jest.fn().mockResolvedValue({ error: { message: 'Ingredient Error' } }) }
+            }
+            return { insert: jest.fn().mockResolvedValue({ error: null }) }
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'Related Fail')
+        formData.append('ingredients', JSON.stringify([{ name: 'Flour' }]))
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+        const file = new File(['img'], 'img.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        expect(mockStorage.from().remove).toHaveBeenCalled()
+    })
+
+    it('handles step insert error', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        mockFrom.mockImplementation((table) => {
+            if (table === 'recipes') return { insert: jest.fn().mockReturnValue({ select: jest.fn().mockReturnValue({ single: jest.fn().mockResolvedValue({ data: { id: 'recipe1' }, error: null }) }) }) }
+            if (table === 'recipe_ingredients') return { insert: jest.fn().mockResolvedValue({ error: null }) }
+            if (table === 'recipe_steps') return { insert: jest.fn().mockResolvedValue({ error: { message: 'Step Error' } }) }
+            return { insert: jest.fn().mockResolvedValue({ error: null }) }
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'Step Fail')
+        formData.append('ingredients', JSON.stringify([{ name: 'Flour' }]))
+        formData.append('steps', JSON.stringify([{ content: 'Mix' }]))
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+        const file = new File(['img'], 'img.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        expect(mockStorage.from().remove).toHaveBeenCalled()
+    })
+
+    it('handles nutrition insert error', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        mockFrom.mockImplementation((table) => {
+            if (table === 'recipes') return { insert: jest.fn().mockReturnValue({ select: jest.fn().mockReturnValue({ single: jest.fn().mockResolvedValue({ data: { id: 'recipe1' }, error: null }) }) }) }
+            if (table === 'recipe_nutrition') return { insert: jest.fn().mockResolvedValue({ error: { message: 'Nutrition Error' } }) }
+            return { insert: jest.fn().mockResolvedValue({ error: null }) }
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'Nut Fail')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', JSON.stringify([{ name: 'Cal', amount: '100' }]))
+        formData.append('tags', '[]')
+        const file = new File(['img'], 'img.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        expect(mockStorage.from().remove).toHaveBeenCalled()
+    })
+
+    it('handles tags insert error', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        mockFrom.mockImplementation((table) => {
+            if (table === 'recipes') return { insert: jest.fn().mockReturnValue({ select: jest.fn().mockReturnValue({ single: jest.fn().mockResolvedValue({ data: { id: 'recipe1' }, error: null }) }) }) }
+            if (table === 'recipe_tags') return { insert: jest.fn().mockResolvedValue({ error: { message: 'Tag Error' } }) }
+            return { insert: jest.fn().mockResolvedValue({ error: null }) }
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'Tag Fail')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', JSON.stringify(['tag1']))
+        const file = new File(['img'], 'img.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        expect(mockStorage.from().remove).toHaveBeenCalled()
+    })
+
+    it('does not attempt rollback if no image uploaded', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        // Mock DB failure
+        mockInsert.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' } })
+            })
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'No Image Fail')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+        // No file
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        expect(mockStorage.from().remove).not.toHaveBeenCalled()
+    })
+
+    it('handles unknown error without message', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        // Mock DB failure with object having no message
+        mockInsert.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                single: jest.fn().mockResolvedValue({ data: null, error: {} })
+            })
+        })
+
+        const formData = new FormData()
+        formData.append('title', 'Unknown Error')
+        formData.append('ingredients', '[]')
+        formData.append('steps', '[]')
+        formData.append('nutrition', '[]')
+        formData.append('tags', '[]')
+
+        const request = new Request('http://localhost/api/create-recipe-with-image', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Error desconocido')
+    })
 })

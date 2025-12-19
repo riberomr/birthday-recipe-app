@@ -77,4 +77,8 @@ describe('CookingPage', () => {
 
         expect(notFound).toHaveBeenCalled()
     })
+    it('exports dynamic configuration', () => {
+        const { dynamic } = require('./page')
+        expect(dynamic).toBe('force-dynamic')
+    })
 })

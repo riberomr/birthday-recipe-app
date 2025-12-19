@@ -26,11 +26,9 @@ export default function MyRecipesPage() {
     }, [supabaseUser, authLoading, showSnackbar, router]);
 
     useEffect(() => {
-        async function fetchMyRecipesData() {
-            if (!supabaseUser) return;
-
+        async function fetchMyRecipesData(userId: string) {
             try {
-                const data = await getRecipes(undefined, undefined, { user_id: supabaseUser.id });
+                const data = await getRecipes(undefined, undefined, { user_id: userId });
 
                 setRecipes(data.recipes);
             } catch (error) {
@@ -42,7 +40,7 @@ export default function MyRecipesPage() {
         }
 
         if (supabaseUser) {
-            fetchMyRecipesData();
+            fetchMyRecipesData(supabaseUser.id);
         }
     }, [supabaseUser, showSnackbar]);
 

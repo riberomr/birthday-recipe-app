@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { RecipeCard } from './RecipeCard'
 import { useAuth } from './AuthContext'
 
@@ -7,7 +7,7 @@ jest.mock('./AuthContext', () => ({
     useAuth: jest.fn(),
 }))
 jest.mock('./FavoriteButton', () => ({
-    FavoriteButton: () => <button>Favorite</button>,
+    FavoriteButton: ({ recipeId }: any) => <button data-testid="favorite-btn">Favorite {recipeId}</button>,
 }))
 
 const mockRecipe: any = {
@@ -51,5 +51,31 @@ describe('RecipeCard', () => {
         const recipeNoImage = { ...mockRecipe, image_url: null }
         render(<RecipeCard recipe={recipeNoImage} />)
         expect(screen.getByText('🥘')).toBeInTheDocument()
+    })
+
+    it('prevents event propagation on favorite button wrapper click', () => {
+        const { container } = render(<RecipeCard recipe={mockRecipe} />)
+
+        // Find the div wrapper with onClick handler
+        const favoriteWrapper = container.querySelector('.absolute.top-2.right-2')
+
+        if (favoriteWrapper) {
+            const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true })
+            const preventDefaultSpy = jest.spyOn(clickEvent, 'preventDefault')
+            const stopPropagationSpy = jest.spyOn(clickEvent, 'stopPropagation')
+
+            favoriteWrapper.dispatchEvent(clickEvent)
+
+            expect(preventDefaultSpy).toHaveBeenCalled()
+            expect(stopPropagationSpy).toHaveBeenCalled()
+        }
+    })
+
+    it('renders default rating when no rating data', () => {
+        const recipeNoRating = { ...mockRecipe, average_rating: null }
+        render(<RecipeCard recipe={recipeNoRating} />)
+
+        // Should render " ()" for the count part when rating is null
+        expect(screen.getByText('()')).toBeInTheDocument()
     })
 })

@@ -68,4 +68,59 @@ describe('StarRating', () => {
         expect(upsertRating).not.toHaveBeenCalled()
         expect(stars[0]).toBeDisabled()
     })
+
+    it('handles error when fetching rating', async () => {
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+            ; (getUserRating as jest.Mock).mockRejectedValue(new Error('Fetch failed'))
+
+        render(<StarRating recipeId="recipe-1" />)
+
+        await waitFor(() => {
+            expect(consoleError).toHaveBeenCalledWith('Error fetching rating:', expect.any(Error))
+        })
+
+        consoleError.mockRestore()
+    })
+
+    it('reverts rating on save error', async () => {
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+            ; (getUserRating as jest.Mock).mockResolvedValue(3)
+            ; (upsertRating as jest.Mock).mockRejectedValue(new Error('Save failed'))
+
+        render(<StarRating recipeId="recipe-1" />)
+
+        await waitFor(() => {
+            expect(getUserRating).toHaveBeenCalled()
+        })
+
+        const stars = screen.getAllByRole('button')
+        fireEvent.click(stars[4]) // Try to set rating to 5
+
+        await waitFor(() => {
+            expect(consoleError).toHaveBeenCalledWith('Error saving rating:', expect.any(Error))
+        })
+
+        consoleError.mockRestore()
+    })
+
+    it('handles hover states when logged in', () => {
+        render(<StarRating recipeId="recipe-1" />)
+
+        const stars = screen.getAllByRole('button')
+
+        // Hover over 4th star
+        fireEvent.mouseEnter(stars[3])
+        fireEvent.mouseLeave(stars[3])
+
+        // Hover events should work (no errors)
+        expect(stars[3]).toBeInTheDocument()
+    })
+    it('does not allow interaction when recipeId is missing', () => {
+        render(<StarRating />) // No recipeId
+
+        const stars = screen.getAllByRole('button')
+        fireEvent.click(stars[2])
+
+        expect(upsertRating).not.toHaveBeenCalled()
+    })
 })

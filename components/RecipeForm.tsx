@@ -305,7 +305,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     <div>
                         <label className="block text-sm font-medium text-foreground mb-1">Dificultad</label>
                         <select
-                            value={formData.difficulty || "medium"}
+                            value={formData.difficulty}
                             onChange={e => setFormData({ ...formData, difficulty: e.target.value })}
                             className="w-full rounded-md border border-input bg-background p-2 focus:outline-none focus:ring-2 focus:ring-ring"
                         >

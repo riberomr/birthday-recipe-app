@@ -1,7 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { Button } from './button'
+import { Button, buttonVariants } from './button'
 
 describe('Button', () => {
+    it('exports buttonVariants', () => {
+        expect(buttonVariants).toBeDefined()
+    })
     it('renders correctly with default props', () => {
         render(<Button>Click me</Button>)
         const button = screen.getByRole('button', { name: /click me/i })

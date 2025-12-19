@@ -58,6 +58,22 @@ describe('/api/comments/create', () => {
         POST = route.POST
     })
 
+    it('returns 500 if server config is missing', async () => {
+        const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        delete process.env.NEXT_PUBLIC_SUPABASE_URL
+
+        const request = new Request('http://localhost/api/comments/create', {
+            method: 'POST',
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Server configuration error')
+
+        process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl
+    })
+
     it('returns 401 if unauthorized', async () => {
         getUserFromRequest.mockResolvedValue(null)
 
@@ -185,5 +201,105 @@ describe('/api/comments/create', () => {
         expect(response.status).toBe(500)
         // Check rollback
         expect(mockStorage.from().remove).toHaveBeenCalled()
+    })
+
+    it('logs error if rollback fails', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        // Upload succeeds
+        mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
+
+        // DB fails
+        mockSingle.mockResolvedValue({ data: null, error: { message: 'DB Error' } })
+
+        // Rollback fails
+        mockStorage.from().remove.mockRejectedValue(new Error('Rollback Error'))
+
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+
+        const formData = new FormData()
+        formData.append('content', 'Rollback Fail')
+        formData.append('recipe_id', 'rec1')
+        const file = new File(['rollback'], 'rollback.png', { type: 'image/png' })
+        formData.append('file', file)
+
+        const request = new Request('http://localhost/api/comments/create', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+
+        expect(response.status).toBe(500)
+        // Wait for async rollback catch
+        await new Promise(resolve => setTimeout(resolve, 0))
+
+        expect(consoleError).toHaveBeenCalledWith('Error deleting image during rollback:', expect.any(Error))
+
+        consoleError.mockRestore()
+    })
+    it('handles createClient error', async () => {
+        const route = require('./route')
+        jest.spyOn(console, 'error').mockImplementation()
+
+        // Mock createClient to throw
+        const { createClient } = require('@supabase/supabase-js')
+        createClient.mockImplementation(() => {
+            throw new Error('Client Init Error')
+        })
+
+        const request = new Request('http://localhost/api/comments/create', {
+            method: 'POST',
+        })
+        const response = await route.POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Error publicando comentario')
+    })
+
+    it('handles db error without image upload', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        // DB fails
+        mockSingle.mockResolvedValue({ data: null, error: { message: 'DB Error' } })
+
+        const formData = new FormData()
+        formData.append('content', 'No Image Fail')
+        formData.append('recipe_id', 'rec1')
+
+        const request = new Request('http://localhost/api/comments/create', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Error publicando comentario')
+        expect(mockStorage.from().remove).not.toHaveBeenCalled()
+    })
+
+    it('handles unknown error message', async () => {
+        getUserFromRequest.mockResolvedValue({ uid: '123' })
+        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+
+        // DB fails with no message
+        mockSingle.mockResolvedValue({ data: null, error: { message: '' } })
+
+        const formData = new FormData()
+        formData.append('content', 'Unknown Error')
+        formData.append('recipe_id', 'rec1')
+
+        const request = new Request('http://localhost/api/comments/create', {
+            method: 'POST',
+            body: formData,
+        })
+        const response = await POST(request)
+        const data = await response.json()
+
+        expect(response.status).toBe(500)
+        expect(data.error).toContain('Error desconocido')
     })
 })

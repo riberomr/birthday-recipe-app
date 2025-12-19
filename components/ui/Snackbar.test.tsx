@@ -9,6 +9,7 @@ const TestComponent = () => {
             <button onClick={() => showSnackbar('Success message', 'success')}>Show Success</button>
             <button onClick={() => showSnackbar('Error message', 'error')}>Show Error</button>
             <button onClick={() => showSnackbar('Info message', 'info')}>Show Info</button>
+            <button onClick={() => showSnackbar('Default message')}>Show Default</button>
         </div>
     )
 }
@@ -36,6 +37,22 @@ describe('Snackbar', () => {
         const snackbar = await screen.findByText('Success message')
         expect(snackbar).toBeInTheDocument()
         expect(snackbar.closest('div')).toHaveClass('bg-green-500')
+    })
+
+    it('uses default type info if not provided', async () => {
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime })
+
+        render(
+            <SnackbarProvider>
+                <TestComponent />
+            </SnackbarProvider>
+        )
+
+        await user.click(screen.getByText('Show Default'))
+
+        const snackbar = await screen.findByText('Default message')
+        expect(snackbar).toBeInTheDocument()
+        expect(snackbar.closest('div')).toHaveClass('bg-blue-500')
     })
 
     it('auto-hides after 3 seconds', async () => {

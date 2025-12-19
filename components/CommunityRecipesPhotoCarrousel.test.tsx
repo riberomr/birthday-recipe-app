@@ -29,4 +29,17 @@ describe('CommunityRecipesPhotoCarrousel', () => {
         const { container } = render(<CommunityPhotosCarousel photos={[]} />)
         expect(container).toBeEmptyDOMElement()
     })
+
+    it('uses image_url as key when id is not present', () => {
+        const photosWithoutId: any = [
+            { image_url: 'https://example.com/photo1.jpg' },
+            { image_url: 'https://example.com/photo2.jpg' }
+        ]
+
+        render(<CommunityPhotosCarousel photos={photosWithoutId} />)
+
+        // Verify the component renders with the photos (key is used internally by React)
+        expect(screen.getByTestId('swiper')).toBeInTheDocument()
+        expect(screen.getAllByTestId('swiper-slide')).toHaveLength(2)
+    })
 })

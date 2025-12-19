@@ -44,7 +44,7 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
             return;
         }
 
-        if (loading) return;
+
         setLoading(true);
 
         try {

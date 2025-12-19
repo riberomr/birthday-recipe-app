@@ -14,11 +14,12 @@ export async function POST(request: Request) {
         )
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
-
+    let supabaseAdmin
     let uploadedImagePath: string | null = null
 
     try {
+        supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
         // 1. Verify Authentication
         const decodedToken = await getUserFromRequest(request);
         if (!decodedToken) {
@@ -111,12 +112,12 @@ export async function POST(request: Request) {
         console.error('Error in comments/create:', error)
 
         // Rollback: Delete image if it was uploaded
-        if (uploadedImagePath) {
-            await supabaseAdmin
+        if (uploadedImagePath !== null) {
+            await supabaseAdmin!
                 .storage
                 .from('community-photos')
                 .remove([uploadedImagePath])
-                .catch(err => console.error('Error deleting image during rollback:', err))
+                .catch((err: any) => console.error('Error deleting image during rollback:', err))
         }
 
         return NextResponse.json(

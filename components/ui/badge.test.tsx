@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react'
-import { Badge } from './badge'
+import { Badge, badgeVariants } from './badge'
 
 describe('Badge', () => {
+    it('exports badgeVariants', () => {
+        expect(badgeVariants).toBeDefined()
+    })
     it('renders correctly with default props', () => {
         render(<Badge>Default</Badge>)
         const badge = screen.getByText('Default')

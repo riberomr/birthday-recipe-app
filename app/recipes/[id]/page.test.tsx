@@ -107,6 +107,19 @@ describe('RecipePage', () => {
         expect(screen.queryByText('Receta compartida por')).not.toBeInTheDocument()
     })
 
+    it('renders with partial profile information', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({
+            ...mockRecipe,
+            profile: { full_name: null, avatar_url: null }
+        })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.getByText('Usuario')).toBeInTheDocument()
+        expect(screen.getByAltText('Usuario')).toBeInTheDocument()
+    })
+
     it('renders nutrition information when available', async () => {
         const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
         render(jsx)
@@ -114,6 +127,15 @@ describe('RecipePage', () => {
         expect(screen.getByText('Información Nutricional')).toBeInTheDocument()
         expect(screen.getByText('Calories')).toBeInTheDocument()
         expect(screen.getByText('200')).toBeInTheDocument()
+    })
+
+    it('renders without rating when not available', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, average_rating: null })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.queryByText('(10)')).not.toBeInTheDocument()
     })
 
     it('does not render nutrition section when empty', async () => {
@@ -172,12 +194,61 @@ describe('RecipePage', () => {
         expect(screen.getByText('1')).toBeInTheDocument() // step number
     })
 
+    it('renders without steps when not available', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, recipe_steps: null })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.queryByText('Mix ingredients')).not.toBeInTheDocument()
+    })
+
     it('renders cooking mode button with correct link', async () => {
         const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
         render(jsx)
 
         const cookingModeLink = screen.getByRole('link', { name: /modo cocina/i })
         expect(cookingModeLink).toHaveAttribute('href', '/recipes/1/cook')
+    })
+
+    it('renders without steps when empty', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, recipe_steps: [] })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.queryByText('Mix ingredients')).not.toBeInTheDocument()
+    })
+
+    it('renders without steps when undefined', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, recipe_steps: undefined })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.queryByText('Mix ingredients')).not.toBeInTheDocument()
+    })
+
+    it('renders without profile', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, profile: null })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.queryByText('Usuario')).not.toBeInTheDocument()
+    })
+
+    it('renders with default servings and empty ingredients', async () => {
+        ; (getRecipe as jest.Mock).mockResolvedValue({
+            ...mockRecipe,
+            servings: null,
+            recipe_ingredients: null
+        })
+
+        const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
+        render(jsx)
+
+        expect(screen.getByText('Ingredientes')).toBeInTheDocument()
     })
 
     it('calls notFound when recipe does not exist', async () => {
@@ -188,6 +259,12 @@ describe('RecipePage', () => {
 
         expect(notFound).toHaveBeenCalled()
     })
+
+    it('exports dynamic configuration', () => {
+        const { dynamic } = require('./page')
+        expect(dynamic).toBe('force-dynamic')
+    })
+
 
     it('renders back button with correct link', async () => {
         const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })

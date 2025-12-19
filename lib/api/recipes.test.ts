@@ -283,6 +283,23 @@ describe('lib/api/recipes', () => {
             expect(console.error).toHaveBeenCalledWith('Error fetching recipe:', { message: 'DB Error' })
             expect(result).toBeNull()
         })
+
+        it('returns null when data is null and no error', async () => {
+            const mockSingle = jest.fn().mockResolvedValue({
+                data: null,
+                error: null
+            })
+
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: mockSingle
+                })
+
+            const result = await getRecipe('1')
+
+            expect(result).toBeNull()
+        })
     })
 
     describe('getRecipeCommunityPhotos', () => {

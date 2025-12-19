@@ -1,4 +1,4 @@
-import { render, screen, waitFor, renderHook } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { AuthProvider, useAuth } from './AuthContext'
 import { useFirebaseAuth } from '@/features/auth/hooks/useAuth'
 
@@ -99,5 +99,18 @@ describe('AuthContext', () => {
         await waitFor(() => {
             expect(screen.getByText('Logged Out')).toBeInTheDocument()
         })
+    })
+
+    it('throws error when useAuth is used outside AuthProvider', () => {
+        const TestComponent = () => {
+            useAuth()
+            return <div>Test</div>
+        }
+
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+
+        expect(() => render(<TestComponent />)).toThrow('useAuth must be used within an AuthProvider')
+
+        consoleError.mockRestore()
     })
 })

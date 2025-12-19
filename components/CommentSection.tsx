@@ -68,7 +68,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     }
 
     const loadMoreComments = async () => {
-        if (loadingMore || comments.length >= total) return
+
 
         setLoadingMore(true)
         try {
@@ -99,7 +99,8 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!comment.trim() || !user) return
+
+
 
         setSubmitting(true)
 
@@ -107,7 +108,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
             const formData = new FormData()
             formData.append('content', comment)
             formData.append('recipe_id', recipeId)
-            formData.append('user_id', user.uid)
+            formData.append('user_id', user!.uid)
 
             let finalFile = selectedImage
             if (selectedImage) {

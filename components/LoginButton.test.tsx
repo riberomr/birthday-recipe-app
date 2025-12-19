@@ -67,4 +67,28 @@ describe('LoginButton', () => {
         fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
         expect(mockOpen).toHaveBeenCalled()
     })
+
+    it('calls login when modal is confirmed', async () => {
+        ; (useAuth as jest.Mock).mockReturnValue({
+            user: null,
+            login: mockLogin,
+            isLoading: false,
+        })
+
+        let onConfirmCallback: (() => Promise<void>) | undefined
+            ; (useModal as jest.Mock).mockReturnValue({
+                open: jest.fn((config: any) => {
+                    onConfirmCallback = config.onConfirm
+                })
+            })
+
+        render(<LoginButton />)
+        fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }))
+
+        // Execute the onConfirm callback
+        if (onConfirmCallback) {
+            await onConfirmCallback()
+            expect(mockLogin).toHaveBeenCalled()
+        }
+    })
 })

@@ -34,4 +34,8 @@ describe('RecipesPage', () => {
         expect(screen.getByText('Recipes: 1, Total: 1, Categories: 1')).toBeInTheDocument()
         expect(screen.getByText('Recetas')).toBeInTheDocument()
     })
+    it('exports dynamic configuration', () => {
+        const { dynamic } = require('./page')
+        expect(dynamic).toBe('force-dynamic')
+    })
 })

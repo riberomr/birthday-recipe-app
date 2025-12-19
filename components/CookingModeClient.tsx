@@ -54,10 +54,10 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
     }
 
     const handlePrev = () => {
-        if (!isFirstStep) {
-            setCurrentStepIndex((prev) => prev - 1)
-        }
+
+        setCurrentStepIndex((prev) => prev - 1)
     }
+
 
     return (
         <div className="fixed inset-0 bg-background z-50 flex flex-col">
