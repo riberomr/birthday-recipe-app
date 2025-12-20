@@ -1,4 +1,4 @@
-import { getCategories, getRecipes, getRecipe, getRecipeCommunityPhotos, createRecipe, updateRecipe, deleteRecipe, deleteRecipeRaw } from '../recipes'
+import { getCategories, getRecipes, getRecipe, getRecipeCommunityPhotos, createRecipe, updateRecipe, deleteRecipe, deleteRecipePermanently } from '../recipes'
 import { supabase } from '@/lib/supabase/client'
 import { auth } from '@/lib/firebase/client'
 import { getAverageRating } from '../../utils'
@@ -493,14 +493,14 @@ describe('lib/api/recipes', () => {
             })
         })
 
-        describe('deleteRecipeRaw', () => {
+        describe('deleteRecipePermanently', () => {
             it('throws error if user is not authenticated', async () => {
                 Object.defineProperty(auth, 'currentUser', {
                     value: null,
                     writable: true
                 })
 
-                await expect(deleteRecipeRaw('1')).rejects.toThrow('Usuario no autenticado')
+                await expect(deleteRecipePermanently('1')).rejects.toThrow('Usuario no autenticado')
             })
 
             it('deletes recipe permanently successfully', async () => {
@@ -509,7 +509,7 @@ describe('lib/api/recipes', () => {
                     json: async () => ({ success: true })
                 })
 
-                const result = await deleteRecipeRaw('1')
+                const result = await deleteRecipePermanently('1')
 
                 expect(global.fetch).toHaveBeenCalledWith('/api/recipes/1/raw-delete', {
                     method: 'DELETE',
@@ -526,7 +526,7 @@ describe('lib/api/recipes', () => {
                     json: async () => ({ error: 'Delete failed' })
                 })
 
-                await expect(deleteRecipeRaw('1')).rejects.toThrow('Delete failed')
+                await expect(deleteRecipePermanently('1')).rejects.toThrow('Delete failed')
             })
 
             it('throws default error on failure without message', async () => {
@@ -535,7 +535,7 @@ describe('lib/api/recipes', () => {
                     json: async () => ({})
                 })
 
-                await expect(deleteRecipeRaw('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
+                await expect(deleteRecipePermanently('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
             })
         })
     })

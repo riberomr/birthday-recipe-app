@@ -55,7 +55,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         mockSupabase.from.mockReturnValue({
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: null, error: 'Not found' })
+                    eq: jest.fn().mockReturnValue({
+                        single: jest.fn().mockResolvedValue({ data: null, error: 'Not found' })
+                    })
                 })
             })
         })
@@ -76,7 +78,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         const mockRecipeQuery = {
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: { user_id: 'profile123' }, error: null })
+                    eq: jest.fn().mockReturnValue({
+                        single: jest.fn().mockResolvedValue({ data: { user_id: 'profile123' }, error: null })
+                    })
                 })
             })
         }
@@ -110,7 +114,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         const mockRecipeQuery = {
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: { user_id: 'owner123' }, error: null })
+                    eq: jest.fn().mockReturnValue({
+                        single: jest.fn().mockResolvedValue({ data: { user_id: 'owner123' }, error: null })
+                    })
                 })
             })
         }
@@ -144,7 +150,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         const mockRecipeQuery = {
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: { user_id: 'user123' }, error: null })
+                    eq: jest.fn().mockReturnValue({
+                        single: jest.fn().mockResolvedValue({ data: { user_id: 'user123' }, error: null })
+                    })
                 })
             })
         }
@@ -186,7 +194,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         const mockRecipeQuery = {
             select: jest.fn().mockReturnValue({
                 eq: jest.fn().mockReturnValue({
-                    single: jest.fn().mockResolvedValue({ data: { user_id: 'user123' }, error: null })
+                    eq: jest.fn().mockReturnValue({
+                        single: jest.fn().mockResolvedValue({ data: { user_id: 'user123' }, error: null })
+                    })
                 })
             })
         }

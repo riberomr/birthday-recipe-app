@@ -259,7 +259,7 @@ export async function deleteRecipe(id: string) {
     return result;
 }
 
-export async function deleteRecipeRaw(id: string) {
+export async function deleteRecipePermanently(id: string) {
     const user = auth.currentUser;
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();

@@ -23,6 +23,7 @@ export async function DELETE(
             .from("recipes")
             .select("user_id")
             .eq("id", id)
+            .eq("is_deleted", false)
             .single()
 
         if (fetchError || !recipe) {
