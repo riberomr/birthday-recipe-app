@@ -30,13 +30,15 @@ export async function GET(request: Request) {
         const { data, error } = await supabaseAdmin
             .from("favorites")
             .select(`
-                recipe_id,
-                recipes (
-                *,
-                ratings (rating)
-                )
-            `)
-            .eq("user_id", userId);
+        recipe_id,
+        recipes!inner (
+            *,
+            ratings (rating)
+        )
+    `)
+            .eq("user_id", userId)
+            .eq("recipes.is_deleted", false)
+            .order("created_at", { ascending: false });
 
         if (error) throw error;
 

@@ -68,8 +68,8 @@ describe("DeleteConfirmationModal", () => {
         expect(screen.getByText("Eliminando...")).toBeDisabled()
     })
 
-    it('renders with default text when data is missing', () => {
-        (useModalContext as jest.Mock).mockReturnValue({
+    it("renders with default text when data is missing", () => {
+        ; (useModalContext as jest.Mock).mockReturnValue({
             isModalOpen: jest.fn().mockReturnValue(true),
             closeModal: jest.fn(),
             getModalData: jest.fn().mockReturnValue(undefined)
@@ -77,7 +77,9 @@ describe("DeleteConfirmationModal", () => {
 
         render(<DeleteConfirmationModal />)
 
-        expect(screen.getByText('¿Eliminar receta?')).toBeInTheDocument()
-        expect(screen.getByText(/¿Estás seguro de que quieres eliminar esta receta?/)).toBeInTheDocument()
+        expect(screen.getByText("¿Eliminar receta?")).toBeInTheDocument()
+        expect(
+            screen.getByText(/¿Estás seguro de que quieres eliminar esta receta\?/)
+        ).toBeInTheDocument()
     })
 })

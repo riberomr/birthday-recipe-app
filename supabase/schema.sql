@@ -1,12 +1,5 @@
-
--- ===========================================
--- TODO:
--- add ON DELETE CASCADE in some tables, check that
--- check created_at and updated_at in all tables
--- check missing foreign keys
--- check missing indexes
--- check missing unique constraints
--- ===========================================
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.profiles (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -19,19 +12,21 @@ CREATE TABLE public.profiles (
   email text,
   CONSTRAINT profiles_pkey PRIMARY KEY (id)
 );
+
 CREATE TABLE public.recipes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   title text NOT NULL,
   description text,
   image_url text,
-  prep_time_minutes integer DEFAULT 0,
-  cook_time_minutes integer DEFAULT 0,
+  prep_time_minutes integer DEFAULT 0 CHECK (prep_time_minutes >= 0),
+  cook_time_minutes integer DEFAULT 0 CHECK (cook_time_minutes >= 0),
   category_id uuid,
   created_at timestamp with time zone DEFAULT now(),
   user_id uuid,
   difficulty text,
-  servings integer DEFAULT 4,
+  servings integer DEFAULT 4 CHECK (servings > 0),
   updated_at timestamp with time zone DEFAULT now(),
+  is_deleted boolean NOT NULL DEFAULT false,
   CONSTRAINT recipes_pkey PRIMARY KEY (id),
   CONSTRAINT recipes_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.recipe_categories(id),
   CONSTRAINT recipes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
@@ -54,6 +49,7 @@ CREATE TABLE public.favorites (
   CONSTRAINT favorites_pkey PRIMARY KEY (user_id, recipe_id),
   CONSTRAINT favorites_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id)
 );
+
 CREATE TABLE public.ratings (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   recipe_id uuid NOT NULL,
@@ -95,8 +91,8 @@ CREATE TABLE public.recipe_photos (
   caption text,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT recipe_photos_pkey PRIMARY KEY (id),
-  CONSTRAINT recipe_photos_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id),
-  CONSTRAINT recipe_photos_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+  CONSTRAINT recipe_photos_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id),
+  CONSTRAINT recipe_photos_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id)
 );
 CREATE TABLE public.recipe_steps (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -110,28 +106,13 @@ CREATE TABLE public.recipe_tags (
   recipe_id uuid NOT NULL,
   tag_id uuid NOT NULL,
   CONSTRAINT recipe_tags_pkey PRIMARY KEY (recipe_id, tag_id),
-  CONSTRAINT recipe_tags_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id),
-  CONSTRAINT recipe_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id)
+  CONSTRAINT recipe_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id),
+  CONSTRAINT recipe_tags_recipe_id_fkey FOREIGN KEY (recipe_id) REFERENCES public.recipes(id)
 );
+
 CREATE TABLE public.tags (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   type text,
   CONSTRAINT tags_pkey PRIMARY KEY (id)
 );
-
--- ===========================================
--- SEED DATA
--- ===========================================
-
-insert into recipe_categories (name)
-values ('Pastas'), ('Postres'), ('Sopas'), ('Cocina Rápida'), ('Cumpleaños Kawaii')
-on conflict do nothing;
-
-insert into tags (name, type) values
-('Vegana', 'diet'),
-('Sin Gluten', 'diet'),
-('Rápida', 'time'), -- < 20 mins
-('Cumpleaños', 'occasion'),
-('Navidad', 'occasion')
-on conflict do nothing;

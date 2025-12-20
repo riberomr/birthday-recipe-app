@@ -189,7 +189,9 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
                             <div className="border-t border-primary/10 dark:border-primary/20 pt-8">
                                 <RatingSection recipeId={id} />
-                                <CommentSection recipeId={id} />
+                                <div className="mt-12 print:hidden">
+                                    <CommentSection recipeId={id} recipeOwnerId={recipe.user_id} />
+                                </div>
                             </div>
                         </div>
 

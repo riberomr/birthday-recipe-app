@@ -15,6 +15,7 @@ export async function getComments(recipeId: string, page: number = 1, limit: num
             )
         `, { count: 'exact' })
         .eq("recipe_id", recipeId)
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false })
         .range(from, to)
 
@@ -43,6 +44,27 @@ export async function postComment(formData: FormData) {
 
     if (!response.ok) {
         throw new Error(result.error || 'Error al publicar comentario');
+    }
+
+    return result;
+}
+
+export async function deleteComment(id: string) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+    const token = await user.getIdToken();
+
+    const response = await fetch(`/api/comments/${id}/delete`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido al eliminar el comentario');
     }
 
     return result;
