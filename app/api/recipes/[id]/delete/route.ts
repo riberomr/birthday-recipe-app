@@ -59,7 +59,6 @@ export async function DELETE(
             .from("recipes")
             .update({ is_deleted: true })
             .eq("id", id)
-            .eq("is_deleted", false)
 
         if (updateError) {
             console.error("Error deleting recipe:", updateError)

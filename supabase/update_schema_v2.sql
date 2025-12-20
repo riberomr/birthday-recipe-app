@@ -7,7 +7,7 @@ ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN NOT NULL DEFAULT false;
 -- ===========================================
 
 -- 1. Add ON DELETE CASCADE to foreign keys where appropriate
--- Recipes: When a user is deleted, their recipes should be not deleted, then an admin can delete them or reassign them to another user
+-- Recipes: When a user is deleted, their recipes should not be deleted, then an admin can delete them or reassign them to another user
 ALTER TABLE public.recipes DROP CONSTRAINT IF EXISTS recipes_user_id_fkey;
 ALTER TABLE public.recipes ADD CONSTRAINT recipes_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
 

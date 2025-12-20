@@ -10,7 +10,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin"
  * We separate logical and permanent delete operations to ensure safety and prevent accidental data loss.
  * Logical delete is the default action for users.
  *
- * Not need of check if is soft deleted, because we are deleting the recipe from the database.
+ * No need to check if it is soft deleted, because we are deleting the recipe from the database.
  * This endpoint will be used only by admins.
  *
  * If the users use this endpoint, it will be via an action after the recipe was soft deleted.
