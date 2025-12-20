@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { useAuth } from "@/components/AuthContext"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 import { deleteRecipe } from "@/lib/api/recipes"
 import { useRouter } from "next/navigation"
 import { useState } from "react"

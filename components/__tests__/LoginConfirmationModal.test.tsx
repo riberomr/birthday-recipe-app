@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { LoginConfirmationModal } from '../LoginConfirmationModal'
-import { useModal } from '@/hooks/useModal'
+import { useModal } from '@/hooks/ui/useModal'
 
 // Mock dependencies
-jest.mock('@/hooks/useModal', () => ({
+jest.mock('@/hooks/ui/useModal', () => ({
     useModal: jest.fn(),
 }))
 

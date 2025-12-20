@@ -6,7 +6,7 @@ import { useSnackbar } from "@/components/ui/Snackbar";
 import { useRouter } from "next/navigation";
 import { RecipeCard } from "@/components/RecipeCard";
 import { Loader2 } from "lucide-react";
-import { useFavorites } from "@/hooks/useFavorites";
+import { useFavorites } from "@/hooks/queries/useFavorites";
 
 export default function FavoritesPage() {
     const { supabaseUser, isLoading: authLoading } = useAuth();

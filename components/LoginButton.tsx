@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/components/AuthContext"
 import { LogIn } from "lucide-react"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 import { UserMenu } from "@/components/UserMenu"
 
 export function LoginButton() {

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { Recipe } from "@/types";
-import { useFavorites } from "@/hooks/useFavorites";
-import { useToggleFavorite } from "@/hooks/useToggleFavorite";
+import { useFavorites } from "@/hooks/queries/useFavorites";
+import { useToggleFavorite } from "@/hooks/mutations/useToggleFavorite";
 
 interface FavoriteButtonProps {
     recipe: Recipe;

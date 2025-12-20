@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { LoginButton } from '../LoginButton'
 import { useAuth } from '../AuthContext'
-import { useModal } from '@/hooks/useModal'
+import { useModal } from '@/hooks/ui/useModal'
 
 // Mock dependencies
 jest.mock('../AuthContext', () => ({
     useAuth: jest.fn(),
 }))
-jest.mock('@/hooks/useModal', () => ({
+jest.mock('@/hooks/ui/useModal', () => ({
     useModal: jest.fn(),
 }))
 jest.mock('../UserMenu', () => ({

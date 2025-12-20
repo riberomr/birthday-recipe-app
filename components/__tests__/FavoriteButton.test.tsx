@@ -2,8 +2,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { FavoriteButton } from '../FavoriteButton'
 import { useAuth } from '../AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
-import { useFavorites } from '@/hooks/useFavorites'
-import { useToggleFavorite } from '@/hooks/useToggleFavorite'
+import { useFavorites } from '@/hooks/queries/useFavorites'
+import { useToggleFavorite } from '@/hooks/mutations/useToggleFavorite'
 
 // Mock dependencies
 jest.mock('../AuthContext', () => ({
@@ -12,8 +12,8 @@ jest.mock('../AuthContext', () => ({
 jest.mock('@/components/ui/Snackbar', () => ({
     useSnackbar: jest.fn(),
 }))
-jest.mock('@/hooks/useFavorites')
-jest.mock('@/hooks/useToggleFavorite')
+jest.mock('@/hooks/queries/useFavorites')
+jest.mock('@/hooks/mutations/useToggleFavorite')
 
 describe('FavoriteButton', () => {
     const mockUser = { id: 'user-1' }

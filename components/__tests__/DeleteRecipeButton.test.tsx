@@ -1,14 +1,14 @@
 import { render, screen, fireEvent } from "@testing-library/react"
 import { DeleteRecipeButton } from "../DeleteRecipeButton"
 import { useAuth } from "@/components/AuthContext"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 import { deleteRecipe } from "@/lib/api/recipes"
 import { useRouter } from "next/navigation"
 import { useSnackbar } from "@/components/ui/Snackbar"
 
 // Mock dependencies
 jest.mock("@/components/AuthContext")
-jest.mock("@/hooks/useModal")
+jest.mock("@/hooks/ui/useModal")
 jest.mock("@/lib/api/recipes")
 jest.mock("next/navigation", () => ({
     useRouter: jest.fn()

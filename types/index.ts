@@ -81,3 +81,16 @@ export type Favorite = {
     created_at: string;
 };
 
+export type Comment = {
+    id: string;
+    user_id: string;
+    recipe_id: string;
+    content: string;
+    image_url?: string | null;
+    created_at: string;
+    profiles?: {
+        full_name: string;
+        avatar_url: string;
+    };
+};
+

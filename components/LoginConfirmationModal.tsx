@@ -2,7 +2,7 @@
 
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 
 export function LoginConfirmationModal() {
     const { isOpen, close, data } = useModal('login-confirmation')

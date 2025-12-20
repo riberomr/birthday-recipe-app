@@ -3,14 +3,14 @@ import FavoritesPage from './page'
 import { useAuth } from '@/components/AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
 import { useRouter } from 'next/navigation'
-import { useFavorites } from '@/hooks/useFavorites'
+import { useFavorites } from '@/hooks/queries/useFavorites'
 
 jest.mock('@/components/AuthContext')
 jest.mock('@/components/ui/Snackbar')
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn()
 }))
-jest.mock('@/hooks/useFavorites')
+jest.mock('@/hooks/queries/useFavorites')
 jest.mock('@/components/RecipeCard', () => ({
     RecipeCard: ({ recipe }: any) => <div data-testid={`recipe-${recipe.id}`}>{recipe.title}</div>
 }))

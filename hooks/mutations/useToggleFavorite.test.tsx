@@ -84,4 +84,23 @@ describe('useToggleFavorite', () => {
         const cachedData = queryClient.getQueryData(['favorites', 'user-1']);
         expect(cachedData).toEqual([]); // Should be empty again
     });
+
+    it('returns if !supabaseUser', async () => {
+        const recipe = { id: '1', title: 'Test Recipe' } as any;
+        (toggleFavorite as jest.Mock).mockRejectedValue(new Error('Failed'));
+        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+
+        const { result } = renderHook(() => useToggleFavorite(), { wrapper });
+
+        await act(async () => {
+            try {
+                await result.current.mutateAsync(recipe);
+            } catch (e) {
+                // Expected error
+            }
+        });
+
+        const cachedData = queryClient.getQueryData(['favorites', 'user-1']);
+        expect(cachedData).toEqual(undefined);
+    });
 });
