@@ -36,7 +36,7 @@ describe('CommentForm', () => {
             isPending: false,
         });
         mockUseAuth.mockReturnValue({
-            supabaseUser: { id: 'user1', avatar_url: 'url' },
+            profile: { id: 'user1', avatar_url: 'url' },
             login: jest.fn(),
         });
         mockUseModal.mockReturnValue({
@@ -46,7 +46,7 @@ describe('CommentForm', () => {
     });
 
     it('renders login prompt if not authenticated', () => {
-        mockUseAuth.mockReturnValue({ supabaseUser: null });
+        mockUseAuth.mockReturnValue({ profile: null });
         render(<CommentForm recipeId="recipe1" />);
         expect(screen.getByText('Para dejar un comentario necesitás iniciar sesión ✨')).toBeInTheDocument();
 
@@ -195,11 +195,12 @@ describe('CommentForm', () => {
     it('should show error snackbar when image compression fails', async () => {
         (compressImage as jest.Mock).mockRejectedValue(new Error('Compression failed'));
 
-        render(<CommentForm recipeId="recipe1" />);
+        const { container } = render(<CommentForm recipeId="recipe1" />);
 
         // Simular selección de imagen
         const file = new File(['hello'], 'hello.png', { type: 'image/png' });
-        const input = screen.getByLabelText('', { selector: 'input[type="file"]' });
+        const input = container.querySelector('input[type="file"]');
+        if (!input) throw new Error('Input not found');
         fireEvent.change(input, { target: { files: [file] } });
 
         fireEvent.change(screen.getByPlaceholderText('Escribe un comentario...'), {
@@ -218,7 +219,7 @@ describe('CommentForm', () => {
         const mockOpenModal = jest.fn(({ onConfirm }) => onConfirm()); // Simula ejecución inmediata
 
         mockUseAuth.mockReturnValue({
-            supabaseUser: null,
+            profile: null,
             login: mockLogin,
         });
         mockUseModal.mockReturnValue({

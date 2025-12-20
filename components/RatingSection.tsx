@@ -10,7 +10,7 @@ interface RatingSectionProps {
 }
 
 export function RatingSection({ recipeId }: RatingSectionProps) {
-    const { user } = useAuth()
+    const { profile } = useAuth()
     const { data } = useRecipeRating(recipeId)
     const average = data?.average || 0
     const count = data?.count || 0
@@ -27,7 +27,7 @@ export function RatingSection({ recipeId }: RatingSectionProps) {
                 </span>
             </div>
 
-            {user && (
+            {profile && (
                 <div className="flex sm:items-center gap-4 sm:flex-row flex-col justify-between p-4 bg-primary/5 rounded-xl border border-primary/10">
                     <div>
                         <h3 className="font-bold text-primary">

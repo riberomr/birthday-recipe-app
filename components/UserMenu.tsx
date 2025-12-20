@@ -12,12 +12,15 @@ import {
 import { Heart, LogOut, BookOpenCheck } from "lucide-react"
 
 export function UserMenu() {
-    const { user, logout } = useAuth()
+    const { profile, logout } = useAuth()
     const pathname = usePathname()
     const router = useRouter()
     const isCreatingRecipe = pathname === "/recipes/create"
 
-    if (!user) return null
+    if (!profile) return null
+
+    const displayName = profile?.full_name || 'Usuario'
+    const photoURL = profile?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
 
     const handleLogout = () => {
         if (isCreatingRecipe) {
@@ -32,12 +35,12 @@ export function UserMenu() {
                 <div className="w-8 h-8 rounded-full bg-primary/10 overflow-hidden border-2 border-primary/20">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                        alt={user.displayName || 'User'}
+                        src={photoURL}
+                        alt={displayName}
                         className="w-full h-full object-cover"
                     />
                 </div>
-                <span className="hidden sm:inline">{user.displayName}</span>
+                <span className="hidden sm:inline">{displayName}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem

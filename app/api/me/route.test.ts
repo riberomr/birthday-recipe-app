@@ -2,12 +2,12 @@
  * @jest-environment node
  */
 import { GET } from './route'
-import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth'
+import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth'
 
 // Mock dependencies
 jest.mock('@/lib/auth/requireAuth', () => ({
     getUserFromRequest: jest.fn(),
-    getSupabaseUserFromFirebaseUid: jest.fn(),
+    getProfileFromFirebase: jest.fn(),
 }))
 
 describe('/api/me', () => {
@@ -20,7 +20,7 @@ describe('/api/me', () => {
         const mockSupabaseUser = { id: '123', full_name: 'Test' }
 
             ; (getUserFromRequest as jest.Mock).mockResolvedValue(mockUser)
-            ; (getSupabaseUserFromFirebaseUid as jest.Mock).mockResolvedValue(mockSupabaseUser)
+            ; (getProfileFromFirebase as jest.Mock).mockResolvedValue(mockSupabaseUser)
 
         const request = new Request('http://localhost/api/me')
         const response = await GET(request)

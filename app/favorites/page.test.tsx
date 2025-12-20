@@ -36,7 +36,7 @@ describe('FavoritesPage', () => {
     })
 
     it('redirects to home when user is not logged in', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null, isLoading: false })
             ; (useFavorites as jest.Mock).mockReturnValue({ data: undefined, isLoading: false })
 
         render(<FavoritesPage />)
@@ -48,7 +48,7 @@ describe('FavoritesPage', () => {
     })
 
     it('displays favorites when loaded', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
 
         render(<FavoritesPage />)
 
@@ -58,7 +58,7 @@ describe('FavoritesPage', () => {
     })
 
     it('shows empty state when no favorites', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (useFavorites as jest.Mock).mockReturnValue({ data: [], isLoading: false })
 
         render(<FavoritesPage />)
@@ -67,7 +67,7 @@ describe('FavoritesPage', () => {
     })
 
     it('handles fetch error gracefully', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (useFavorites as jest.Mock).mockReturnValue({
                 data: undefined,
                 isLoading: false,
@@ -82,7 +82,7 @@ describe('FavoritesPage', () => {
     })
 
     it('shows loading state', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (useFavorites as jest.Mock).mockReturnValue({ data: undefined, isLoading: true })
 
         render(<FavoritesPage />)

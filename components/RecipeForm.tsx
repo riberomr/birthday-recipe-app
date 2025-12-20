@@ -20,7 +20,7 @@ interface RecipeFormProps {
 
 export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) {
     const router = useRouter()
-    const { user, supabaseUser } = useAuth()
+    const { firebaseUser, profile } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [loading, setLoading] = useState(false)
 
@@ -61,11 +61,11 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
     // Protect Edit Route
     useEffect(() => {
-        if (isEditing && initialData && supabaseUser && supabaseUser.id !== initialData.user_id) {
+        if (isEditing && initialData && profile && profile.id !== initialData.user_id) {
             router.push("/")
             showSnackbar("No tienes permiso para editar esta receta", "error")
         }
-    }, [supabaseUser, initialData, isEditing, router, showSnackbar])
+    }, [profile, initialData, isEditing, router, showSnackbar])
 
     // Cleanup preview URL on unmount or when image changes
     useEffect(() => {
@@ -133,7 +133,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!user) {
+        if (!firebaseUser) {
             showSnackbar("Debes iniciar sesión para crear una receta", "error")
             return
         }
@@ -161,7 +161,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             submitData.append('cook_time', formData.cook_time)
             submitData.append('difficulty', formData.difficulty)
             submitData.append('servings', formData.servings)
-            submitData.append('user_id', supabaseUser?.id!)
+            submitData.append('user_id', profile?.id!)
 
             let finalFile = selectedImage
             // Append file if selected

@@ -23,7 +23,7 @@ describe('FavoriteButton', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-            ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser })
             ; (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar })
             ; (useFavorites as jest.Mock).mockReturnValue({ data: [] })
             ; (useToggleFavorite as jest.Mock).mockReturnValue({
@@ -55,7 +55,7 @@ describe('FavoriteButton', () => {
     })
 
     it('shows error if not logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null })
         render(<FavoriteButton recipe={mockRecipe} />)
 
         fireEvent.click(screen.getByRole('button'))

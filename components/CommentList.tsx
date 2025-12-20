@@ -17,7 +17,7 @@ interface CommentListProps {
 }
 
 export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
-    const { supabaseUser: user } = useAuth()
+    const { profile: user } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [page, setPage] = useState(1)
 

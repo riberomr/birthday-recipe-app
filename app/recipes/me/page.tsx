@@ -12,18 +12,18 @@ import { getRecipes } from "@/lib/api/recipes";
 import { Button } from "@/components/ui/button";
 
 export default function MyRecipesPage() {
-    const { supabaseUser, isLoading: authLoading } = useAuth();
+    const { profile, isLoading: authLoading } = useAuth();
     const { showSnackbar } = useSnackbar();
     const router = useRouter();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && !supabaseUser) {
+        if (!authLoading && !profile) {
             showSnackbar("Debes iniciar sesión para ver tus recetas", "error");
             router.push("/");
         }
-    }, [supabaseUser, authLoading, showSnackbar, router]);
+    }, [profile, authLoading, showSnackbar, router]);
 
     useEffect(() => {
         async function fetchMyRecipesData(userId: string) {
@@ -39,12 +39,12 @@ export default function MyRecipesPage() {
             }
         }
 
-        if (supabaseUser) {
-            fetchMyRecipesData(supabaseUser.id);
+        if (profile) {
+            fetchMyRecipesData(profile.id);
         }
-    }, [supabaseUser, showSnackbar]);
+    }, [profile, showSnackbar]);
 
-    if (authLoading || (loading && supabaseUser)) {
+    if (authLoading || (loading && profile)) {
         return (
             <div className="flex justify-center items-center min-h-[50vh]">
                 <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
@@ -52,7 +52,7 @@ export default function MyRecipesPage() {
         );
     }
 
-    if (!supabaseUser) return null;
+    if (!profile) return null;
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">

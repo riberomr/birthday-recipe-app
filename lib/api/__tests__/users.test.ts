@@ -1,4 +1,4 @@
-import { getUsers, getUsersWithRecipes } from '../users'
+import { getUsers, getUsersWithRecipes, getUserProfile, updateUserProfile } from '../users'
 import { supabase } from '@/lib/supabase/client'
 
 // Mock Supabase
@@ -129,6 +129,61 @@ describe('lib/api/users', () => {
             const result = await getUsersWithRecipes()
 
             expect(result).toEqual([])
+        })
+    })
+
+    describe('getUserProfile', () => {
+        it('fetches user profile successfully', async () => {
+            const mockSingle = jest.fn().mockResolvedValue({ data: { id: '1', full_name: 'Test User' }, error: null })
+            const mockEq = jest.fn().mockReturnValue({ single: mockSingle })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: jest.fn().mockReturnValue({ eq: mockEq })
+                })
+
+            const result = await getUserProfile('fb1')
+            expect(result).toEqual({ id: '1', full_name: 'Test User' })
+        })
+
+        it('returns null on error', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
+            const mockSingle = jest.fn().mockResolvedValue({ data: null, error: { message: 'Error' } })
+            const mockEq = jest.fn().mockReturnValue({ single: mockSingle })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: jest.fn().mockReturnValue({ eq: mockEq })
+                })
+
+            const result = await getUserProfile('fb1')
+            expect(result).toBeNull()
+            consoleSpy.mockRestore()
+        })
+    })
+
+    describe('updateUserProfile', () => {
+        it('updates user profile successfully', async () => {
+            const mockSingle = jest.fn().mockResolvedValue({ data: { id: '1', full_name: 'Updated User' }, error: null })
+            const mockSelect = jest.fn().mockReturnValue({ single: mockSingle })
+            const mockEq = jest.fn().mockReturnValue({ select: mockSelect })
+            const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    update: mockUpdate
+                })
+
+            const result = await updateUserProfile('fb1', { full_name: 'Updated User' })
+            expect(result).toEqual({ id: '1', full_name: 'Updated User' })
+        })
+
+        it('throws error on update failure', async () => {
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
+            const mockSingle = jest.fn().mockResolvedValue({ data: null, error: { message: 'Update Error' } })
+            const mockSelect = jest.fn().mockReturnValue({ single: mockSingle })
+            const mockEq = jest.fn().mockReturnValue({ select: mockSelect })
+            const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    update: mockUpdate
+                })
+
+            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toEqual({ message: 'Update Error' })
+            consoleSpy.mockRestore()
         })
     })
 })

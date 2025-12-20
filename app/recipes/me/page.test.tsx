@@ -33,7 +33,7 @@ describe('MyRecipesPage', () => {
     })
 
     it('redirects to home when user is not logged in', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null, isLoading: false })
 
         render(<MyRecipesPage />)
 
@@ -44,7 +44,7 @@ describe('MyRecipesPage', () => {
     })
 
     it('displays recipes when loaded', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
 
         render(<MyRecipesPage />)
 
@@ -56,7 +56,7 @@ describe('MyRecipesPage', () => {
     })
 
     it('shows empty state with create button when no recipes', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (getRecipes as jest.Mock).mockResolvedValue({ recipes: [], total: 0 })
 
         render(<MyRecipesPage />)
@@ -69,7 +69,7 @@ describe('MyRecipesPage', () => {
 
     it('navigates to create page when clicking create button', async () => {
         const user = userEvent.setup()
-            ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (getRecipes as jest.Mock).mockResolvedValue({ recipes: [], total: 0 })
 
         render(<MyRecipesPage />)
@@ -85,7 +85,7 @@ describe('MyRecipesPage', () => {
 
     it('handles fetch error gracefully', async () => {
         const consoleError = jest.spyOn(console, 'error').mockImplementation()
-            ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
             ; (getRecipes as jest.Mock).mockRejectedValue(new Error('Fetch failed'))
 
         render(<MyRecipesPage />)
@@ -98,7 +98,7 @@ describe('MyRecipesPage', () => {
     })
 
     it('calls getRecipes with correct user filter', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
 
         render(<MyRecipesPage />)
 
@@ -108,7 +108,7 @@ describe('MyRecipesPage', () => {
     })
 
     it('returns null when user is not authenticated after loading', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null, isLoading: false })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null, isLoading: false })
 
         const { container } = render(<MyRecipesPage />)
 

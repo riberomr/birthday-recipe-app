@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth';
+import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth';
 
 export async function GET(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ user: null }, { status: 401 });
     }
 
-    const user = await getSupabaseUserFromFirebaseUid(
+    const user = await getProfileFromFirebase(
       decodedToken.uid,
       decodedToken.email,
       decodedToken.name,

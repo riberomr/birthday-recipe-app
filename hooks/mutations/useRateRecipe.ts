@@ -4,22 +4,22 @@ import { useAuth } from '@/components/AuthContext';
 
 export function useRateRecipe() {
     const queryClient = useQueryClient();
-    const { supabaseUser } = useAuth();
+    const { profile } = useAuth();
 
     return useMutation({
         mutationFn: ({ recipeId, rating }: { recipeId: string; rating: number }) =>
             upsertRating(recipeId, rating),
         onMutate: async ({ recipeId, rating }) => {
-            if (!supabaseUser) return;
+            if (!profile) return;
 
             // Cancel outgoing refetches
             await queryClient.cancelQueries({ queryKey: ['ratings', recipeId] });
 
             // Snapshot previous value
-            const previousUserRating = queryClient.getQueryData(['ratings', recipeId, 'user', supabaseUser.id]);
+            const previousUserRating = queryClient.getQueryData(['ratings', recipeId, 'user', profile.id]);
 
             // Optimistically update user rating
-            queryClient.setQueryData(['ratings', recipeId, 'user', supabaseUser.id], rating);
+            queryClient.setQueryData(['ratings', recipeId, 'user', profile.id], rating);
 
             // Optimistically update average (approximation)
             // Note: Updating average accurately requires knowing the previous rating to subtract it and add new one.
@@ -31,12 +31,12 @@ export function useRateRecipe() {
         onError: (err, { recipeId }, context) => {
             if (context) {
                 /* istanbul ignore next */
-                if (!supabaseUser) return;
+                if (!profile) return;
 
                 if (context.previousUserRating === undefined) {
-                    queryClient.removeQueries({ queryKey: ['ratings', recipeId, 'user', supabaseUser.id] });
+                    queryClient.removeQueries({ queryKey: ['ratings', recipeId, 'user', profile.id] });
                 } else {
-                    queryClient.setQueryData(['ratings', recipeId, 'user', supabaseUser.id], context.previousUserRating);
+                    queryClient.setQueryData(['ratings', recipeId, 'user', profile.id], context.previousUserRating);
                 }
             }
         },

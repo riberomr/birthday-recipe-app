@@ -24,8 +24,8 @@ describe("DeleteRecipeButton", () => {
     beforeEach(() => {
         jest.clearAllMocks()
             ; (useAuth as jest.Mock).mockReturnValue({
-                user: { uid: "user123" },
-                supabaseUser: { id: "user123" }
+                firebaseUser: { uid: "user123" },
+                profile: { id: "user123" }
             })
             ; (useModal as jest.Mock).mockReturnValue({
                 open: mockOpen,
@@ -46,8 +46,8 @@ describe("DeleteRecipeButton", () => {
 
     it("does not render when user is not owner", () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: { uid: "otherUser" },
-            supabaseUser: { id: "otherUser" }
+            firebaseUser: { uid: "otherUser" },
+            profile: { id: "otherUser" }
         })
         const { container } = render(<DeleteRecipeButton recipeId="recipe123" ownerId="user123" />)
         expect(container).toBeEmptyDOMElement()
@@ -55,8 +55,8 @@ describe("DeleteRecipeButton", () => {
 
     it("does not render when not logged in", () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: null,
-            supabaseUser: null
+            firebaseUser: null,
+            profile: null
         })
         const { container } = render(<DeleteRecipeButton recipeId="recipe123" ownerId="user123" />)
         expect(container).toBeEmptyDOMElement()

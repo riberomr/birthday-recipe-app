@@ -15,7 +15,7 @@ interface CommentFormProps {
 }
 
 export function CommentForm({ recipeId }: CommentFormProps) {
-    const { supabaseUser: user, login } = useAuth()
+    const { profile: user, login } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [comment, setComment] = useState("")
     const [selectedImage, setSelectedImage] = useState<File | null>(null)

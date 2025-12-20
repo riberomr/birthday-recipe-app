@@ -10,7 +10,7 @@ jest.mock('../AuthContext', () => ({
 describe('EditRecipeButton', () => {
     it('renders when user is owner', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            supabaseUser: { id: 'owner-id' },
+            profile: { id: 'owner-id' },
         })
 
         render(<EditRecipeButton recipeId="recipe-1" ownerId="owner-id" />)
@@ -19,7 +19,7 @@ describe('EditRecipeButton', () => {
 
     it('does not render when user is not owner', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            supabaseUser: { id: 'other-id' },
+            profile: { id: 'other-id' },
         })
 
         render(<EditRecipeButton recipeId="recipe-1" ownerId="owner-id" />)
@@ -28,7 +28,7 @@ describe('EditRecipeButton', () => {
 
     it('does not render when user is not logged in', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            supabaseUser: null,
+            profile: null,
         })
 
         render(<EditRecipeButton recipeId="recipe-1" ownerId="owner-id" />)

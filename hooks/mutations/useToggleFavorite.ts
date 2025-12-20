@@ -5,14 +5,14 @@ import { useAuth } from '@/components/AuthContext';
 
 export function useToggleFavorite() {
     const queryClient = useQueryClient();
-    const { supabaseUser } = useAuth();
+    const { profile } = useAuth();
 
     return useMutation({
         mutationFn: (recipe: Recipe) => toggleFavorite(recipe.id),
         onMutate: async (recipe) => {
-            if (!supabaseUser) return;
+            if (!profile) return;
 
-            const queryKey = ['favorites', supabaseUser.id];
+            const queryKey = ['favorites', profile.id];
 
             // Cancel any outgoing refetches
             await queryClient.cancelQueries({ queryKey });
@@ -35,13 +35,13 @@ export function useToggleFavorite() {
             return { previousFavorites };
         },
         onError: (err, newTodo, context) => {
-            if (supabaseUser && context?.previousFavorites) {
-                queryClient.setQueryData(['favorites', supabaseUser.id], context.previousFavorites);
+            if (profile && context?.previousFavorites) {
+                queryClient.setQueryData(['favorites', profile.id], context.previousFavorites);
             }
         },
         onSettled: () => {
-            if (supabaseUser) {
-                queryClient.invalidateQueries({ queryKey: ['favorites', supabaseUser.id] });
+            if (profile) {
+                queryClient.invalidateQueries({ queryKey: ['favorites', profile.id] });
             }
         },
     });

@@ -14,7 +14,7 @@ describe('useToggleFavorite', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         queryClient = createQueryClient();
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: { id: 'user-1' } });
+        (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } });
     });
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -85,10 +85,10 @@ describe('useToggleFavorite', () => {
         expect(cachedData).toEqual([]); // Should be empty again
     });
 
-    it('returns if !supabaseUser', async () => {
+    it('returns if !profile', async () => {
         const recipe = { id: '1', title: 'Test Recipe' } as any;
         (toggleFavorite as jest.Mock).mockRejectedValue(new Error('Failed'));
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
 
         const { result } = renderHook(() => useToggleFavorite(), { wrapper });
 

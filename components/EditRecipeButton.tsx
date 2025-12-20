@@ -11,9 +11,9 @@ interface EditRecipeButtonProps {
 }
 
 export function EditRecipeButton({ recipeId, ownerId }: EditRecipeButtonProps) {
-    const { supabaseUser } = useAuth()
+    const { profile } = useAuth()
 
-    if (!supabaseUser || supabaseUser.id !== ownerId) {
+    if (!profile || profile.id !== ownerId) {
         return null
     }
 

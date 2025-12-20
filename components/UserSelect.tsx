@@ -8,10 +8,10 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select'
-import { SupabaseUser } from '@/types';
+import { Profile } from '@/types';
 
 
-export function UserSelect({ users, value, onChange, className }: { users: SupabaseUser[]; value: string; onChange: (value: string) => void; className?: string }) {
+export function UserSelect({ users, value, onChange, className }: { users: Profile[]; value: string; onChange: (value: string) => void; className?: string }) {
     return (
         <SelectRoot value={value} onValueChange={onChange} >
             <SelectTrigger className={className}>

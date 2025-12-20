@@ -16,7 +16,7 @@ describe('StarRating', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: { id: 'user-1' } });
+        (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } });
         (useUserRating as jest.Mock).mockReturnValue({ data: 0 });
         (useRateRecipe as jest.Mock).mockReturnValue({ mutate: mockRateRecipe, isPending: false });
         (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar });
@@ -84,7 +84,7 @@ describe('StarRating', () => {
     });
 
     it('is disabled when not authenticated', () => {
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
         render(<StarRating recipeId="recipe-1" />);
         const stars = screen.getAllByRole('button');
         expect(stars[0]).toBeDisabled();
@@ -128,7 +128,7 @@ describe('StarRating', () => {
     });
 
     it('does not hover when logged out', () => {
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
         render(<StarRating recipeId="recipe-1" />);
         const stars = screen.getAllByRole('button');
         const starIcon = stars[0].querySelector('.lucide-star');

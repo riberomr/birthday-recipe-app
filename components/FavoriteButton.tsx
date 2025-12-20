@@ -16,10 +16,10 @@ interface FavoriteButtonProps {
 }
 
 export function FavoriteButton({ recipe, className, size = "md" }: FavoriteButtonProps) {
-    const { supabaseUser } = useAuth();
+    const { profile } = useAuth();
     const { showSnackbar } = useSnackbar();
 
-    const { data: favorites } = useFavorites(supabaseUser?.id);
+    const { data: favorites } = useFavorites(profile?.id);
     const { mutate: toggleFav, isPending } = useToggleFavorite();
 
     const isFavorite = favorites?.some(r => r.id === recipe.id) ?? false;
@@ -28,7 +28,7 @@ export function FavoriteButton({ recipe, className, size = "md" }: FavoriteButto
         e.preventDefault();
         e.stopPropagation();
 
-        if (!supabaseUser) {
+        if (!profile) {
             showSnackbar("Debes iniciar sesión para agregar a favoritos", "error");
             return;
         }

@@ -1,4 +1,4 @@
-import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from './requireAuth'
+import { getUserFromRequest, getProfileFromFirebase } from './requireAuth'
 import { adminAuth } from '@/lib/firebase/admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
@@ -79,7 +79,7 @@ describe('lib/auth/requireAuth', () => {
         })
     })
 
-    describe('getSupabaseUserFromFirebaseUid', () => {
+    describe('getProfileFromFirebase', () => {
         it('returns existing user if found', async () => {
             const mockUser = { id: 'user1', firebase_uid: 'fb1' }
             const mockSingle = jest.fn().mockResolvedValue({ data: mockUser, error: null })
@@ -90,7 +90,7 @@ describe('lib/auth/requireAuth', () => {
                     single: mockSingle
                 })
 
-            const result = await getSupabaseUserFromFirebaseUid('fb1')
+            const result = await getProfileFromFirebase('fb1')
 
             expect(supabaseAdmin.from).toHaveBeenCalledWith('profiles')
             expect(result).toEqual(mockUser)
@@ -124,7 +124,7 @@ describe('lib/auth/requireAuth', () => {
                     .mockReturnValueOnce(mockSelectChain)
                     .mockReturnValueOnce(mockInsertChain)
 
-            const result = await getSupabaseUserFromFirebaseUid('fb1', 'test@example.com', 'Test User', 'avatar.jpg')
+            const result = await getProfileFromFirebase('fb1', 'test@example.com', 'Test User', 'avatar.jpg')
 
             expect(supabaseAdmin.from).toHaveBeenNthCalledWith(1, 'profiles')
             expect(supabaseAdmin.from).toHaveBeenNthCalledWith(2, 'profiles')
@@ -147,7 +147,7 @@ describe('lib/auth/requireAuth', () => {
                     single: mockSingleFind
                 })
 
-            await expect(getSupabaseUserFromFirebaseUid('fb1')).rejects.toThrow('Email is required to create a user')
+            await expect(getProfileFromFirebase('fb1')).rejects.toThrow('Email is required to create a user')
         })
 
         it('throws error if insert fails', async () => {
@@ -170,7 +170,7 @@ describe('lib/auth/requireAuth', () => {
                     .mockReturnValueOnce(mockSelectChain)
                     .mockReturnValueOnce(mockInsertChain)
 
-            await expect(getSupabaseUserFromFirebaseUid('fb1', 'test@example.com'))
+            await expect(getProfileFromFirebase('fb1', 'test@example.com'))
                 .rejects.toEqual({ message: 'Insert failed' })
 
             expect(console.error).toHaveBeenCalledWith('Error creating user in Supabase:', { message: 'Insert failed' })

@@ -35,7 +35,7 @@ describe('CommentList', () => {
             mutate: mockDeleteMutate,
         });
         mockUseAuth.mockReturnValue({
-            supabaseUser: { id: 'user1' },
+            profile: { id: 'user1' },
         });
         mockUseModal.mockReturnValue({
             open: mockOpenDeleteModal,
@@ -121,7 +121,7 @@ describe('CommentList', () => {
 
     it('does not show delete button for other user comment', () => {
         mockUseAuth.mockReturnValue({
-            supabaseUser: { id: 'user2' },
+            profile: { id: 'user2' },
         });
         mockUseComments.mockReturnValue({
             data: {
@@ -146,7 +146,7 @@ describe('CommentList', () => {
 
     it('shows delete button for recipe owner', () => {
         mockUseAuth.mockReturnValue({
-            supabaseUser: { id: 'owner1' },
+            profile: { id: 'owner1' },
         });
         mockUseComments.mockReturnValue({
             data: {

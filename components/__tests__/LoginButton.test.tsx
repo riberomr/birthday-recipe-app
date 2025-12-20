@@ -25,7 +25,7 @@ describe('LoginButton', () => {
 
     it('renders login button when not authenticated', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: null,
+            profile: null,
             login: mockLogin,
             isLoading: false,
         })
@@ -36,7 +36,7 @@ describe('LoginButton', () => {
 
     it('renders user menu when authenticated', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: { uid: '123' },
+            profile: { uid: '123' },
             login: mockLogin,
             isLoading: false,
         })
@@ -47,7 +47,7 @@ describe('LoginButton', () => {
 
     it('renders loading state', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: null,
+            profile: null,
             login: mockLogin,
             isLoading: true,
         })
@@ -58,7 +58,7 @@ describe('LoginButton', () => {
 
     it('opens modal on click', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: null,
+            profile: null,
             login: mockLogin,
             isLoading: false,
         })
@@ -70,7 +70,7 @@ describe('LoginButton', () => {
 
     it('calls login when modal is confirmed', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: null,
+            profile: null,
             login: mockLogin,
             isLoading: false,
         })

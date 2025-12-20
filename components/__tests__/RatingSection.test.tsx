@@ -19,28 +19,28 @@ describe('RatingSection', () => {
     })
 
     it('renders when logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: { id: '1' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: '1' } })
         renderWithClient(<RatingSection recipeId="1" />)
         expect(screen.getByText('Calificar Receta')).toBeInTheDocument()
         expect(screen.getByTestId('star-rating')).toBeInTheDocument()
     })
 
     it('does not render when logged out', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: null })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null })
         renderWithClient(<RatingSection recipeId="1" />)
         expect(screen.queryByText('Calificar Receta')).not.toBeInTheDocument()
     })
 
     it('displays singular vote count', () => {
         (useRecipeRating as jest.Mock).mockReturnValue({ data: { average: 5, count: 1 } })
-            ; (useAuth as jest.Mock).mockReturnValue({ user: null })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: null })
         renderWithClient(<RatingSection recipeId="1" />)
         expect(screen.getByText('(1 voto)')).toBeInTheDocument()
     })
 
     it('displays plural vote count', () => {
         (useRecipeRating as jest.Mock).mockReturnValue({ data: { average: 4.5, count: 2 } })
-            ; (useAuth as jest.Mock).mockReturnValue({ user: null })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: null })
         renderWithClient(<RatingSection recipeId="1" />)
         expect(screen.getByText('(2 votos)')).toBeInTheDocument()
     })

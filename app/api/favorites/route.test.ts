@@ -11,7 +11,7 @@ describe('/api/favorites', () => {
     let POST: any
     let mockChain: any
     let getUserFromRequest: jest.Mock
-    let getSupabaseUserFromFirebaseUid: jest.Mock
+    let getProfileFromFirebase: jest.Mock
 
     beforeEach(() => {
         jest.resetModules()
@@ -35,11 +35,11 @@ describe('/api/favorites', () => {
         mockChain.then = (resolve: any) => resolve({ data: mockChain.data, error: mockChain.error });
 
         getUserFromRequest = jest.fn()
-        getSupabaseUserFromFirebaseUid = jest.fn()
+        getProfileFromFirebase = jest.fn()
 
         jest.doMock('@/lib/auth/requireAuth', () => ({
             getUserFromRequest,
-            getSupabaseUserFromFirebaseUid,
+            getProfileFromFirebase,
         }))
 
         jest.doMock('@supabase/supabase-js', () => ({
@@ -103,7 +103,7 @@ describe('/api/favorites', () => {
     describe('POST', () => {
         it('removes favorite if exists', async () => {
             getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
             // Mock de búsqueda inicial (.single())
             mockChain.single.mockResolvedValueOnce({
@@ -131,7 +131,7 @@ describe('/api/favorites', () => {
 
         it('returns 500 on insert error', async () => {
             getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
             mockChain.single.mockResolvedValue({ data: null }) // No existe, va a insertar
 
             // Simulamos error en insert
@@ -172,7 +172,7 @@ describe('/api/favorites', () => {
 
         it('returns 400 if recipeId is missing in the body', async () => {
             getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
             const request = new Request('http://localhost/api/favorites', {
                 method: 'POST',
@@ -187,7 +187,7 @@ describe('/api/favorites', () => {
 
         it('returns isFavorite true when successfully adding a new favorite', async () => {
             getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
             // Mock: no existe el favorito previo
             mockChain.single.mockResolvedValue({ data: null, error: null })

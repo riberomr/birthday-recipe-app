@@ -52,7 +52,7 @@ describe('RecipeForm', () => {
         mockCreateRecipe.mockReset()
         mockUpdateRecipe.mockReset()
 
-            ; (useAuth as jest.Mock).mockReturnValue({ user: mockUser, supabaseUser: { id: 'user1' } })
+            ; (useAuth as jest.Mock).mockReturnValue({ firebaseUser: mockUser, profile: { id: 'user1' } })
             ; (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar })
             ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
     })
@@ -106,7 +106,7 @@ describe('RecipeForm', () => {
     })
 
     it('redirects if user is not owner in edit mode', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: mockUser, supabaseUser: { id: 'otherUser' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ firebaseUser: mockUser, profile: { id: 'otherUser' } })
         const initialData: any = { user_id: 'user1', id: 'recipe1' }
 
         render(<RecipeForm initialData={initialData} isEditing={true} />)
@@ -430,7 +430,7 @@ describe('RecipeForm', () => {
     })
 
     it('prevents submission if not logged in', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: null, supabaseUser: null })
+        ; (useAuth as jest.Mock).mockReturnValue({ firebaseUser: null, profile: null })
         const user = userEvent.setup()
         render(<RecipeForm />)
 

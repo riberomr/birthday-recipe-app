@@ -20,17 +20,17 @@ export function StarRating({
     size = "md",
     onRatingChange
 }: StarRatingProps) {
-    const { supabaseUser } = useAuth()
+    const { profile } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [hoverRating, setHoverRating] = useState(0)
 
-    const { data: userRating } = useUserRating(recipeId, supabaseUser?.id)
+    const { data: userRating } = useUserRating(recipeId, profile?.id)
     const { mutate: rateRecipe, isPending } = useRateRecipe()
 
     const currentRating = userRating || 0
 
     const handleRatingClick = (newRating: number) => {
-        if (readonly || !supabaseUser || isPending) return
+        if (readonly || !profile || isPending) return
 
         rateRecipe({ recipeId, rating: newRating }, {
             onSuccess: () => {
@@ -55,13 +55,13 @@ export function StarRating({
                 <button
                     key={star}
                     type="button"
-                    disabled={readonly || !supabaseUser || isPending}
+                    disabled={readonly || !profile || isPending}
                     onClick={() => handleRatingClick(star)}
-                    onMouseEnter={() => !readonly && supabaseUser && setHoverRating(star)}
-                    onMouseLeave={() => !readonly && supabaseUser && setHoverRating(0)}
+                    onMouseEnter={() => !readonly && profile && setHoverRating(star)}
+                    onMouseLeave={() => !readonly && profile && setHoverRating(0)}
                     className={cn(
                         "transition-all duration-200 focus:outline-none",
-                        readonly || !supabaseUser ? "cursor-default" : "cursor-pointer [@media(hover:hover)]:hover:scale-110"
+                        readonly || !profile ? "cursor-default" : "cursor-pointer [@media(hover:hover)]:hover:scale-110"
                     )}
                     aria-label={`Calificar con ${star} estrellas`}
                 >

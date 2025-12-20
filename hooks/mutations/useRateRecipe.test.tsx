@@ -14,7 +14,7 @@ describe('useRateRecipe', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         queryClient = createQueryClient();
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: { id: 'user-1' } });
+        (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } });
     });
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -83,7 +83,7 @@ describe('useRateRecipe', () => {
     });
 
     it('does nothing if not authenticated', async () => {
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
         (upsertRating as jest.Mock).mockResolvedValue({ success: true });
 
         const { result } = renderHook(() => useRateRecipe(), { wrapper });
@@ -98,7 +98,7 @@ describe('useRateRecipe', () => {
     });
 
     it('does not rollback (no-op) if not authenticated and error occurs', async () => {
-        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
         (upsertRating as jest.Mock).mockRejectedValue(new Error('Failed'));
 
         const { result } = renderHook(() => useRateRecipe(), { wrapper });

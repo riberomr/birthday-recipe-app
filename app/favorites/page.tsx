@@ -9,18 +9,18 @@ import { Loader2 } from "lucide-react";
 import { useFavorites } from "@/hooks/queries/useFavorites";
 
 export default function FavoritesPage() {
-    const { supabaseUser, isLoading: authLoading } = useAuth();
+    const { profile, isLoading: authLoading } = useAuth();
     const { showSnackbar } = useSnackbar();
     const router = useRouter();
 
-    const { data: favorites, isLoading: favoritesLoading, error } = useFavorites(supabaseUser?.id);
+    const { data: favorites, isLoading: favoritesLoading, error } = useFavorites(profile?.id);
 
     useEffect(() => {
-        if (!authLoading && !supabaseUser) {
+        if (!authLoading && !profile) {
             showSnackbar("Debes iniciar sesión para ver tus favoritos", "error");
             router.push("/");
         }
-    }, [supabaseUser, authLoading, showSnackbar, router]);
+    }, [profile, authLoading, showSnackbar, router]);
 
     useEffect(() => {
         if (error) {
@@ -28,7 +28,7 @@ export default function FavoritesPage() {
         }
     }, [error, showSnackbar]);
 
-    if (authLoading || (favoritesLoading && supabaseUser)) {
+    if (authLoading || (favoritesLoading && profile)) {
         return (
             <div className="flex justify-center items-center min-h-[50vh]">
                 <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
@@ -36,7 +36,7 @@ export default function FavoritesPage() {
         );
     }
 
-    if (!supabaseUser) return null;
+    if (!profile) return null;
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">

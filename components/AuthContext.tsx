@@ -1,53 +1,40 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
+import { User } from 'firebase/auth'; // Keep this for now as FirebaseUser is our custom type but we need the raw firebase user for auth state
 import { useFirebaseAuth } from '@/features/auth/hooks/useAuth';
-import { SupabaseUser } from '@/types';
+import { FirebaseUser, Profile } from '@/types';
+import { useProfile } from '@/hooks/queries/useProfile';
 
 type AuthContextType = {
-    user: User | null;
+    firebaseUser: User | FirebaseUser | null; // Our custom subset
+    profile: Profile | null | undefined;
     login: () => Promise<void>;
     logout: () => Promise<void>;
     isLoading: boolean;
-    supabaseUser: SupabaseUser | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { user, loading, loginWithGoogle, logout } = useFirebaseAuth();
+    const { data: profile, isLoading: isProfileLoading } = useProfile(user?.uid);
 
-    const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
-    const [loadingSupabaseUser, setLoadingSupabaseUser] = useState(true);
-
-    useEffect(() => {
-        const fetchMe = async () => {
-            if (user) {
-                const token = await user.getIdToken();
-
-                const response = await fetch('/api/me', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-
-                });
-                const data = await response.json();
-                setLoadingSupabaseUser(false);
-                setSupabaseUser(data.user);
-            }
-            if (!user && !loading) {
-                setLoadingSupabaseUser(false);
-                setSupabaseUser(null);
-            }
-        }
-        fetchMe();
-    }, [user, loading]);
+    const firebaseUser: FirebaseUser | null = user ? {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+    } : null;
 
     return (
-        <AuthContext.Provider value={{ user, supabaseUser, login: loginWithGoogle, logout, isLoading: loading || loadingSupabaseUser }}>
+        <AuthContext.Provider value={{
+            firebaseUser,
+            profile,
+            login: loginWithGoogle,
+            logout,
+            isLoading: loading || (!!user && isProfileLoading)
+        }}>
             {children}
         </AuthContext.Provider>
     );

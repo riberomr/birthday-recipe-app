@@ -37,7 +37,7 @@ const mockRecipe: any = {
 
 describe('RecipeCard', () => {
     beforeEach(() => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: { id: 'user-1' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } })
     })
 
     it('renders recipe details', () => {
