@@ -1,4 +1,4 @@
-import { getCategories, getRecipes, getRecipe, getRecipeCommunityPhotos, createRecipe, updateRecipe } from '../recipes'
+import { getCategories, getRecipes, getRecipe, getRecipeCommunityPhotos, createRecipe, updateRecipe, deleteRecipe, deleteRecipeRaw } from '../recipes'
 import { supabase } from '@/lib/supabase/client'
 import { auth } from '@/lib/firebase/client'
 import { getAverageRating } from '../../utils'
@@ -109,6 +109,7 @@ describe('lib/api/recipes', () => {
 
                 ; (supabase.from as jest.Mock).mockReturnValue({
                     select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
                     range: mockRange
                 })
 
@@ -154,6 +155,7 @@ describe('lib/api/recipes', () => {
         it('handles medium time filter', async () => {
             const mockChain = {
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 gte: jest.fn().mockReturnThis(),
                 lte: jest.fn().mockReturnThis(),
                 range: jest.fn().mockReturnThis(),
@@ -170,6 +172,7 @@ describe('lib/api/recipes', () => {
         it('handles slow time filter', async () => {
             const mockChain = {
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 gt: jest.fn().mockReturnThis(),
                 range: jest.fn().mockReturnThis(),
                 order: jest.fn().mockResolvedValue({ data: [], error: null, count: 0 })
@@ -184,6 +187,7 @@ describe('lib/api/recipes', () => {
         it('ignores invalid time filter', async () => {
             const mockChainInvalid = {
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 range: jest.fn().mockReturnThis(),
                 order: jest.fn().mockResolvedValue({ data: [], error: null, count: 0 })
             }
@@ -198,6 +202,7 @@ describe('lib/api/recipes', () => {
         it('returns empty result on error', async () => {
             const mockChain = {
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 range: jest.fn().mockReturnThis(),
                 order: jest.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' }, count: 0 })
             }
@@ -212,6 +217,7 @@ describe('lib/api/recipes', () => {
         it('returns empty array when data is null', async () => {
             const mockChain = {
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 range: jest.fn().mockReturnThis(),
                 order: jest.fn().mockResolvedValue({ data: null, error: null, count: null })
             }
@@ -440,6 +446,97 @@ describe('lib/api/recipes', () => {
                 })
 
             await expect(updateRecipe('1', formData)).rejects.toThrow('Error desconocido al actualizar la receta')
+        })
+        describe('deleteRecipe', () => {
+            it('throws error if user is not authenticated', async () => {
+                Object.defineProperty(auth, 'currentUser', {
+                    value: null,
+                    writable: true
+                })
+
+                await expect(deleteRecipe('1')).rejects.toThrow('Usuario no autenticado')
+            })
+
+            it('deletes recipe successfully', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => ({ success: true })
+                })
+
+                const result = await deleteRecipe('1')
+
+                expect(global.fetch).toHaveBeenCalledWith('/api/recipes/1/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer mock-token'
+                    }
+                })
+                expect(result).toEqual({ success: true })
+            })
+
+            it('throws error on failure', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: false,
+                    json: async () => ({ error: 'Delete failed' })
+                })
+
+                await expect(deleteRecipe('1')).rejects.toThrow('Delete failed')
+            })
+
+            it('throws default error on failure without message', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: false,
+                    json: async () => ({})
+                })
+
+                await expect(deleteRecipe('1')).rejects.toThrow('Error desconocido al eliminar la receta')
+            })
+        })
+
+        describe('deleteRecipeRaw', () => {
+            it('throws error if user is not authenticated', async () => {
+                Object.defineProperty(auth, 'currentUser', {
+                    value: null,
+                    writable: true
+                })
+
+                await expect(deleteRecipeRaw('1')).rejects.toThrow('Usuario no autenticado')
+            })
+
+            it('deletes recipe permanently successfully', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => ({ success: true })
+                })
+
+                const result = await deleteRecipeRaw('1')
+
+                expect(global.fetch).toHaveBeenCalledWith('/api/recipes/1/raw-delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer mock-token'
+                    }
+                })
+                expect(result).toEqual({ success: true })
+            })
+
+            it('throws error on failure', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: false,
+                    json: async () => ({ error: 'Delete failed' })
+                })
+
+                await expect(deleteRecipeRaw('1')).rejects.toThrow('Delete failed')
+            })
+
+            it('throws default error on failure without message', async () => {
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: false,
+                    json: async () => ({})
+                })
+
+                await expect(deleteRecipeRaw('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
+            })
         })
     })
 })

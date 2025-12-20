@@ -13,6 +13,7 @@ import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel
 import { FavoriteButton } from "@/components/FavoriteButton"
 import { RatingSection } from "@/components/RatingSection"
 import { EditRecipeButton } from "@/components/EditRecipeButton"
+import { DeleteRecipeButton } from "@/components/DeleteRecipeButton"
 
 export const dynamic = "force-dynamic"
 
@@ -73,7 +74,6 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
                             </div>
                             <div className="flex gap-2">
-                                <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
                                 <FavoriteButton recipeId={recipe.id} />
                             </div>
 
@@ -164,9 +164,15 @@ export default async function RecipePage({ params }: RecipePageProps) {
                             <div className="flex-1">
                                 Puedes compartir o descargar la receta
                             </div>
-                            <div></div>
                             <ShareButtons title={recipe.title} />
                             <DownloadButton />
+                        </div>
+                        <div className="flex gap-2 print:hidden mt-4">
+                            <div className="flex-1">
+                                Puedes realizar cambios en la receta
+                            </div>
+                            <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
+                            <DeleteRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
                         </div>
                         {/* Social Features - Hidden on Print */}
                         <div className="mt-8 space-y-8 print:hidden">

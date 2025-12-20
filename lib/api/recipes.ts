@@ -52,6 +52,7 @@ export async function getRecipes(
         updated_at
       )
     `, { count: 'exact' })
+        .eq("is_deleted", false)
 
     // Apply filters
     if (filters.category) {
@@ -147,6 +148,7 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
       )
     `)
         .eq("id", id)
+        .eq("is_deleted", false)
         .single()
 
     if (error) {
@@ -231,6 +233,48 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al actualizar la receta');
+    }
+
+    return result;
+}
+
+export async function deleteRecipe(id: string) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+    const token = await user.getIdToken();
+
+    const response = await fetch(`/api/recipes/${id}/delete`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido al eliminar la receta');
+    }
+
+    return result;
+}
+
+export async function deleteRecipeRaw(id: string) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+    const token = await user.getIdToken();
+
+    const response = await fetch(`/api/recipes/${id}/raw-delete`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(result.error || 'Error desconocido al eliminar la receta permanentemente');
     }
 
     return result;
