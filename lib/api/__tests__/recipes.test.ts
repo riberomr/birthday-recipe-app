@@ -511,7 +511,7 @@ describe('lib/api/recipes', () => {
 
                 const result = await deleteRecipePermanently('1')
 
-                expect(global.fetch).toHaveBeenCalledWith('/api/recipes/1/raw-delete', {
+                expect(global.fetch).toHaveBeenCalledWith('/api/recipes/1/permanent-delete', {
                     method: 'DELETE',
                     headers: {
                         'Authorization': 'Bearer mock-token'

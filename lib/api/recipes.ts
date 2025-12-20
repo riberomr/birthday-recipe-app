@@ -238,6 +238,20 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
     return result;
 }
 
+/**
+ * Performs a logical delete of a recipe.
+ *
+ * This function sets the `is_deleted` flag to true in the database, effectively hiding the recipe
+ * from the application UI while preserving the data for potential restoration or audit purposes.
+ * It does NOT remove the record from the database.
+ *
+ * We separate logical and permanent delete operations to ensure safety and prevent accidental data loss.
+ * Logical delete is the default action for users.
+ *
+ * @param id - The unique identifier of the recipe to delete.
+ * @returns A promise that resolves to the API response result.
+ * @throws Error if the user is not authenticated or the operation fails.
+ */
 export async function deleteRecipe(id: string) {
     const user = auth.currentUser;
     if (!user) throw new Error("Usuario no autenticado");
@@ -259,12 +273,26 @@ export async function deleteRecipe(id: string) {
     return result;
 }
 
+/**
+ * Performs a permanent (physical) delete of a recipe.
+ *
+ * This function IRREVERSIBLY removes the recipe record from the database.
+ * Once executed, the data cannot be recovered. This should be used with extreme caution,
+ * typically for administrative purposes or GDPR compliance.
+ *
+ * We keep this separate from the standard delete to enforce a clear distinction between
+ * reversible (soft) and irreversible (hard) actions.
+ *
+ * @param id - The unique identifier of the recipe to permanently delete.
+ * @returns A promise that resolves to the API response result.
+ * @throws Error if the user is not authenticated or the operation fails.
+ */
 export async function deleteRecipePermanently(id: string) {
     const user = auth.currentUser;
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`/api/recipes/${id}/raw-delete`, {
+    const response = await fetch(`/api/recipes/${id}/permanent-delete`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`

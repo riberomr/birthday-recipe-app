@@ -100,6 +100,6 @@ describe("DeleteRecipeButton", () => {
         expect(deleteRecipe).toHaveBeenCalledWith("recipe123")
         expect(mockShowSnackbar).toHaveBeenCalledWith("Error al eliminar la receta", "error")
         expect(mockPush).not.toHaveBeenCalled()
-        expect(mockClose).toHaveBeenCalled()
+        expect(mockClose).not.toHaveBeenCalled()
     })
 })

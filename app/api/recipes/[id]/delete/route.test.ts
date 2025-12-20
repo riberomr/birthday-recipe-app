@@ -169,7 +169,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         // Mock update failure
         const mockUpdateQuery = {
             update: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({ error: 'Update failed' })
+                eq: jest.fn().mockReturnValue({
+                    eq: jest.fn().mockResolvedValue({ error: 'Update failed' })
+                })
             })
         }
 
@@ -213,7 +215,9 @@ describe('DELETE /api/recipes/[id]/delete', () => {
         // Mock update success
         const mockUpdateQuery = {
             update: jest.fn().mockReturnValue({
-                eq: jest.fn().mockResolvedValue({ error: null })
+                eq: jest.fn().mockReturnValue({
+                    eq: jest.fn().mockResolvedValue({ error: null })
+                })
             })
         }
 

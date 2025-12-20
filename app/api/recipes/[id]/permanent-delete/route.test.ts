@@ -31,7 +31,7 @@ jest.mock('next/server', () => ({
     }
 }))
 
-describe('DELETE /api/recipes/[id]/raw-delete', () => {
+describe('DELETE /api/recipes/[id]/permanent-delete', () => {
     const mockGetUserFromRequest = getUserFromRequest as jest.Mock
     const mockSupabase = supabaseAdmin as any
 
@@ -41,7 +41,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
 
     it('should return 401 if not authenticated', async () => {
         mockGetUserFromRequest.mockResolvedValue(null)
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -60,7 +60,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
             })
         })
 
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -94,7 +94,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
             .mockReturnValueOnce(mockRecipeQuery) // First call for recipe
             .mockReturnValueOnce(mockProfileQuery) // Second call for profile
 
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -128,7 +128,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
             .mockReturnValueOnce(mockRecipeQuery)
             .mockReturnValueOnce(mockProfileQuery)
 
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -170,7 +170,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
             .mockReturnValueOnce(mockProfileQuery)
             .mockReturnValueOnce(mockDeleteQuery)
 
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -212,7 +212,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
             .mockReturnValueOnce(mockProfileQuery)
             .mockReturnValueOnce(mockDeleteQuery)
 
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })
@@ -224,7 +224,7 @@ describe('DELETE /api/recipes/[id]/raw-delete', () => {
     it('should return 500 on unexpected error', async () => {
         const mockGetUserFromRequest = getUserFromRequest as jest.Mock
         mockGetUserFromRequest.mockRejectedValue(new Error('Unexpected error'))
-        const request = new NextRequest('http://localhost/api/recipes/123/raw-delete')
+        const request = new NextRequest('http://localhost/api/recipes/123/permanent-delete')
         const params = Promise.resolve({ id: '123' })
 
         const response = await DELETE(request, { params })

@@ -2,6 +2,24 @@ import { NextResponse } from "next/server"
 import { getUserFromRequest } from "@/lib/auth/requireAuth"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 
+/**
+ * Performs a permanent delete of a recipe.
+ *
+ * This function removes the recipe record from the database, effectively deleting it from the application.
+ *
+ * We separate logical and permanent delete operations to ensure safety and prevent accidental data loss.
+ * Logical delete is the default action for users.
+ *
+ * Not need of check if is soft deleted, because we are deleting the recipe from the database.
+ * This endpoint will be used only by admins.
+ *
+ * If the users use this endpoint, it will be via an action after the recipe was soft deleted.
+ * 
+ * @param id - The unique identifier of the recipe to delete.
+ * @returns A promise that resolves to the API response result.
+ * @throws Error if the user is not authenticated or the operation fails.
+ */
+
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
