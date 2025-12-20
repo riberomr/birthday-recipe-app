@@ -41,6 +41,9 @@ jest.mock('@/components/RatingSection', () => ({
 jest.mock('@/components/EditRecipeButton', () => ({
     EditRecipeButton: () => <button data-testid="edit-button">Edit</button>
 }))
+jest.mock('@/components/DeleteRecipeButton', () => ({
+    DeleteRecipeButton: () => <button data-testid="delete-button">Delete</button>
+}))
 
 describe('RecipePage', () => {
     const mockRecipe = {
@@ -175,6 +178,7 @@ describe('RecipePage', () => {
         expect(screen.getByTestId('star-rating')).toBeInTheDocument()
         expect(screen.getByTestId('rating-section')).toBeInTheDocument()
         expect(screen.getByTestId('comment-section')).toBeInTheDocument()
+        expect(screen.getByTestId('delete-button')).toBeInTheDocument()
     })
 
     it('renders ingredient scaler with correct data', async () => {
