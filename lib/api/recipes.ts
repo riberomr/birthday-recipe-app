@@ -1,6 +1,7 @@
 import { supabase } from "../supabase/client"
 import { Recipe, RecipeCategory } from "@/types"
 import { getAverageRating } from "../utils"
+import { auth } from "@/lib/firebase/client";
 
 export async function getCategories(): Promise<RecipeCategory[]> {
     const { data, error } = await supabase
@@ -177,6 +178,7 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
                 image_url
             `)
         .eq("recipe_id", recipeId)
+        .eq("is_deleted", false)
         .not("image_url", "is", null)
         .neq("image_url", "")
         .order("created_at", { ascending: false })
@@ -188,8 +190,6 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
 
     return data
 }
-
-import { auth } from "@/lib/firebase/client";
 
 export async function createRecipe(formData: FormData) {
     const user = auth.currentUser;

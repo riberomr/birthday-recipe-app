@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/components/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { getComments, postComment } from "@/lib/api/comments"
-import { Send, Camera, X, LogIn } from "lucide-react"
+import { getComments, postComment, deleteComment } from "@/lib/api/comments"
+import { Send, Camera, X, LogIn, Trash2 } from "lucide-react"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
 import { CommentSkeleton } from "@/components/CommentSkeleton"
@@ -24,10 +24,11 @@ type Comment = {
 
 interface CommentSectionProps {
     recipeId: string
+    recipeOwnerId: string
 }
 
-export function CommentSection({ recipeId }: CommentSectionProps) {
-    const { user, login } = useAuth()
+export function CommentSection({ recipeId, recipeOwnerId }: CommentSectionProps) {
+    const { supabaseUser: user, login } = useAuth()
     const { showSnackbar } = useSnackbar()
     const [comment, setComment] = useState("")
     const [comments, setComments] = useState<Comment[]>([])
@@ -38,7 +39,8 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     const [submitting, setSubmitting] = useState(false)
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-    const { open } = useModal('login-confirmation')
+    const { open: openLoginModal } = useModal('login-confirmation')
+    const { open: openDeleteModal, close: closeDeleteModal } = useModal('delete-confirmation')
 
     useEffect(() => {
         fetchCommentsData()
@@ -108,7 +110,7 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
             const formData = new FormData()
             formData.append('content', comment)
             formData.append('recipe_id', recipeId)
-            formData.append('user_id', user!.uid)
+            formData.append('user_id', user!.id)
 
             let finalFile = selectedImage
             if (selectedImage) {
@@ -131,9 +133,29 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
     }
 
     const handleLoginClick = () => {
-        open({
+        openLoginModal({
             onConfirm: async () => {
                 await login()
+            }
+        })
+    }
+
+    const handleDeleteComment = (commentId: string) => {
+        openDeleteModal({
+            title: "¿Eliminar comentario?",
+            description: "¿Estás seguro de que quieres eliminar este comentario? Esta acción no se puede deshacer.",
+            onConfirm: async () => {
+                try {
+                    await deleteComment(commentId)
+                    showSnackbar("Comentario eliminado", "success")
+                    // Refresh comments or remove from state
+                    setComments(prev => prev.filter(c => c.id !== commentId))
+                    setTotal(prev => prev - 1)
+                    closeDeleteModal()
+                } catch (error: any) {
+                    console.error("Error deleting comment:", error)
+                    showSnackbar(error.message || "Error al eliminar comentario", "error")
+                }
             }
         })
     }
@@ -146,8 +168,8 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                 <form onSubmit={handleSubmit} className="flex gap-4">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src={user.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                        alt={user.displayName || 'User'}
+                        src={user.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                        alt={user.full_name || 'User'}
                         className="w-10 h-10 rounded-full border border-primary/20 shrink-0"
                     />
                     <div className="flex-1 space-y-2">
@@ -245,7 +267,20 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                                             {new Date(comment.created_at).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <p className="text-muted-foreground whitespace-pre-wrap">{comment.content}</p>
+                                    <div className="flex justify-between items-start">
+                                        <p className="text-muted-foreground whitespace-pre-wrap flex-1">{comment.content}</p>
+                                        {user && (user.id === comment.user_id || user.id === recipeOwnerId) && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 ml-2"
+                                                onClick={() => handleDeleteComment(comment.id)}
+                                                aria-label="Eliminar comentario"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
                                     {comment.image_url && (
                                         <div className="mt-3">
                                             <img
@@ -274,6 +309,6 @@ export function CommentSection({ recipeId }: CommentSectionProps) {
                     </>
                 )}
             </div>
-        </div>
+        </div >
     )
 }
