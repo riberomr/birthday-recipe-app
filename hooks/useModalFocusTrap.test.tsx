@@ -2,7 +2,6 @@
 import { render, fireEvent } from "@testing-library/react"
 import { useModalFocusTrap } from "./useModalFocusTrap"
 import { useRef } from "react"
-import { Delete } from "lucide-react"
 
 function HookTestWrapper({
     isOpen,
@@ -17,8 +16,8 @@ function HookTestWrapper({
     return (
         <div>
             <div ref={modalRef} data-testid="modal" >
-                <button>Cancel </button>
-                < button > Delete </button>
+                <button>Cancel</button>
+                <button>Delete</button>
             </div>
         </div>
     )

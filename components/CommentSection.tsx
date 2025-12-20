@@ -309,6 +309,6 @@ export function CommentSection({ recipeId, recipeOwnerId }: CommentSectionProps)
                     </>
                 )}
             </div>
-        </div >
+        </div>
     )
 }
