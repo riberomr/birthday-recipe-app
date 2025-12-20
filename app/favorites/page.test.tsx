@@ -3,14 +3,14 @@ import FavoritesPage from './page'
 import { useAuth } from '@/components/AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
 import { useRouter } from 'next/navigation'
-import { getFavorites } from '@/lib/api/favorites'
+import { useFavorites } from '@/hooks/useFavorites'
 
 jest.mock('@/components/AuthContext')
 jest.mock('@/components/ui/Snackbar')
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn()
 }))
-jest.mock('@/lib/api/favorites')
+jest.mock('@/hooks/useFavorites')
 jest.mock('@/components/RecipeCard', () => ({
     RecipeCard: ({ recipe }: any) => <div data-testid={`recipe-${recipe.id}`}>{recipe.title}</div>
 }))
@@ -28,11 +28,16 @@ describe('FavoritesPage', () => {
         jest.clearAllMocks()
             ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
             ; (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar })
-            ; (getFavorites as jest.Mock).mockResolvedValue(mockFavorites)
+            ; (useFavorites as jest.Mock).mockReturnValue({
+                data: mockFavorites,
+                isLoading: false,
+                error: null
+            })
     })
 
     it('redirects to home when user is not logged in', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null, isLoading: false })
+            ; (useFavorites as jest.Mock).mockReturnValue({ data: undefined, isLoading: false })
 
         render(<FavoritesPage />)
 
@@ -47,45 +52,44 @@ describe('FavoritesPage', () => {
 
         render(<FavoritesPage />)
 
-        await waitFor(() => {
-            expect(screen.getByText('Mis Favoritos')).toBeInTheDocument()
-            expect(screen.getByTestId('recipe-1')).toBeInTheDocument()
-            expect(screen.getByTestId('recipe-2')).toBeInTheDocument()
-        })
+        expect(screen.getByText('Mis Favoritos')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-1')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-2')).toBeInTheDocument()
     })
 
     it('shows empty state when no favorites', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
-            ; (getFavorites as jest.Mock).mockResolvedValue([])
+            ; (useFavorites as jest.Mock).mockReturnValue({ data: [], isLoading: false })
 
         render(<FavoritesPage />)
 
-        await waitFor(() => {
-            expect(screen.getByText(/no tienes recetas favoritas aún/i)).toBeInTheDocument()
-        })
+        expect(screen.getByText(/no tienes recetas favoritas aún/i)).toBeInTheDocument()
     })
 
     it('handles fetch error gracefully', async () => {
-        const consoleError = jest.spyOn(console, 'error').mockImplementation()
-            ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
-            ; (getFavorites as jest.Mock).mockRejectedValue(new Error('Fetch failed'))
+        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+            ; (useFavorites as jest.Mock).mockReturnValue({
+                data: undefined,
+                isLoading: false,
+                error: new Error('Fetch failed')
+            })
 
         render(<FavoritesPage />)
 
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Error al cargar favoritos', 'error')
         })
-
-        consoleError.mockRestore()
     })
 
-    it('returns null when user is not authenticated after loading', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null, isLoading: false })
+    it('shows loading state', () => {
+        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser, isLoading: false })
+            ; (useFavorites as jest.Mock).mockReturnValue({ data: undefined, isLoading: true })
 
-        const { container } = render(<FavoritesPage />)
+        render(<FavoritesPage />)
 
-        await waitFor(() => {
-            expect(container.firstChild).toBeNull()
-        })
+        // Loader2 is usually an SVG, we can look for it or just check if content is not there
+        // The original code has a div with Loader2
+        // We can check for a class or just that favorites are not shown
+        expect(screen.queryByText('Mis Favoritos')).not.toBeInTheDocument()
     })
 })

@@ -35,7 +35,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             e.stopPropagation();
                         }}
                     >
-                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-background/80 backdrop-blur-sm [@media(hover:hover)]:hover:bg-background dark:bg-background/50 dark:[@media(hover:hover)]:hover:bg-background/70 min-h-[44px] min-w-[44px]" />
+                        <FavoriteButton recipe={recipe} size="sm" className="bg-background/80 backdrop-blur-sm [@media(hover:hover)]:hover:bg-background dark:bg-background/50 dark:[@media(hover:hover)]:hover:bg-background/70 min-h-[44px] min-w-[44px]" />
                     </div>
                 </div>
                 <CardHeader className="p-4 pb-2">

@@ -1,41 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Heart } from "lucide-react";
-import { checkIsFavorite, toggleFavorite } from "@/lib/api/favorites";
 import { useAuth } from "@/components/AuthContext";
 import { useSnackbar } from "@/components/ui/Snackbar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Heart } from "lucide-react";
+import { Recipe } from "@/types";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useToggleFavorite } from "@/hooks/useToggleFavorite";
 
 interface FavoriteButtonProps {
-    recipeId: string;
+    recipe: Recipe;
     className?: string;
     size?: "sm" | "md" | "lg";
 }
 
-export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteButtonProps) {
+export function FavoriteButton({ recipe, className, size = "md" }: FavoriteButtonProps) {
     const { supabaseUser } = useAuth();
     const { showSnackbar } = useSnackbar();
-    const [isFavorite, setIsFavorite] = useState(false);
-    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        if (supabaseUser) {
-            checkIfFavorite();
-        }
-    }, [supabaseUser, recipeId]);
+    const { data: favorites } = useFavorites(supabaseUser?.id);
+    const { mutate: toggleFav, isPending } = useToggleFavorite();
 
-    const checkIfFavorite = async () => {
-        try {
-            const isFav = await checkIsFavorite(supabaseUser!.id, recipeId);
-            setIsFavorite(isFav);
-        } catch (error) {
-            // Ignore error
-        }
-    };
+    const isFavorite = favorites?.some(r => r.id === recipe.id) ?? false;
 
-    const handleToggleFavorite = async (e: React.MouseEvent) => {
+    const handleToggleFavorite = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -44,19 +33,14 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
             return;
         }
 
-
-        setLoading(true);
-
-        try {
-            const newStatus = await toggleFavorite(supabaseUser.id, recipeId, isFavorite);
-            setIsFavorite(newStatus);
-            showSnackbar(newStatus ? "Agregado a favoritos" : "Eliminado de favoritos", "success");
-        } catch (error) {
-            console.error("Error toggling favorite:", error);
-            showSnackbar("Error al actualizar favoritos", "error");
-        } finally {
-            setLoading(false);
-        }
+        toggleFav(recipe, {
+            onSuccess: () => {
+                showSnackbar(isFavorite ? "Eliminado de favoritos" : "Agregado a favoritos", "success");
+            },
+            onError: () => {
+                showSnackbar("Error al actualizar favoritos", "error");
+            }
+        });
     };
 
     const sizeClasses = {
@@ -82,13 +66,12 @@ export function FavoriteButton({ recipeId, className, size = "md" }: FavoriteBut
                 className
             )}
             onClick={handleToggleFavorite}
-            disabled={loading}
+            disabled={isPending}
         >
             <Heart
                 className={cn(
                     iconSizes[size],
-                    isFavorite ? "fill-current" : "",
-                    loading ? "animate-pulse" : ""
+                    isFavorite ? "fill-current" : ""
                 )}
             />
         </Button>

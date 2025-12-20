@@ -74,7 +74,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
 
                             </div>
                             <div className="flex gap-2">
-                                <FavoriteButton recipeId={recipe.id} />
+                                <FavoriteButton recipe={recipe} />
                             </div>
 
                         </div>
