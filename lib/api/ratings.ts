@@ -1,9 +1,24 @@
 import { auth } from "@/lib/firebase/client";
 import { supabase } from "@/lib/supabase/client";
 
+export async function getRecipeRating(recipeId: string) {
+    const { data, error } = await supabase
+        .from("ratings")
+        .select("rating")
+        .eq("recipe_id", recipeId);
+
+    if (error) throw error;
+
+    const ratings = data || [];
+    const count = ratings.length;
+    const average = count > 0
+        ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / count
+        : 0;
+
+    return { average, count };
+}
+
 export async function getUserRating(userId: string, recipeId: string) {
-    // Reading public/user data via Supabase client is fine if RLS allows it.
-    // Ratings are generally public or at least readable.
     const { data, error } = await supabase
         .from("ratings")
         .select("rating")
@@ -15,7 +30,7 @@ export async function getUserRating(userId: string, recipeId: string) {
     return data?.rating || 0;
 }
 
-export async function upsertRating(userId: string, recipeId: string, rating: number) {
+export async function upsertRating(recipeId: string, rating: number) {
     const user = auth.currentUser;
     if (!user) throw new Error("User not authenticated");
     const token = await user.getIdToken();
@@ -29,5 +44,10 @@ export async function upsertRating(userId: string, recipeId: string, rating: num
         body: JSON.stringify({ recipeId, rating })
     });
 
-    if (!response.ok) throw new Error("Error saving rating");
+    if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Error saving rating");
+    }
+
+    return await response.json();
 }

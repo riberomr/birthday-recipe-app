@@ -110,7 +110,7 @@ export default async function RecipePage({ params }: RecipePageProps) {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 print:hidden">
-                                <StarRating recipeId={id} rating={recipe.average_rating?.rating || 0} readonly size="sm" />
+                                <StarRating recipeId={recipe.id} readonly size="sm" />
                                 <span>{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
                             </div>
                         </div>

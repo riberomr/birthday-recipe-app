@@ -1,61 +1,46 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getUserRating, upsertRating } from "@/lib/api/ratings"
 import { useAuth } from "./AuthContext"
+import { useUserRating } from "@/hooks/queries/useUserRating"
+import { useRateRecipe } from "@/hooks/mutations/useRateRecipe"
+import { useSnackbar } from "@/components/ui/Snackbar"
 
 interface StarRatingProps {
-    recipeId?: string
-    rating?: number
-    onRatingChange?: (rating: number) => void
+    recipeId: string
     readonly?: boolean
     size?: "sm" | "md" | "lg"
+    onRatingChange?: (rating: number) => void
 }
 
 export function StarRating({
     recipeId,
-    rating: initialRating = 0,
-    onRatingChange,
     readonly = false,
-    size = "md"
+    size = "md",
+    onRatingChange
 }: StarRatingProps) {
-    const [rating, setRating] = useState(initialRating)
-    const [hoverRating, setHoverRating] = useState(0)
     const { supabaseUser } = useAuth()
+    const { showSnackbar } = useSnackbar()
+    const [hoverRating, setHoverRating] = useState(0)
 
-    useEffect(() => {
-        if (!readonly) {
-            fetchUserRating()
-        }
-    }, [recipeId, supabaseUser, readonly])
+    const { data: userRating } = useUserRating(recipeId, supabaseUser?.id)
+    const { mutate: rateRecipe, isPending } = useRateRecipe()
 
-    const fetchUserRating = async () => {
-        if (!recipeId || !supabaseUser) return
+    const currentRating = userRating || 0
 
-        try {
-            const userRating = await getUserRating(supabaseUser.id, recipeId)
-            setRating(userRating)
-        } catch (error) {
-            console.error("Error fetching rating:", error)
-        }
-    }
+    const handleRatingClick = (newRating: number) => {
+        if (readonly || !supabaseUser || isPending) return
 
-    const handleRatingClick = async (newRating: number) => {
-        if (readonly || !supabaseUser || !recipeId) return
-
-        // Optimistic update
-        const previousRating = rating
-        setRating(newRating)
-
-        try {
-            await upsertRating(supabaseUser.id, recipeId, newRating)
-            onRatingChange?.(newRating)
-        } catch (error) {
-            console.error("Error saving rating:", error)
-            // Revert on error
-            setRating(previousRating)
-        }
+        rateRecipe({ recipeId, rating: newRating }, {
+            onSuccess: () => {
+                onRatingChange?.(newRating)
+                showSnackbar("¡Calificación guardada!", "success")
+            },
+            onError: (error: any) => {
+                showSnackbar(error.message || "Error al guardar calificación", "error")
+            }
+        })
     }
 
     const sizeClasses = {
@@ -70,7 +55,7 @@ export function StarRating({
                 <button
                     key={star}
                     type="button"
-                    disabled={readonly || !supabaseUser}
+                    disabled={readonly || !supabaseUser || isPending}
                     onClick={() => handleRatingClick(star)}
                     onMouseEnter={() => !readonly && supabaseUser && setHoverRating(star)}
                     onMouseLeave={() => !readonly && supabaseUser && setHoverRating(0)}
@@ -78,11 +63,12 @@ export function StarRating({
                         "transition-all duration-200 focus:outline-none",
                         readonly || !supabaseUser ? "cursor-default" : "cursor-pointer [@media(hover:hover)]:hover:scale-110"
                     )}
+                    aria-label={`Calificar con ${star} estrellas`}
                 >
                     <Star
                         className={cn(
                             sizeClasses[size],
-                            (hoverRating || rating) >= star
+                            (hoverRating || currentRating) >= star
                                 ? "fill-yellow-400 text-yellow-400"
                                 : "text-muted-foreground/30"
                         )}
