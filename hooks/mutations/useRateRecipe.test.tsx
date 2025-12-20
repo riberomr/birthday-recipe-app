@@ -62,6 +62,26 @@ describe('useRateRecipe', () => {
         expect(cachedData).toBe(3);
     });
 
+    it('does not rollback if no previous rating on error', async () => {
+        (upsertRating as jest.Mock).mockRejectedValue(new Error('Failed'));
+
+        // No previous rating in cache
+
+        const { result } = renderHook(() => useRateRecipe(), { wrapper });
+
+        await act(async () => {
+            try {
+                await result.current.mutateAsync({ recipeId: 'recipe-1', rating: 5 });
+            } catch (e) {
+                // Expected
+            }
+        });
+
+        // Cache should still be empty (or undefined)
+        const cachedData = queryClient.getQueryData(['ratings', 'recipe-1', 'user', 'user-1']);
+        expect(cachedData).toBeUndefined();
+    });
+
     it('does nothing if not authenticated', async () => {
         (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
         (upsertRating as jest.Mock).mockResolvedValue({ success: true });
@@ -76,4 +96,23 @@ describe('useRateRecipe', () => {
         const cachedData = queryClient.getQueryData(['ratings', 'recipe-1', 'user', 'user-1']);
         expect(cachedData).toBeUndefined();
     });
+
+    it('does not rollback (no-op) if not authenticated and error occurs', async () => {
+        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        (upsertRating as jest.Mock).mockRejectedValue(new Error('Failed'));
+
+        const { result } = renderHook(() => useRateRecipe(), { wrapper });
+
+        await act(async () => {
+            try {
+                await result.current.mutateAsync({ recipeId: 'recipe-1', rating: 5 });
+            } catch (e) {
+                // Expected
+            }
+        });
+
+        // Should not have crashed and nothing in cache
+        expect(queryClient.getQueryData(['ratings', 'recipe-1', 'user', 'user-1'])).toBeUndefined();
+    });
 });
+

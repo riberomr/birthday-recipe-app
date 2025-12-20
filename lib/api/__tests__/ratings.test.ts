@@ -1,4 +1,4 @@
-import { getUserRating, upsertRating } from '../ratings'
+import { getUserRating, upsertRating, getRecipeRating } from '../ratings'
 import { auth } from '@/lib/firebase/client'
 import { supabase } from '@/lib/supabase/client'
 
@@ -78,15 +78,16 @@ describe('lib/api/ratings', () => {
                 writable: true
             })
 
-            await expect(upsertRating('user1', 'recipe1', 5)).rejects.toThrow('User not authenticated')
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('User not authenticated')
         })
 
         it('saves rating successfully', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true
+                ok: true,
+                json: jest.fn().mockResolvedValue({ success: true })
             })
 
-            await upsertRating('user1', 'recipe1', 5)
+            await upsertRating('recipe1', 5)
 
             expect(global.fetch).toHaveBeenCalledWith('/api/ratings', {
                 method: 'POST',
@@ -100,10 +101,77 @@ describe('lib/api/ratings', () => {
 
         it('throws error on save failure', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: false
+                ok: false,
+                json: jest.fn().mockResolvedValue({ error: 'Error saving rating' })
             })
 
-            await expect(upsertRating('user1', 'recipe1', 5)).rejects.toThrow('Error saving rating')
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
+        })
+
+        it('throws default error if no error message from server', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: false,
+                json: jest.fn().mockResolvedValue({})
+            })
+
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
+        })
+    })
+
+    describe('getRecipeRating', () => {
+        it('returns average and count', async () => {
+            const mockEq = jest.fn().mockResolvedValue({
+                data: [{ rating: 4 }, { rating: 5 }],
+                error: null
+            })
+            const mockSelectChain = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: mockSelectChain
+                })
+
+            const result = await getRecipeRating('recipe1')
+            expect(result).toEqual({ average: 4.5, count: 2 })
+        })
+
+        it('returns 0 when no ratings', async () => {
+            const mockEq = jest.fn().mockResolvedValue({
+                data: [],
+                error: null
+            })
+            const mockSelectChain = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: mockSelectChain
+                })
+
+            const result = await getRecipeRating('recipe1')
+            expect(result).toEqual({ average: 0, count: 0 })
+        })
+
+        it('returns 0 when data is null', async () => {
+            const mockEq = jest.fn().mockResolvedValue({
+                data: null,
+                error: null
+            })
+            const mockSelectChain = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: mockSelectChain
+                })
+
+            const result = await getRecipeRating('recipe1')
+            expect(result).toEqual({ average: 0, count: 0 })
+        })
+
+        it('throws error on db failure', async () => {
+            const mockEq = jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'DB Error' }
+            })
+            const mockSelectChain = jest.fn().mockReturnValue({ eq: mockEq })
+                ; (supabase.from as jest.Mock).mockReturnValue({
+                    select: mockSelectChain
+                })
+
+            await expect(getRecipeRating('recipe1')).rejects.toEqual({ message: 'DB Error' })
         })
     })
 })

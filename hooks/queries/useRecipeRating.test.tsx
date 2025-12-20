@@ -36,4 +36,10 @@ describe('useRecipeRating', () => {
 
         await waitFor(() => expect(result.current.isError).toBe(true));
     });
+
+    it('is disabled when recipeId is empty', () => {
+        const { result } = renderHook(() => useRecipeRating(''), { wrapper });
+        expect(result.current.fetchStatus).toBe('idle');
+        expect(getRecipeRating).not.toHaveBeenCalled();
+    });
 });

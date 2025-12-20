@@ -95,5 +95,86 @@ describe('StarRating', () => {
         render(<StarRating recipeId="recipe-1" />);
         const stars = screen.getAllByRole('button');
         expect(stars[0]).toBeDisabled();
+
+        // Try to click
+        fireEvent.click(stars[0]);
+        expect(mockRateRecipe).not.toHaveBeenCalled();
+    });
+
+    it('handles hover states', () => {
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
+
+        // Initial state
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+
+        // Hover
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).toHaveClass('fill-yellow-400');
+
+        // Leave
+        fireEvent.mouseLeave(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
+
+    it('does not hover when readonly', () => {
+        render(<StarRating recipeId="recipe-1" readonly />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
+
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
+
+    it('does not hover when logged out', () => {
+        (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null });
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
+
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
+
+    it('handles error without message', () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onError({});
+        });
+
+        render(<StarRating recipeId="recipe-1" />);
+
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
+
+        expect(mockShowSnackbar).toHaveBeenCalledWith("Error al guardar calificación", "error");
+    });
+
+    it('calls onRatingChange if provided', () => {
+        const onRatingChange = jest.fn();
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onSuccess();
+        });
+
+        render(<StarRating recipeId="recipe-1" onRatingChange={onRatingChange} />);
+
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
+
+        expect(onRatingChange).toHaveBeenCalledWith(5);
+    });
+
+    it('does not crash if onRatingChange is undefined', () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onSuccess();
+        });
+
+        render(<StarRating recipeId="recipe-1" />);
+
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
+
+        // Should not throw
+        expect(mockShowSnackbar).toHaveBeenCalledWith("¡Calificación guardada!", "success");
     });
 });

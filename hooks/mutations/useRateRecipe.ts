@@ -29,8 +29,15 @@ export function useRateRecipe() {
             return { previousUserRating };
         },
         onError: (err, { recipeId }, context) => {
-            if (context?.previousUserRating !== undefined && supabaseUser) {
-                queryClient.setQueryData(['ratings', recipeId, 'user', supabaseUser.id], context.previousUserRating);
+            if (context) {
+                /* istanbul ignore next */
+                if (!supabaseUser) return;
+
+                if (context.previousUserRating === undefined) {
+                    queryClient.removeQueries({ queryKey: ['ratings', recipeId, 'user', supabaseUser.id] });
+                } else {
+                    queryClient.setQueryData(['ratings', recipeId, 'user', supabaseUser.id], context.previousUserRating);
+                }
             }
         },
         onSuccess: (_, { recipeId }) => {

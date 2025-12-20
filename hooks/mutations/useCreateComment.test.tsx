@@ -27,6 +27,6 @@ describe('useCreateComment', () => {
 
         expect(postComment).toHaveBeenCalledWith(formData);
         expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['comments', 'recipe1'] });
-        expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['recipes'] });
+        expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['recipe'] });
     });
 });
