@@ -3,7 +3,6 @@ import { getUserFromRequest } from "@/lib/auth/requireAuth"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 
 /**
- * Performs a permanent delete of a recipe.
  *
  * This function removes the recipe record from the database, effectively deleting it from the application.
  *
@@ -14,6 +13,12 @@ import { supabaseAdmin } from "@/lib/supabase/admin"
  * This endpoint will be used only by admins.
  *
  * If the users use this endpoint, it will be via an action after the recipe was soft deleted.
+ * 
+ * TODO: Add admin check, and add an or with owner check.
+ * note: currently there is no frontend function to permanently delete a recipe.
+ * TODO: After trash implementation, owners can delete their own recipes with this endpoint.
+ * TODO: Admin feature to permanently delete recipes.
+ * 
  * 
  * @param id - The unique identifier of the recipe to delete.
  * @returns A promise that resolves to the API response result.
