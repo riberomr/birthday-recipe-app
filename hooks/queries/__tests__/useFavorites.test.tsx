@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useFavorites } from './useFavorites';
+import { useFavorites } from '../useFavorites';
 import { getFavorites } from '@/lib/api/favorites';
 import { wrapper } from '@/lib/test-utils';
 

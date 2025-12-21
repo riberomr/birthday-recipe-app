@@ -105,27 +105,32 @@ export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
                         className="w-10 h-10 rounded-full border border-primary/10 shrink-0"
                     />
                     <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-foreground">
-                                {comment.profiles?.full_name || 'Usuario'}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                                {new Date(comment.created_at).toLocaleDateString()}
-                            </span>
+                        <div className="flex justify-between items-left gap-2 mb-2">
+                            <div className="flex flex-col items-left">
+                                <span className="font-bold text-foreground">
+                                    {comment.profiles?.full_name || 'Usuario'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    {new Date(comment.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
+                            {user && (user.id === comment.user_id || user.id === recipeOwnerId) && (
+                                <div className="flex items-right gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 ml-2"
+                                        onClick={() => handleDeleteComment(comment.id)}
+                                        aria-label="Eliminar comentario"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         <div className="flex justify-between items-start">
                             <p className="text-muted-foreground whitespace-pre-wrap flex-1">{comment.content}</p>
-                            {user && (user.id === comment.user_id || user.id === recipeOwnerId) && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 ml-2"
-                                    onClick={() => handleDeleteComment(comment.id)}
-                                    aria-label="Eliminar comentario"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            )}
+
                         </div>
                         {comment.image_url && (
                             <div className="mt-3">

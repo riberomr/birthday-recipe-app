@@ -1,5 +1,5 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useRateRecipe } from './useRateRecipe';
+import { useRateRecipe } from '../useRateRecipe';
 import { upsertRating } from '@/lib/api/ratings';
 import { useAuth } from '@/components/AuthContext';
 import { createQueryClient } from '@/lib/test-utils';

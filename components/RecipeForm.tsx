@@ -10,7 +10,8 @@ import { supabase } from "@/lib/supabase/client"
 import { useAuth } from "@/components/AuthContext"
 import { useSnackbar } from "@/components/ui/Snackbar"
 import { compressImage } from "@/lib/utils"
-import { createRecipe, updateRecipe } from "@/lib/api/recipes"
+import { useCreateRecipe } from "@/hooks/mutations/useCreateRecipe"
+import { useUpdateRecipe } from "@/hooks/mutations/useUpdateRecipe"
 import { Recipe } from "@/types"
 
 interface RecipeFormProps {
@@ -22,7 +23,11 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     const router = useRouter()
     const { firebaseUser, profile } = useAuth()
     const { showSnackbar } = useSnackbar()
-    const [loading, setLoading] = useState(false)
+
+    const createRecipeMutation = useCreateRecipe()
+    const updateRecipeMutation = useUpdateRecipe()
+
+    const isPending = createRecipeMutation.isPending || updateRecipeMutation.isPending
 
     const [tags, setTags] = useState<{ id: string, name: string }[]>([])
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -132,6 +137,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log("handleSubmit")
         e.preventDefault()
         if (!firebaseUser) {
             showSnackbar("Debes iniciar sesión para crear una receta", "error")
@@ -150,8 +156,6 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             showSnackbar("Agrega al menos un paso de preparación", "error")
             return
         }
-
-        setLoading(true)
 
         try {
             const submitData = new FormData()
@@ -181,10 +185,10 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
 
             let result;
             if (isEditing && initialData) {
-                result = await updateRecipe(initialData.id, submitData)
+                result = await updateRecipeMutation.mutateAsync({ id: initialData.id, formData: submitData })
                 showSnackbar("Receta actualizada con éxito", "success")
             } else {
-                result = await createRecipe(submitData)
+                result = await createRecipeMutation.mutateAsync(submitData)
                 showSnackbar("Receta creada con éxito", "success")
             }
 
@@ -193,8 +197,6 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
         } catch (error: any) {
             console.error("Error saving recipe:", error)
             showSnackbar(error.message || "Error al guardar la receta. Por favor intenta de nuevo.", "error")
-        } finally {
-            setLoading(false)
         }
     }
 
@@ -477,9 +479,9 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                 <Button
                     type="submit"
                     className="h-14 text-sm bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all [@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98]"
-                    disabled={loading}
+                    disabled={isPending}
                 >
-                    {loading ? "Guardando..." : (
+                    {isPending ? "Guardando..." : (
                         <>
                             {isEditing ? "Actualizar Receta" : "Guardar Receta"}
                         </>

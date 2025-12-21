@@ -1,22 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/components/AuthContext";
 import { useSnackbar } from "@/components/ui/Snackbar";
 import { useRouter } from "next/navigation";
-import { getFavorites } from "@/lib/api/favorites";
-import { Recipe } from "@/types";
 import { RecipeCard } from "@/components/RecipeCard";
-import { Link, Loader2, PlusCircle } from "lucide-react";
-import { getRecipes } from "@/lib/api/recipes";
+import { Loader2, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useMyRecipes } from "@/hooks/queries/useMyRecipes";
 
 export default function MyRecipesPage() {
     const { profile, isLoading: authLoading } = useAuth();
     const { showSnackbar } = useSnackbar();
     const router = useRouter();
-    const [recipes, setRecipes] = useState<Recipe[]>([]);
-    const [loading, setLoading] = useState(true);
+
+    const {
+        data,
+        isLoading: recipesLoading,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useMyRecipes();
 
     useEffect(() => {
         if (!authLoading && !profile) {
@@ -26,33 +31,22 @@ export default function MyRecipesPage() {
     }, [profile, authLoading, showSnackbar, router]);
 
     useEffect(() => {
-        async function fetchMyRecipesData(userId: string) {
-            try {
-                const data = await getRecipes(undefined, undefined, { user_id: userId });
-
-                setRecipes(data.recipes);
-            } catch (error) {
-                console.error("Error fetching my recipes:", error);
-                showSnackbar("Error al cargar mis recetas", "error");
-            } finally {
-                setLoading(false);
-            }
+        if (isError) {
+            showSnackbar("Error al cargar mis recetas", "error");
         }
+    }, [isError, showSnackbar]);
 
-        if (profile) {
-            fetchMyRecipesData(profile.id);
-        }
-    }, [profile, showSnackbar]);
-
-    if (authLoading || (loading && profile)) {
+    if (authLoading || (recipesLoading && profile)) {
         return (
             <div className="flex justify-center items-center min-h-[50vh]">
-                <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+                <Loader2 className="h-8 w-8 animate-spin text-pink-500" data-testid="loader" />
             </div>
         );
     }
 
     if (!profile) return null;
+
+    const recipes = data ? data.pages.flatMap(page => page.recipes) : [];
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">
@@ -78,10 +72,31 @@ export default function MyRecipesPage() {
 
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recipes.map((recipe) => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
-                    ))}
+                <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {recipes.map((recipe) => (
+                            <RecipeCard key={recipe.id} recipe={recipe} />
+                        ))}
+                    </div>
+
+                    {hasNextPage && (
+                        <div className="flex justify-center">
+                            <Button
+                                onClick={() => fetchNextPage()}
+                                disabled={isFetchingNextPage}
+                                variant="outline"
+                            >
+                                {isFetchingNextPage ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Cargando...
+                                    </>
+                                ) : (
+                                    "Cargar más"
+                                )}
+                            </Button>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

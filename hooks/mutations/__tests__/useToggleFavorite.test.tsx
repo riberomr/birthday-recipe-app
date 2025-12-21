@@ -1,5 +1,5 @@
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useToggleFavorite } from './useToggleFavorite';
+import { useToggleFavorite } from '../useToggleFavorite';
 import { toggleFavorite } from '@/lib/api/favorites';
 import { useAuth } from '@/components/AuthContext';
 import { createQueryClient } from '@/lib/test-utils';

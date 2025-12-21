@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useRecipeRating } from './useRecipeRating';
+import { useRecipeRating } from '../useRecipeRating';
 import { getRecipeRating } from '@/lib/api/ratings';
 import { createQueryClient } from '@/lib/test-utils';
 import { QueryClientProvider } from '@tanstack/react-query';

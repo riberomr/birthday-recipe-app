@@ -10,7 +10,7 @@ export function useCreateComment() {
             const recipeId = variables.get('recipe_id') as string;
             if (recipeId) {
                 queryClient.invalidateQueries({ queryKey: ['comments', recipeId] });
-                queryClient.invalidateQueries({ queryKey: ['recipe'] });
+                queryClient.invalidateQueries({ queryKey: ['recipes', recipeId] });
             }
         },
     });

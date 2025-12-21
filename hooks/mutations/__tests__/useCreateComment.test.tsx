@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useCreateComment } from './useCreateComment';
+import { useCreateComment } from '../useCreateComment';
 import { wrapper, createQueryClient } from '@/lib/test-utils';
 import { postComment } from '@/lib/api/comments';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -27,6 +27,6 @@ describe('useCreateComment', () => {
 
         expect(postComment).toHaveBeenCalledWith(formData);
         expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['comments', 'recipe1'] });
-        expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['recipe'] });
+        expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ['recipes', 'recipe1'] });
     });
 });

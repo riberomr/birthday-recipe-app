@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useComments } from './useComments';
+import { useComments } from '../useComments';
 import { wrapper } from '@/lib/test-utils';
 import { getComments } from '@/lib/api/comments';
 

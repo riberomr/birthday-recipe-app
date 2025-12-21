@@ -1,20 +1,37 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MyRecipesPage from './page'
 import { useAuth } from '@/components/AuthContext'
 import { useSnackbar } from '@/components/ui/Snackbar'
 import { useRouter } from 'next/navigation'
-import { getRecipes } from '@/lib/api/recipes'
+import { useMyRecipes } from '@/hooks/queries/useMyRecipes'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// Mocks de dependencias
 jest.mock('@/components/AuthContext')
 jest.mock('@/components/ui/Snackbar')
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn()
 }))
-jest.mock('@/lib/api/recipes')
+
+// Mock del Hook - Esto es lo que pediste
+jest.mock('@/hooks/queries/useMyRecipes')
+
 jest.mock('@/components/RecipeCard', () => ({
     RecipeCard: ({ recipe }: any) => <div data-testid={`recipe-${recipe.id}`}>{recipe.title}</div>
 }))
+
+// Helper para renderizar sin el wrapper complejo si estamos mockeando el hook
+const renderWithProvider = (ui: React.ReactElement) => {
+    const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } }
+    })
+    return render(
+        <QueryClientProvider client={queryClient}>
+            {ui}
+        </QueryClientProvider>
+    )
+}
 
 describe('MyRecipesPage', () => {
     const mockRouter = { push: jest.fn() }
@@ -29,13 +46,29 @@ describe('MyRecipesPage', () => {
         jest.clearAllMocks()
             ; (useRouter as jest.Mock).mockReturnValue(mockRouter)
             ; (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar })
-            ; (getRecipes as jest.Mock).mockResolvedValue({ recipes: mockRecipes, total: 2 })
+
+            // Mock default state del hook
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: {
+                    pages: [{ recipes: mockRecipes, total: 2 }],
+                },
+                fetchNextPage: jest.fn(),
+                hasNextPage: false,
+                isFetchingNextPage: false,
+                isLoading: false,
+                isError: false,
+            })
     })
 
     it('redirects to home when user is not logged in', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ profile: null, isLoading: false })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: undefined,
+                isLoading: false,
+                isError: false
+            })
 
-        render(<MyRecipesPage />)
+        renderWithProvider(<MyRecipesPage />)
 
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Debes iniciar sesión para ver tus recetas', 'error')
@@ -46,74 +79,93 @@ describe('MyRecipesPage', () => {
     it('displays recipes when loaded', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
 
-        render(<MyRecipesPage />)
+        renderWithProvider(<MyRecipesPage />)
 
-        await waitFor(() => {
-            expect(screen.getByText('Mis Recetas')).toBeInTheDocument()
-            expect(screen.getByTestId('recipe-1')).toBeInTheDocument()
-            expect(screen.getByTestId('recipe-2')).toBeInTheDocument()
-        })
+        expect(screen.getByText('Mis Recetas')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-1')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-2')).toBeInTheDocument()
     })
 
     it('shows empty state with create button when no recipes', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
-            ; (getRecipes as jest.Mock).mockResolvedValue({ recipes: [], total: 0 })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: { pages: [{ recipes: [], total: 0 }] },
+                isLoading: false,
+                isError: false,
+            })
 
-        render(<MyRecipesPage />)
+        renderWithProvider(<MyRecipesPage />)
 
-        await waitFor(() => {
-            expect(screen.getByText(/no tienes recetas creadas aún/i)).toBeInTheDocument()
-            expect(screen.getByRole('button', { name: /crear nueva receta/i })).toBeInTheDocument()
-        })
-    })
+        expect(screen.getByText(/no tienes recetas creadas aún/i)).toBeInTheDocument()
+        const createBtn = screen.getByRole('button', { name: /crear nueva receta/i })
+        expect(createBtn).toBeInTheDocument()
 
-    it('navigates to create page when clicking create button', async () => {
-        const user = userEvent.setup()
-            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
-            ; (getRecipes as jest.Mock).mockResolvedValue({ recipes: [], total: 0 })
-
-        render(<MyRecipesPage />)
-
-        await waitFor(() => {
-            expect(screen.getByRole('button', { name: /crear nueva receta/i })).toBeInTheDocument()
-        })
-
-        await user.click(screen.getByRole('button', { name: /crear nueva receta/i }))
-
+        await userEvent.click(createBtn)
         expect(mockRouter.push).toHaveBeenCalledWith('/recipes/create')
     })
 
     it('handles fetch error gracefully', async () => {
-        const consoleError = jest.spyOn(console, 'error').mockImplementation()
-            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
-            ; (getRecipes as jest.Mock).mockRejectedValue(new Error('Fetch failed'))
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: undefined,
+                isLoading: false,
+                isError: true,
+            })
 
-        render(<MyRecipesPage />)
+        renderWithProvider(<MyRecipesPage />)
 
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Error al cargar mis recetas', 'error')
         })
-
-        consoleError.mockRestore()
     })
 
-    it('calls getRecipes with correct user filter', async () => {
+    it('loads more recipes when clicking the load more button', async () => {
+        const fetchNextPage = jest.fn()
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: { pages: [{ recipes: mockRecipes, total: 4 }] },
+                isLoading: false,
+                isError: false,
+                hasNextPage: true,
+                isFetchingNextPage: false,
+                fetchNextPage
+            })
+
+        renderWithProvider(<MyRecipesPage />)
+
+        const loadMoreBtn = screen.getByRole('button', { name: /cargar más/i })
+        await userEvent.click(loadMoreBtn)
+
+        expect(fetchNextPage).toHaveBeenCalled()
+    })
+
+    it('shows loading state while fetching next page', async () => {
         ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: { pages: [{ recipes: mockRecipes, total: 4 }] },
+                isLoading: false,
+                isError: false,
+                hasNextPage: true,
+                isFetchingNextPage: true, // Esto activa el loader y deshabilita el botón
+                fetchNextPage: jest.fn()
+            })
 
-        render(<MyRecipesPage />)
+        renderWithProvider(<MyRecipesPage />)
 
-        await waitFor(() => {
-            expect(getRecipes).toHaveBeenCalledWith(undefined, undefined, { user_id: 'user-1' })
-        })
+        expect(screen.getByText(/cargando.../i)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /cargando.../i })).toBeDisabled()
     })
 
-    it('returns null when user is not authenticated after loading', async () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ profile: null, isLoading: false })
+    it('shows initial loading state', () => {
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: mockUser, isLoading: false })
+            ; (useMyRecipes as jest.Mock).mockReturnValue({
+                data: undefined,
+                isLoading: true,
+                isError: false,
+            })
 
-        const { container } = render(<MyRecipesPage />)
-
-        await waitFor(() => {
-            expect(container.firstChild).toBeNull()
-        })
+        renderWithProvider(<MyRecipesPage />)
+        // Buscamos el div que contiene el Loader (puedes añadir test-id al Loader si prefieres)
+        expect(screen.getByTestId('loader')).toBeInTheDocument()
     })
 })

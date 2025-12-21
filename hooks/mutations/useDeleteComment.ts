@@ -8,7 +8,7 @@ export function useDeleteComment(recipeId: string) {
         mutationFn: (commentId: string) => deleteComment(commentId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['comments', recipeId] });
-            queryClient.invalidateQueries({ queryKey: ['recipes'] });
+            queryClient.invalidateQueries({ queryKey: ['recipes', recipeId] });
         },
     });
 }
