@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Clock, ChefHat, Play } from "lucide-react"
-import { notFound, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { StarRating } from "@/components/StarRating"
 import { CommentSection } from "@/components/CommentSection"
 import { DownloadButton } from "@/components/DownloadButton"
@@ -18,7 +18,6 @@ import { FavoriteButton } from "@/components/FavoriteButton"
 import { RatingSection } from "@/components/RatingSection"
 import { EditRecipeButton } from "@/components/EditRecipeButton"
 import { DeleteRecipeButton } from "@/components/DeleteRecipeButton"
-import { RecipeCardSkeleton } from "@/components/RecipeCardSkeleton"
 
 interface RecipeDetailClientProps {
     id: string

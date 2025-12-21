@@ -12,7 +12,7 @@ export function useRecipe(id: string) {
             // Try to find the recipe in the 'recipes' list cache
             const queries = queryClient.getQueriesData<any>({ queryKey: ["recipes"] })
 
-            for (const [key, data] of queries) {
+            for (const [_key, data] of queries) {
                 if (data?.pages) {
                     for (const page of data.pages) {
                         const found = page.recipes.find((r: Recipe) => r.id === id)

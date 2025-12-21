@@ -26,7 +26,7 @@ describe('useProfile', () => {
         const mockProfile = { id: '1', firebase_uid: 'fb1', full_name: 'Test' };
         (getUserProfile as jest.Mock).mockReturnValue(mockProfile);
 
-        const { result } = renderHook(() => useProfile('fb1'));
+        renderHook(() => useProfile('fb1'));
 
         await waitFor(() => {
             expect(getUserProfile).toHaveBeenCalledWith('fb1');

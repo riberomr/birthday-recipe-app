@@ -1,4 +1,4 @@
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useRecipes } from '../useRecipes';
 import { getRecipes } from '@/lib/api/recipes';
 import { createQueryClient } from '@/lib/test-utils';

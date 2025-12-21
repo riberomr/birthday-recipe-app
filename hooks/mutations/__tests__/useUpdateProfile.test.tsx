@@ -1,7 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useUpdateProfile } from '../useUpdateProfile';
 import { updateUserProfile } from '@/lib/api/users';
-import { useQueryClient } from '@tanstack/react-query';
 
 // Mock the API
 jest.mock('@/lib/api/users', () => ({

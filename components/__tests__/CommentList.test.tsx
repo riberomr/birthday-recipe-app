@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { CommentList } from '../CommentList';
 import { useComments } from '@/hooks/queries/useComments';
 import { useDeleteComment } from '@/hooks/mutations/useDeleteComment';
@@ -55,7 +55,7 @@ describe('CommentList', () => {
             error: null,
         });
 
-        const { container } = render(<CommentList recipeId="recipe1" recipeOwnerId="owner1" />);
+        render(<CommentList recipeId="recipe1" recipeOwnerId="owner1" />);
         // Check for skeletons (usually they have animate-pulse class or similar, or we check for absence of "No hay comentarios")
         // The component renders 3 CommentSkeleton.
         // Let's check if we can find elements with specific class if we knew it, or just check that empty message is not there.

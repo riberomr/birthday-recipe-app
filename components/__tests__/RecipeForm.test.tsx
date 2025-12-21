@@ -274,11 +274,6 @@ describe('RecipeForm', () => {
         await user.click(screen.getAllByText('Agregar')[2]) // Nutrition
 
         // Remove them
-        const removeBtns = screen.getAllByRole('button').filter(btn => btn.querySelector('svg.lucide-trash-2'))
-        // We have initial 1 ing, 1 step, 1 nut. Added 1 each. Total 2 each.
-        // removeBtns should have 6 buttons? No, trash icon is used for remove.
-        // Let's use test ids if available or just click the buttons.
-        // The component has data-testid={`remove-ingredient-${idx}`} etc.
 
         await user.click(screen.getByTestId('remove-ingredient-1'))
         expect(screen.queryByTestId('remove-ingredient-1')).not.toBeInTheDocument()

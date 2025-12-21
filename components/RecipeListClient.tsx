@@ -33,7 +33,6 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
         hasNextPage,
         isFetchingNextPage,
         isLoading,
-        isError
     } = useRecipes(filters)
 
     // Intersection Observer for infinite scroll

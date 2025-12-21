@@ -58,10 +58,9 @@ export function CommentForm({ recipeId }: CommentFormProps) {
             formData.append('recipe_id', recipeId)
             formData.append('user_id', user.id)
 
-            let finalFile = selectedImage
             if (selectedImage) {
-                finalFile = await compressImage(selectedImage)
-                formData.append('file', finalFile)
+                const compressedFile = await compressImage(selectedImage)
+                formData.append('file', compressedFile)
             }
 
             createComment(formData, {

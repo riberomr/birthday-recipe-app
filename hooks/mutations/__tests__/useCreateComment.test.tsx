@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useCreateComment } from '../useCreateComment';
-import { wrapper, createQueryClient } from '@/lib/test-utils';
+import { createQueryClient } from '@/lib/test-utils';
 import { postComment } from '@/lib/api/comments';
 import { QueryClientProvider } from '@tanstack/react-query';
 

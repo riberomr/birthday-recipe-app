@@ -19,7 +19,6 @@ interface CommentListProps {
 export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
     const { profile: user } = useAuth()
     const { showSnackbar } = useSnackbar()
-    const [page, setPage] = useState(1)
 
     // We fetch 5 comments per page. 
     // Note: The current useComments hook fetches a specific page. 

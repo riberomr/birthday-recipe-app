@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { StarRating } from '../StarRating';
 import { useAuth } from '@/components/AuthContext';
 import { useUserRating } from '@/hooks/queries/useUserRating';
