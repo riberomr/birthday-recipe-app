@@ -1,138 +1,180 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { StarRating } from '../StarRating'
-import { useAuth } from '../AuthContext'
-import { getUserRating, upsertRating } from '@/lib/api/ratings'
+import { render, screen, fireEvent } from '@testing-library/react';
+import { StarRating } from '../StarRating';
+import { useAuth } from '@/components/AuthContext';
+import { useUserRating } from '@/hooks/queries/useUserRating';
+import { useRateRecipe } from '@/hooks/mutations/useRateRecipe';
+import { useSnackbar } from '@/components/ui/Snackbar';
 
-// Mock dependencies
-jest.mock('../AuthContext', () => ({
-    useAuth: jest.fn(),
-}))
-jest.mock('@/lib/api/ratings', () => ({
-    getUserRating: jest.fn(),
-    upsertRating: jest.fn(),
-}))
+jest.mock('@/components/AuthContext');
+jest.mock('@/hooks/queries/useUserRating');
+jest.mock('@/hooks/mutations/useRateRecipe');
+jest.mock('@/components/ui/Snackbar');
 
 describe('StarRating', () => {
-    const mockUser = { id: 'user-1' }
+    const mockRateRecipe = jest.fn();
+    const mockShowSnackbar = jest.fn();
 
     beforeEach(() => {
-        jest.clearAllMocks()
-            ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: mockUser })
-            ; (getUserRating as jest.Mock).mockResolvedValue(0)
-            ; (upsertRating as jest.Mock).mockResolvedValue(undefined)
-    })
+        jest.clearAllMocks();
+        (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } });
+        (useUserRating as jest.Mock).mockReturnValue({ data: 0 });
+        (useRateRecipe as jest.Mock).mockReturnValue({ mutate: mockRateRecipe, isPending: false });
+        (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar });
+    });
 
-    it('renders correctly', async () => {
-        render(<StarRating recipeId="recipe-1" />)
-        // Should render 5 stars
-        expect(screen.getAllByRole('button')).toHaveLength(5)
+    it('renders correctly', () => {
+        render(<StarRating recipeId="recipe-1" />);
+        expect(screen.getAllByRole('button')).toHaveLength(5);
+    });
 
-        await waitFor(() => {
-            expect(getUserRating).toHaveBeenCalled()
-        })
-    })
+    it('displays user rating', () => {
+        (useUserRating as jest.Mock).mockReturnValue({ data: 3 });
+        const { container } = render(<StarRating recipeId="recipe-1" />);
 
-    it('fetches user rating on mount', async () => {
-        ; (getUserRating as jest.Mock).mockResolvedValue(4)
-        render(<StarRating recipeId="recipe-1" />)
+        // Check if 3 stars are filled (yellow)
+        const stars = container.querySelectorAll('.lucide-star');
+        expect(stars[0]).toHaveClass('fill-yellow-400');
+        expect(stars[1]).toHaveClass('fill-yellow-400');
+        expect(stars[2]).toHaveClass('fill-yellow-400');
+        expect(stars[3]).not.toHaveClass('fill-yellow-400');
+    });
 
-        await waitFor(() => {
-            expect(getUserRating).toHaveBeenCalledWith('user-1', 'recipe-1')
-        })
-    })
+    it('calls rateRecipe on click', () => {
+        render(<StarRating recipeId="recipe-1" />);
 
-    it('handles rating click', async () => {
-        render(<StarRating recipeId="recipe-1" />)
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]); // 5 stars
 
-        await waitFor(() => {
-            expect(getUserRating).toHaveBeenCalled()
-        })
+        expect(mockRateRecipe).toHaveBeenCalledWith(
+            { recipeId: 'recipe-1', rating: 5 },
+            expect.any(Object)
+        );
+    });
 
-        const stars = screen.getAllByRole('button')
-        fireEvent.click(stars[2]) // Click 3rd star (rating 3)
+    it('handles success', async () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onSuccess();
+        });
 
-        await waitFor(() => {
-            expect(upsertRating).toHaveBeenCalledWith('user-1', 'recipe-1', 3)
-        })
-    })
+        render(<StarRating recipeId="recipe-1" />);
 
-    it('does not allow interaction when readonly', async () => {
-        render(<StarRating recipeId="recipe-1" readonly rating={3} />)
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
 
-        const stars = screen.getAllByRole('button')
-        fireEvent.click(stars[4])
+        expect(mockShowSnackbar).toHaveBeenCalledWith("¡Calificación guardada!", "success");
+    });
 
-        expect(upsertRating).not.toHaveBeenCalled()
-        expect(stars[0]).toBeDisabled()
-    })
+    it('handles error', async () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onError(new Error('Failed'));
+        });
 
-    it('does not allow interaction when not logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: null })
-        render(<StarRating recipeId="recipe-1" />)
+        render(<StarRating recipeId="recipe-1" />);
 
-        const stars = screen.getAllByRole('button')
-        fireEvent.click(stars[2])
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
 
-        expect(upsertRating).not.toHaveBeenCalled()
-        expect(stars[0]).toBeDisabled()
-    })
+        expect(mockShowSnackbar).toHaveBeenCalledWith("Failed", "error");
+    });
 
-    it('handles error when fetching rating', async () => {
-        const consoleError = jest.spyOn(console, 'error').mockImplementation()
-            ; (getUserRating as jest.Mock).mockRejectedValue(new Error('Fetch failed'))
+    it('is disabled when readonly', () => {
+        render(<StarRating recipeId="recipe-1" readonly />);
+        const stars = screen.getAllByRole('button');
+        expect(stars[0]).toBeDisabled();
+    });
 
-        render(<StarRating recipeId="recipe-1" />)
+    it('is disabled when not authenticated', () => {
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        expect(stars[0]).toBeDisabled();
+    });
 
-        await waitFor(() => {
-            expect(consoleError).toHaveBeenCalledWith('Error fetching rating:', expect.any(Error))
-        })
+    it('is disabled when pending', () => {
+        (useRateRecipe as jest.Mock).mockReturnValue({ mutate: mockRateRecipe, isPending: true });
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        expect(stars[0]).toBeDisabled();
 
-        consoleError.mockRestore()
-    })
+        // Try to click
+        fireEvent.click(stars[0]);
+        expect(mockRateRecipe).not.toHaveBeenCalled();
+    });
 
-    it('reverts rating on save error', async () => {
-        const consoleError = jest.spyOn(console, 'error').mockImplementation()
-            ; (getUserRating as jest.Mock).mockResolvedValue(3)
-            ; (upsertRating as jest.Mock).mockRejectedValue(new Error('Save failed'))
+    it('handles hover states', () => {
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
 
-        render(<StarRating recipeId="recipe-1" />)
+        // Initial state
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
 
-        await waitFor(() => {
-            expect(getUserRating).toHaveBeenCalled()
-        })
+        // Hover
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).toHaveClass('fill-yellow-400');
 
-        const stars = screen.getAllByRole('button')
-        fireEvent.click(stars[4]) // Try to set rating to 5
+        // Leave
+        fireEvent.mouseLeave(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
 
-        await waitFor(() => {
-            expect(consoleError).toHaveBeenCalledWith('Error saving rating:', expect.any(Error))
-        })
+    it('does not hover when readonly', () => {
+        render(<StarRating recipeId="recipe-1" readonly />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
 
-        consoleError.mockRestore()
-    })
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
 
-    it('handles hover states when logged in', async () => {
-        render(<StarRating recipeId="recipe-1" />)
+    it('does not hover when logged out', () => {
+        (useAuth as jest.Mock).mockReturnValue({ profile: null });
+        render(<StarRating recipeId="recipe-1" />);
+        const stars = screen.getAllByRole('button');
+        const starIcon = stars[0].querySelector('.lucide-star');
 
-        await waitFor(() => {
-            expect(getUserRating).toHaveBeenCalled()
-        })
+        fireEvent.mouseEnter(stars[0]);
+        expect(starIcon).not.toHaveClass('fill-yellow-400');
+    });
 
-        const stars = screen.getAllByRole('button')
+    it('handles error without message', () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onError({});
+        });
 
-        // Hover over 4th star
-        fireEvent.mouseEnter(stars[3])
-        fireEvent.mouseLeave(stars[3])
+        render(<StarRating recipeId="recipe-1" />);
 
-        // Hover events should work (no errors)
-        expect(stars[3]).toBeInTheDocument()
-    })
-    it('does not allow interaction when recipeId is missing', () => {
-        render(<StarRating />) // No recipeId
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
 
-        const stars = screen.getAllByRole('button')
-        fireEvent.click(stars[2])
+        expect(mockShowSnackbar).toHaveBeenCalledWith("Error al guardar calificación", "error");
+    });
 
-        expect(upsertRating).not.toHaveBeenCalled()
-    })
-})
+    it('calls onRatingChange if provided', () => {
+        const onRatingChange = jest.fn();
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onSuccess();
+        });
+
+        render(<StarRating recipeId="recipe-1" onRatingChange={onRatingChange} />);
+
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
+
+        expect(onRatingChange).toHaveBeenCalledWith(5);
+    });
+
+    it('does not crash if onRatingChange is undefined', () => {
+        mockRateRecipe.mockImplementation((variables, options) => {
+            options.onSuccess();
+        });
+
+        render(<StarRating recipeId="recipe-1" />);
+
+        const stars = screen.getAllByRole('button');
+        fireEvent.click(stars[4]);
+
+        // Should not throw
+        expect(mockShowSnackbar).toHaveBeenCalledWith("¡Calificación guardada!", "success");
+    });
+});

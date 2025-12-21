@@ -1,14 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { AuthProvider, useAuth } from '../AuthContext'
 import { useFirebaseAuth } from '@/features/auth/hooks/useAuth'
+import { useProfile } from '@/hooks/queries/useProfile'
 
 // Mock dependencies
 jest.mock('@/features/auth/hooks/useAuth', () => ({
     useFirebaseAuth: jest.fn(),
 }))
 
-// Mock fetch
-global.fetch = jest.fn()
+jest.mock('@/hooks/queries/useProfile', () => ({
+    useProfile: jest.fn(),
+}))
 
 describe('AuthContext', () => {
     beforeEach(() => {
@@ -18,6 +20,10 @@ describe('AuthContext', () => {
                 loading: true,
                 loginWithGoogle: jest.fn(),
                 logout: jest.fn(),
+            })
+            ; (useProfile as jest.Mock).mockReturnValue({
+                data: null,
+                isLoading: false,
             })
     })
 
@@ -36,10 +42,20 @@ describe('AuthContext', () => {
         expect(screen.getByText('Loading')).toBeInTheDocument()
     })
 
-    it('fetches supabase user when firebase user is present', async () => {
+    it('fetches profile when firebase user is present', async () => {
         const mockUser = {
             uid: '123',
-            getIdToken: jest.fn().mockResolvedValue('token'),
+            email: 'test@example.com',
+            displayName: 'Test User',
+            photoURL: 'photo.jpg',
+        }
+
+        const mockProfile = {
+            id: '1',
+            firebase_uid: '123',
+            email: 'test@example.com',
+            full_name: 'Test Profile',
+            avatar_url: 'avatar.jpg',
         }
 
             ; (useFirebaseAuth as jest.Mock).mockReturnValue({
@@ -49,14 +65,20 @@ describe('AuthContext', () => {
                 logout: jest.fn(),
             })
 
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                json: jest.fn().mockResolvedValue({ user: { id: '123', full_name: 'Test User' } }),
+            ; (useProfile as jest.Mock).mockReturnValue({
+                data: mockProfile,
+                isLoading: false,
             })
 
         const TestComponent = () => {
-            const { supabaseUser, isLoading } = useAuth()
+            const { profile, isLoading, firebaseUser } = useAuth()
             if (isLoading) return <div>Loading...</div>
-            return <div>{supabaseUser?.full_name}</div>
+            return (
+                <div>
+                    <span data-testid="profile-name">{profile?.full_name}</span>
+                    <span data-testid="firebase-email">{firebaseUser?.email}</span>
+                </div>
+            )
         }
 
         render(
@@ -66,14 +88,11 @@ describe('AuthContext', () => {
         )
 
         await waitFor(() => {
-            expect(screen.getByText('Test User')).toBeInTheDocument()
+            expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile')
+            expect(screen.getByTestId('firebase-email')).toHaveTextContent('test@example.com')
         })
 
-        expect(global.fetch).toHaveBeenCalledWith('/api/me', expect.objectContaining({
-            headers: expect.objectContaining({
-                'Authorization': 'Bearer token'
-            })
-        }))
+        expect(useProfile).toHaveBeenCalledWith('123')
     })
 
     it('handles logout', async () => {
@@ -85,9 +104,9 @@ describe('AuthContext', () => {
         })
 
         const TestComponent = () => {
-            const { supabaseUser, isLoading } = useAuth()
+            const { profile, isLoading } = useAuth()
             if (isLoading) return <div>Loading...</div>
-            return <div>{supabaseUser ? 'Logged In' : 'Logged Out'}</div>
+            return <div>{profile ? 'Logged In' : 'Logged Out'}</div>
         }
 
         render(

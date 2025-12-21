@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { RecipeCategory, SupabaseUser } from "@/types";
+import { RecipeCategory, Profile } from "@/types";
 import { getUsersWithRecipes } from "@/lib/api/users";
 import { UserSelect } from "./UserSelect";
 
@@ -18,7 +18,7 @@ interface FilterBarProps {
 export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [tags, setTags] = useState<{ id: string; name: string; type: string }[]>([]);
-    const [users, setUsers] = useState<SupabaseUser[]>([]);
+    const [users, setUsers] = useState<Profile[]>([]);
 
     // Active filters (applied)
     const [activeFilters, setActiveFilters] = useState({

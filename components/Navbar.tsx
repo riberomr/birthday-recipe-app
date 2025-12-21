@@ -11,7 +11,7 @@ import { useSnackbar } from "@/components/ui/Snackbar"
 import { useRouter } from "next/navigation"
 
 export function Navbar() {
-    const { user } = useAuth()
+    const { profile } = useAuth()
     const { showSnackbar } = useSnackbar()
     const router = useRouter()
 
@@ -34,7 +34,7 @@ export function Navbar() {
                         className="text-primary [@media(hover:hover)]:hover:text-primary/80 [@media(hover:hover)]:hover:bg-primary/10 min-h-[44px] min-w-[44px]"
                         aria-label="Ver favoritos"
                         onClick={() => {
-                            if (!user) {
+                            if (!profile) {
                                 showSnackbar("Debes iniciar sesión para ver tus favoritos", "error");
                             } else {
                                 router.push("/favorites");
@@ -44,7 +44,7 @@ export function Navbar() {
                         <Heart className="h-5 w-5 sm:mr-2" />
                         <span className="hidden sm:inline">Favoritos</span>
                     </Button>
-                    {user && (
+                    {profile && (
                         <Link href="/recipes/create">
                             <Button
                                 variant="ghost"

@@ -36,7 +36,8 @@ describe('UserMenu', () => {
     beforeEach(() => {
         jest.clearAllMocks()
             ; (useAuth as jest.Mock).mockReturnValue({
-                user: { displayName: 'John Doe', photoURL: 'photo.jpg' },
+                profile: { full_name: 'John Doe', avatar_url: 'photo.jpg' },
+                firebaseUser: { displayName: 'John Doe', photoURL: 'photo.jpg' },
                 logout: mockLogout,
             })
             ; (usePathname as jest.Mock).mockReturnValue('/')
@@ -49,19 +50,20 @@ describe('UserMenu', () => {
     })
 
     it('does not render when not logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: null })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: null, firebaseUser: null })
         render(<UserMenu />)
         expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
     })
 
     it('renders fallback photo and name', () => {
         ; (useAuth as jest.Mock).mockReturnValue({
-            user: { displayName: null, photoURL: null },
+            profile: { full_name: null, avatar_url: null },
+            firebaseUser: { displayName: null, photoURL: null },
             logout: mockLogout,
         })
         render(<UserMenu />)
         // Fallback is only for alt text, displayName span will be empty
-        expect(screen.getByRole('img')).toHaveAttribute('alt', 'User')
+        expect(screen.getByRole('img')).toHaveAttribute('alt', 'Usuario')
         expect(screen.getByRole('img')).toHaveAttribute('src', 'https://api.dicebear.com/7.x/avataaars/svg?seed=default')
     })
 

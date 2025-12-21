@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { renderWithClient } from '@/lib/test-utils'
+import { screen } from '@testing-library/react'
 import { RecipeCard } from '../RecipeCard'
 import { useAuth } from '../AuthContext'
 
@@ -8,6 +9,14 @@ jest.mock('../AuthContext', () => ({
 }))
 jest.mock('../FavoriteButton', () => ({
     FavoriteButton: ({ recipeId }: any) => <button data-testid="favorite-btn">Favorite {recipeId}</button>,
+}))
+// Mock StarRating to avoid inner hook issues, or just wrap with provider. 
+// Since we are using renderWithClient, StarRating should work if it uses hooks.
+// But StarRating uses useUserRating which calls API. We should probably mock StarRating to isolate RecipeCard test.
+// However, the error was "No QueryClient set", so wrapping should fix it.
+// Let's also mock StarRating to keep unit test isolated and avoid network calls.
+jest.mock('../StarRating', () => ({
+    StarRating: () => <div data-testid="star-rating">Star Rating</div>,
 }))
 
 const mockRecipe: any = {
@@ -28,11 +37,11 @@ const mockRecipe: any = {
 
 describe('RecipeCard', () => {
     beforeEach(() => {
-        ; (useAuth as jest.Mock).mockReturnValue({ supabaseUser: { id: 'user-1' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } })
     })
 
     it('renders recipe details', () => {
-        render(<RecipeCard recipe={mockRecipe} />)
+        renderWithClient(<RecipeCard recipe={mockRecipe} />)
 
         expect(screen.getByText('Delicious Cake')).toBeInTheDocument()
         expect(screen.getByText('A very yummy cake')).toBeInTheDocument()
@@ -42,19 +51,19 @@ describe('RecipeCard', () => {
     })
 
     it('renders image', () => {
-        render(<RecipeCard recipe={mockRecipe} />)
+        renderWithClient(<RecipeCard recipe={mockRecipe} />)
         const img = screen.getByRole('img')
         expect(img).toHaveAttribute('src', expect.stringContaining('cake.jpg'))
     })
 
     it('renders fallback when no image', () => {
         const recipeNoImage = { ...mockRecipe, image_url: null }
-        render(<RecipeCard recipe={recipeNoImage} />)
+        renderWithClient(<RecipeCard recipe={recipeNoImage} />)
         expect(screen.getByText('🥘')).toBeInTheDocument()
     })
 
     it('prevents event propagation on favorite button wrapper click', () => {
-        const { container } = render(<RecipeCard recipe={mockRecipe} />)
+        const { container } = renderWithClient(<RecipeCard recipe={mockRecipe} />)
 
         // Find the div wrapper with onClick handler
         const favoriteWrapper = container.querySelector('.absolute.top-2.right-2')
@@ -73,7 +82,7 @@ describe('RecipeCard', () => {
 
     it('renders default rating when no rating data', () => {
         const recipeNoRating = { ...mockRecipe, average_rating: null }
-        render(<RecipeCard recipe={recipeNoRating} />)
+        renderWithClient(<RecipeCard recipe={recipeNoRating} />)
 
         // Should render " ()" for the count part when rating is null
         expect(screen.getByText('()')).toBeInTheDocument()

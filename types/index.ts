@@ -18,7 +18,7 @@ export type Recipe = {
     ratings?: Rating[];
     average_rating?: AverageRating; // Calculated average rating
     tags?: Tag[];
-    profile?: SupabaseUser; // Author profile
+    profile?: Profile; // Author profile
 };
 
 export type RecipeCategory = {
@@ -56,8 +56,16 @@ export type Rating = {
     rating: number;
 };
 
-export type SupabaseUser = {
+export type FirebaseUser = {
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+    photoURL: string | null;
+};
+
+export type Profile = {
     id: string;
+    firebase_uid: string;
     email: string;
     updated_at: string;
     full_name?: string;
@@ -79,5 +87,18 @@ export type Favorite = {
     user_id: string;
     recipe_id: string;
     created_at: string;
+};
+
+export type Comment = {
+    id: string;
+    user_id: string;
+    recipe_id: string;
+    content: string;
+    image_url?: string | null;
+    created_at: string;
+    profiles?: {
+        full_name: string;
+        avatar_url: string;
+    };
 };
 

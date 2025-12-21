@@ -35,7 +35,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                             e.stopPropagation();
                         }}
                     >
-                        <FavoriteButton recipeId={recipe.id} size="sm" className="bg-background/80 backdrop-blur-sm [@media(hover:hover)]:hover:bg-background dark:bg-background/50 dark:[@media(hover:hover)]:hover:bg-background/70 min-h-[44px] min-w-[44px]" />
+                        <FavoriteButton recipe={recipe} size="sm" className="bg-background/80 backdrop-blur-sm [@media(hover:hover)]:hover:bg-background dark:bg-background/50 dark:[@media(hover:hover)]:hover:bg-background/70 min-h-[44px] min-w-[44px]" />
                     </div>
                 </div>
                 <CardHeader className="p-4 pb-2">
@@ -58,7 +58,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                         <span className="text-xs">{recipe.cook_time_minutes} min cook</span>
                     </div>
                     <div className="mt-1 flex justify-between items-center w-full">
-                        <StarRating rating={recipe.average_rating?.rating || 0} readonly size="sm" />
+                        <StarRating recipeId={recipe.id} readonly size="sm" />
                         <span className="text-xs text-muted-foreground">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
                     </div>
                 </CardFooter>

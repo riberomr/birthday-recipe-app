@@ -14,7 +14,7 @@ describe('/api/comments/create', () => {
     let mockSelect: jest.Mock
     let mockSingle: jest.Mock
     let getUserFromRequest: jest.Mock
-    let getSupabaseUserFromFirebaseUid: jest.Mock
+    let getProfileFromFirebase: jest.Mock
 
     beforeEach(() => {
         jest.resetModules()
@@ -37,12 +37,12 @@ describe('/api/comments/create', () => {
         }
 
         getUserFromRequest = jest.fn()
-        getSupabaseUserFromFirebaseUid = jest.fn()
+        getProfileFromFirebase = jest.fn()
 
         // Mock dependencies
         jest.doMock('@/lib/auth/requireAuth', () => ({
             getUserFromRequest,
-            getSupabaseUserFromFirebaseUid,
+            getProfileFromFirebase,
         }))
 
         jest.doMock('@supabase/supabase-js', () => ({
@@ -86,7 +86,7 @@ describe('/api/comments/create', () => {
 
     it('returns 400 if fields are missing', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         // Missing content and recipe_id
@@ -102,7 +102,7 @@ describe('/api/comments/create', () => {
 
     it('creates comment successfully (text only)', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('content', 'Great recipe!')
@@ -127,7 +127,7 @@ describe('/api/comments/create', () => {
 
     it('creates comment successfully with image', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('content', 'Look at this!')
@@ -154,7 +154,7 @@ describe('/api/comments/create', () => {
 
     it('returns 500 on upload error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ error: { message: 'Upload Failed' } })
 
@@ -177,7 +177,7 @@ describe('/api/comments/create', () => {
 
     it('rolls back image on db error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Upload succeeds
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
@@ -204,7 +204,7 @@ describe('/api/comments/create', () => {
 
     it('logs error if rollback fails', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Upload succeeds
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
@@ -259,7 +259,7 @@ describe('/api/comments/create', () => {
 
     it('handles db error without image upload', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // DB fails
         mockSingle.mockResolvedValue({ data: null, error: { message: 'DB Error' } })
@@ -282,7 +282,7 @@ describe('/api/comments/create', () => {
 
     it('handles unknown error message', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // DB fails with no message
         mockSingle.mockResolvedValue({ data: null, error: { message: '' } })

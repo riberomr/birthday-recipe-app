@@ -11,7 +11,7 @@ describe('/api/ratings', () => {
     let mockUpsert: jest.Mock
     let mockFrom: jest.Mock
     let getUserFromRequest: jest.Mock
-    let getSupabaseUserFromFirebaseUid: jest.Mock
+    let getProfileFromFirebase: jest.Mock
 
     beforeEach(() => {
         jest.resetModules()
@@ -21,12 +21,12 @@ describe('/api/ratings', () => {
         mockFrom = jest.fn().mockReturnValue({ upsert: mockUpsert })
 
         getUserFromRequest = jest.fn()
-        getSupabaseUserFromFirebaseUid = jest.fn()
+        getProfileFromFirebase = jest.fn()
 
         // Mock dependencies
         jest.doMock('@/lib/auth/requireAuth', () => ({
             getUserFromRequest,
-            getSupabaseUserFromFirebaseUid,
+            getProfileFromFirebase,
         }))
 
         jest.doMock('@supabase/supabase-js', () => ({
@@ -53,7 +53,7 @@ describe('/api/ratings', () => {
 
     it('returns 400 if fields are missing', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const request = new Request('http://localhost/api/ratings', {
             method: 'POST',
@@ -66,7 +66,7 @@ describe('/api/ratings', () => {
 
     it('upserts rating successfully', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const request = new Request('http://localhost/api/ratings', {
             method: 'POST',
@@ -85,7 +85,7 @@ describe('/api/ratings', () => {
 
     it('returns 500 on database error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockUpsert.mockResolvedValue({ error: { message: 'DB Error' } })
 
         const request = new Request('http://localhost/api/ratings', {

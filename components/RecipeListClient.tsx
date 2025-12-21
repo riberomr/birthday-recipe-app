@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Recipe, RecipeCategory } from "@/types"
 import { FilterBar } from "@/components/FilterBar"
 import { RecipeCard } from "@/components/RecipeCard"
 import { RecipeCardSkeleton } from "@/components/RecipeCardSkeleton"
 import { motion } from "framer-motion"
-import { getRecipes, RecipeFilters } from "@/lib/api/recipes"
+import { RecipeFilters } from "@/lib/api/recipes"
 import { useInView } from "framer-motion"
+import { useRecipes } from "@/hooks/queries/useRecipes"
 
 interface RecipeListClientProps {
     initialRecipes: Recipe[]
@@ -16,12 +17,6 @@ interface RecipeListClientProps {
 }
 
 export function RecipeListClient({ initialRecipes, initialTotal, categories }: RecipeListClientProps) {
-    const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes)
-    const [total, setTotal] = useState(initialTotal)
-    const [page, setPage] = useState(1)
-    const [loading, setLoading] = useState(false)
-    const [hasMore, setHasMore] = useState(initialRecipes.length < initialTotal)
-
     // Filters state
     const [filters, setFilters] = useState<RecipeFilters>({
         search: "",
@@ -32,67 +27,49 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
         user_id: ""
     })
 
-    // Reset when filters change
-    useEffect(() => {
-        const fetchFilteredRecipes = async () => {
-            setLoading(true)
-            setPage(1)
-            try {
-                const { recipes: newRecipes, total: newTotal } = await getRecipes(1, 6, filters)
-                setRecipes(newRecipes)
-                setTotal(newTotal)
-                setHasMore(newRecipes.length < newTotal)
-            } catch (error) {
-                console.error("Error filtering recipes:", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchFilteredRecipes()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters])
-
-    const loadMore = async () => {
-
-
-        setLoading(true)
-        const nextPage = page + 1
-        try {
-            const { recipes: newRecipes, total: newTotal } = await getRecipes(nextPage, 6, filters)
-            setRecipes(prev => [...prev, ...newRecipes])
-            setPage(nextPage)
-            setHasMore(recipes.length + newRecipes.length < newTotal)
-        } catch (error) {
-            console.error("Error loading more recipes:", error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+    } = useRecipes(filters)
 
     // Intersection Observer for infinite scroll
     const loaderRef = useRef(null)
     const isInView = useInView(loaderRef)
 
     useEffect(() => {
-        if (isInView && hasMore && !loading) {
-            loadMore()
+        if (isInView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isInView, hasMore, loading])
+    }, [isInView, hasNextPage, isFetchingNextPage, fetchNextPage])
+
+    // Flatten pages into a single array of recipes
+    const recipes = data ? data.pages.flatMap(page => page.recipes) : initialRecipes
+    // Use initial data if query is loading initially (though useRecipes handles this if we passed initialData, 
+    // but here we are just falling back to props if data is undefined which happens on first render if not hydrated)
+    // Actually, to properly use initial data with useInfiniteQuery we would need to pass it to the hook.
+    // For now, let's rely on the hook fetching. If we want to use initialRecipes as placeholder, we can do:
+    // But since filters might change, initialRecipes are only valid for empty filters.
+
+    // Let's just use the data from the hook. If it's loading and we have no data, show skeletons.
+    // If we want to show initialRecipes while loading, we can check if filters are empty.
+    const showInitial = !data && isLoading && Object.values(filters).every(v => !v || (Array.isArray(v) && v.length === 0))
+    const displayRecipes = showInitial ? initialRecipes : recipes
 
     return (
         <div className="space-y-6">
             <FilterBar categories={categories} onFilterChange={(newFilters: any) => setFilters(prev => ({ ...prev, ...newFilters }))} />
 
-            {recipes.length === 0 && !loading ? (
+            {displayRecipes.length === 0 && !isLoading ? (
                 <div className="text-center py-12 text-muted-foreground">
                     <p className="text-lg">No se encontraron recetas 🍰</p>
                     <p className="text-sm">Intenta con otra búsqueda</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recipes.map((recipe, index) => (
+                    {displayRecipes.map((recipe, index) => (
                         <motion.div
                             key={`${recipe.id}-${index}`}
                             initial={{ opacity: 0, y: 20 }}
@@ -103,7 +80,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
                         </motion.div>
                     ))}
 
-                    {loading && (
+                    {(isLoading || isFetchingNextPage) && (
                         <>
                             <RecipeCardSkeleton />
                             <RecipeCardSkeleton />
@@ -115,8 +92,8 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
 
             {/* Loader element for intersection observer */}
             <div ref={loaderRef} className="h-10 w-full flex justify-center items-center">
-                {hasMore && !loading && (
-                    <button onClick={loadMore} className="text-sm text-primary [@media(hover:hover)]:hover:underline">
+                {hasNextPage && !isFetchingNextPage && (
+                    <button onClick={() => fetchNextPage()} className="text-sm text-primary [@media(hover:hover)]:hover:underline">
                         Cargar más
                     </button>
                 )}

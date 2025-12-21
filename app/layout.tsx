@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { SnackbarProvider } from "@/components/ui/Snackbar";
 import { ModalProvider } from "@/lib/contexts/ModalContext";
 import { ModalRegistry } from "@/components/ModalRegistry";
+import Providers from "@/app/providers";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,19 +30,21 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <SnackbarProvider>
-              <ModalProvider>
-                <div className="min-h-screen flex flex-col">
-                  <Navbar />
-                  <div className="flex-1">
-                    {children}
+          <Providers>
+            <AuthProvider>
+              <SnackbarProvider>
+                <ModalProvider>
+                  <div className="min-h-screen flex flex-col">
+                    <Navbar />
+                    <div className="flex-1">
+                      {children}
+                    </div>
                   </div>
-                </div>
-                <ModalRegistry />
-              </ModalProvider>
-            </SnackbarProvider>
-          </AuthProvider>
+                  <ModalRegistry />
+                </ModalProvider>
+              </SnackbarProvider>
+            </AuthProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

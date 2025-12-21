@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { useAuth } from "@/components/AuthContext"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 import { deleteRecipe } from "@/lib/api/recipes"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -15,7 +15,7 @@ interface DeleteRecipeButtonProps {
 }
 
 export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProps) {
-    const { user, supabaseUser: profile } = useAuth()
+    const { profile } = useAuth()
     const router = useRouter()
     const deleteModal = useModal("delete-confirmation")
     const { showSnackbar } = useSnackbar()
@@ -25,7 +25,7 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
     // We need to check against the profile id that matches the firebase uid
     // But useAuth provides profile which should have the id.
 
-    if (!user || !profile || !ownerId) return null
+    if (!profile || !ownerId) return null
     if (profile.id !== ownerId) return null
 
     const handleDelete = async () => {

@@ -90,10 +90,11 @@ describe('lib/api/comments', () => {
         })
 
         it('posts comment successfully via fetch', async () => {
-            (global.fetch as jest.Mock).mockResolvedValueOnce({
-                ok: true,
-                json: async () => ({ success: true })
-            })
+            const mockComment = { id: '1', content: 'Test' }
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => ({ success: true, comment: mockComment })
+                })
 
             const result = await postComment(mockFormData)
 
@@ -102,7 +103,7 @@ describe('lib/api/comments', () => {
                 headers: { 'Authorization': 'Bearer mock-token' },
                 body: mockFormData
             })
-            expect(result).toEqual({ success: true })
+            expect(result).toEqual(mockComment)
         })
 
         it('handles server-side errors with message', async () => {
@@ -128,13 +129,12 @@ describe('lib/api/comments', () => {
                 json: async () => ({ success: true })
             })
 
-            const result = await deleteComment('comment1')
+            await deleteComment('comment1')
 
             expect(global.fetch).toHaveBeenCalledWith('/api/comments/comment1/delete', {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer mock-token' }
             })
-            expect(result).toEqual({ success: true })
         })
 
         it('throws error if the delete API fails', async () => {

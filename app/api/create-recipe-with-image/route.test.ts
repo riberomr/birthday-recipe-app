@@ -14,7 +14,7 @@ describe('/api/create-recipe-with-image', () => {
     let mockSelect: jest.Mock
     let mockSingle: jest.Mock
     let getUserFromRequest: jest.Mock
-    let getSupabaseUserFromFirebaseUid: jest.Mock
+    let getProfileFromFirebase: jest.Mock
 
     beforeEach(() => {
         jest.resetModules()
@@ -51,12 +51,12 @@ describe('/api/create-recipe-with-image', () => {
         }
 
         getUserFromRequest = jest.fn()
-        getSupabaseUserFromFirebaseUid = jest.fn()
+        getProfileFromFirebase = jest.fn()
 
         // Mock dependencies
         jest.doMock('@/lib/auth/requireAuth', () => ({
             getUserFromRequest,
-            getSupabaseUserFromFirebaseUid,
+            getProfileFromFirebase,
         }))
 
         jest.doMock('@supabase/supabase-js', () => ({
@@ -84,7 +84,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('creates recipe successfully with all data', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('title', 'Yummy Cake')
@@ -135,7 +135,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('returns 500 on upload error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ error: { message: 'Upload Failed' } })
 
@@ -161,7 +161,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('rolls back image on db error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Upload succeeds
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
@@ -206,7 +206,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('logs error if rollback fails', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
 
@@ -259,7 +259,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('creates recipe successfully without file (using existing url)', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('title', 'No File Recipe')
@@ -287,7 +287,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('rolls back if related data insert fails', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
 
@@ -328,7 +328,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('handles step insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
 
@@ -360,7 +360,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('handles nutrition insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
 
         mockFrom.mockImplementation((table) => {
@@ -390,7 +390,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('handles tags insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'path/to/image' }, error: null })
 
         mockFrom.mockImplementation((table) => {
@@ -420,7 +420,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('does not attempt rollback if no image uploaded', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Mock DB failure
         mockInsert.mockReturnValue({
@@ -449,7 +449,7 @@ describe('/api/create-recipe-with-image', () => {
 
     it('handles unknown error without message', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Mock DB failure with object having no message
         mockInsert.mockReturnValue({

@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth'
+import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth'
 
 export async function POST(request: Request) {
     // Initialize Supabase client with Service Role Key for backend operations
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Get User from Supabase (sync if needed)
-        const user = await getSupabaseUserFromFirebaseUid(
+        const user = await getProfileFromFirebase(
             decodedToken.uid,
             decodedToken.email,
             decodedToken.name,

@@ -1,10 +1,10 @@
 import { supabase } from "../supabase/client"
-import { SupabaseUser } from "@/types"
+import { Profile } from "@/types"
 
-export async function getUsers(): Promise<SupabaseUser[]> {
+export async function getUsers(): Promise<Profile[]> {
     const { data, error } = await supabase
         .from("profiles")
-        .select("id, email, full_name, avatar_url, updated_at")
+        .select("id, firebase_uid, email, full_name, avatar_url, updated_at")
         .order("full_name")
 
     if (error) {
@@ -16,12 +16,13 @@ export async function getUsers(): Promise<SupabaseUser[]> {
 }
 
 export async function getUsersWithRecipes(): Promise<
-    Array<SupabaseUser & { recipe_count: number }>
+    Array<Profile & { recipe_count: number }>
 > {
     const { data, error } = await supabase
         .from("profiles")
         .select(`
       id,
+      firebase_uid,
       email,
       full_name,
       avatar_url,
@@ -37,6 +38,7 @@ export async function getUsersWithRecipes(): Promise<
 
     const usersWithRecipes = (data || []).map(user => ({
         id: user.id,
+        firebase_uid: user.firebase_uid,
         email: user.email,
         full_name: user.full_name,
         avatar_url: user.avatar_url,
@@ -45,4 +47,35 @@ export async function getUsersWithRecipes(): Promise<
     }))
 
     return usersWithRecipes.filter(user => user.recipe_count > 0)
+}
+
+export async function getUserProfile(firebaseUid: string): Promise<Profile | null> {
+    const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("firebase_uid", firebaseUid)
+        .single()
+
+    if (error) {
+        console.error("Error fetching user profile:", error)
+        return null
+    }
+
+    return data
+}
+
+export async function updateUserProfile(firebaseUid: string, updates: Partial<Profile>): Promise<Profile | null> {
+    const { data, error } = await supabase
+        .from("profiles")
+        .update(updates)
+        .eq("firebase_uid", firebaseUid)
+        .select()
+        .single()
+
+    if (error) {
+        console.error("Error updating user profile:", error)
+        throw error
+    }
+
+    return data
 }

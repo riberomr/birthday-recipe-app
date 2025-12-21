@@ -17,7 +17,7 @@ describe('/api/update-recipe-with-image', () => {
     let mockDelete: jest.Mock
     let mockEq: jest.Mock
     let getUserFromRequest: jest.Mock
-    let getSupabaseUserFromFirebaseUid: jest.Mock
+    let getProfileFromFirebase: jest.Mock
 
     beforeEach(() => {
         jest.resetModules()
@@ -46,12 +46,12 @@ describe('/api/update-recipe-with-image', () => {
         }
 
         getUserFromRequest = jest.fn()
-        getSupabaseUserFromFirebaseUid = jest.fn()
+        getProfileFromFirebase = jest.fn()
 
         // Mock dependencies
         jest.doMock('@/lib/auth/requireAuth', () => ({
             getUserFromRequest,
-            getSupabaseUserFromFirebaseUid,
+            getProfileFromFirebase,
         }))
 
         jest.doMock('@supabase/supabase-js', () => ({
@@ -79,7 +79,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('returns 400 if recipe ID is missing', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         // Missing recipe_id
@@ -95,7 +95,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('returns 404 if recipe not found', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockSingle.mockResolvedValue({ data: null, error: null })
 
@@ -113,7 +113,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('returns 403 if user does not own recipe', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockSingle.mockResolvedValue({ data: { id: 'rec1', user_id: 'other_user' }, error: null })
 
@@ -131,7 +131,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('updates recipe successfully with full data', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('recipe_id', 'rec1')
@@ -160,7 +160,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('returns 500 on upload error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockStorage.from().upload.mockResolvedValue({ error: { message: 'Upload Failed' } })
 
@@ -186,7 +186,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('rolls back image on db error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         // Mock Date and Math for predictable filename
         jest.spyOn(Date, 'now').mockReturnValue(1234567890)
@@ -233,7 +233,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('logs error if rollback fails', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'new_image' }, error: null })
         mockUpdate.mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: { message: 'DB Error' } }) })
         mockStorage.from().remove.mockRejectedValue(new Error('Rollback Error'))
@@ -278,7 +278,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('updates recipe successfully keeping old image', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('recipe_id', 'rec1')
@@ -307,7 +307,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('updates recipe successfully clearing image', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         const formData = new FormData()
         formData.append('recipe_id', 'rec1')
@@ -335,7 +335,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles related data insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockFrom.mockImplementation((table) => {
             if (table === 'recipes') return {
@@ -371,7 +371,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles old image deletion failure', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockStorage.from().upload.mockResolvedValue({ data: { path: 'new_image' }, error: null })
         mockStorage.from().remove.mockResolvedValue({ error: { message: 'Delete Error' } })
 
@@ -395,7 +395,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles unknown error without message', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
         mockUpdate.mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: {} }) })
 
         const formData = new FormData()
@@ -418,7 +418,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles steps insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockFrom.mockImplementation((table) => {
             if (table === 'recipes') return {
@@ -453,7 +453,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles nutrition insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockFrom.mockImplementation((table) => {
             if (table === 'recipes') return {
@@ -488,7 +488,7 @@ describe('/api/update-recipe-with-image', () => {
 
     it('handles tags insert error', async () => {
         getUserFromRequest.mockResolvedValue({ uid: '123' })
-        getSupabaseUserFromFirebaseUid.mockResolvedValue({ id: 'user1' })
+        getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
 
         mockFrom.mockImplementation((table) => {
             if (table === 'recipes') return {

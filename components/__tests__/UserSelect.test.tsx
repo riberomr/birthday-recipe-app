@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { UserSelect } from '../UserSelect'
-import { SupabaseUser } from '@/types'
+import { Profile } from '@/types'
 
 // Mocking ResizeObserver
 global.ResizeObserver = class ResizeObserver {
@@ -17,7 +17,7 @@ Element.prototype.hasPointerCapture = jest.fn()
 const mockUsers = [
     { id: '1', full_name: 'User 1', avatar_url: 'url1' },
     { id: '2', full_name: 'User 2', avatar_url: 'url2' },
-] as SupabaseUser[]
+] as Profile[]
 
 describe('UserSelect', () => {
     it('renders correctly with users', () => {

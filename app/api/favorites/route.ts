@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getUserFromRequest, getSupabaseUserFromFirebaseUid } from '@/lib/auth/requireAuth';
+import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth';
 import { getAverageRating } from '@/lib/utils';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const user = await getSupabaseUserFromFirebaseUid(decodedToken.uid, decodedToken.email);
+        const user = await getProfileFromFirebase(decodedToken.uid, decodedToken.email);
         const { recipeId } = await request.json();
 
         if (!recipeId) {

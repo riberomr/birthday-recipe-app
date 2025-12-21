@@ -30,7 +30,7 @@ describe('Navbar', () => {
 
     beforeEach(() => {
         jest.clearAllMocks()
-            ; (useAuth as jest.Mock).mockReturnValue({ user: null })
+            ; (useAuth as jest.Mock).mockReturnValue({ profile: null })
             ; (useSnackbar as jest.Mock).mockReturnValue({ showSnackbar: mockShowSnackbar })
     })
 
@@ -53,14 +53,14 @@ describe('Navbar', () => {
     })
 
     it('navigates to favorites if logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: { id: '1' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: '1' } })
         render(<Navbar />)
         fireEvent.click(screen.getByText('Favoritos'))
         expect(mockPush).toHaveBeenCalledWith('/favorites')
     })
 
     it('shows create recipe button if logged in', () => {
-        ; (useAuth as jest.Mock).mockReturnValue({ user: { id: '1' } })
+        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: '1' } })
         render(<Navbar />)
         expect(screen.getByText('Nueva Receta')).toBeInTheDocument()
     })

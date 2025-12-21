@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/components/AuthContext"
 import { LogIn } from "lucide-react"
-import { useModal } from "@/hooks/useModal"
+import { useModal } from "@/hooks/ui/useModal"
 import { UserMenu } from "@/components/UserMenu"
 
 export function LoginButton() {
-    const { user, login, isLoading } = useAuth()
+    const { profile, login, isLoading } = useAuth()
     const { open } = useModal('login-confirmation')
 
     const handleLoginClick = () => {
@@ -22,7 +22,7 @@ export function LoginButton() {
         return <Button variant="ghost" disabled>Loading...</Button>
     }
 
-    if (user) {
+    if (profile) {
         return <UserMenu />
     }
 
