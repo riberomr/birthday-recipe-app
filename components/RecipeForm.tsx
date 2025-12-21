@@ -137,7 +137,6 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        console.log("handleSubmit")
         e.preventDefault()
         if (!firebaseUser) {
             showSnackbar("Debes iniciar sesión para crear una receta", "error")

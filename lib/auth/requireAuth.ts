@@ -8,7 +8,6 @@ export async function getUserFromRequest(req: Request) {
     const token = authHeader.replace("Bearer ", "");
     try {
         const decodedToken = await adminAuth.verifyIdToken(token);
-        console.log(decodedToken, "decodedToken");
         return decodedToken;
     } catch (error) {
         console.error("Error verifying token:", error);
