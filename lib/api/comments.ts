@@ -1,28 +1,23 @@
-import { supabase } from "@/lib/supabase/client";
+
 import { auth } from "@/lib/firebase/client";
 import { Comment } from "@/types";
 
 export async function getComments(recipeId: string, page: number = 1, limit: number = 5): Promise<{ comments: Comment[], total: number }> {
-    const from = (page - 1) * limit
-    const to = from + limit - 1
+    const params = new URLSearchParams({
+        recipeId,
+        page: page.toString(),
+        limit: limit.toString()
+    });
 
-    const { data, error, count } = await supabase
-        .from("comments")
-        .select(`
-            *,
-            profiles (
-                full_name,
-                avatar_url
-            )
-        `, { count: 'exact' })
-        .eq("recipe_id", recipeId)
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false })
-        .range(from, to)
+    const response = await fetch(`/api/comments?${params.toString()}`);
 
-    if (error) throw error;
+    if (!response.ok) {
+        console.error("Error fetching comments");
+        return { comments: [], total: 0 };
+    }
 
-    return { comments: (data as any[]) || [], total: count || 0 };
+    const { data } = await response.json();
+    return { comments: data.comments || [], total: data.total || 0 };
 }
 
 export async function postComment(formData: FormData): Promise<Comment> {

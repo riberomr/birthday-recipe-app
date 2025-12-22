@@ -1,32 +1,34 @@
 import { auth } from "@/lib/firebase/client";
-import { supabase } from "@/lib/supabase/client";
 
 export async function getRecipeRating(recipeId: string) {
-    const { data, error } = await supabase
-        .from("ratings")
-        .select("rating")
-        .eq("recipe_id", recipeId);
+    const response = await fetch(`/api/ratings/${recipeId}`);
 
-    if (error) throw error;
+    if (!response.ok) {
+        console.error("Error fetching recipe rating");
+        return { average: 0, count: 0 };
+    }
 
-    const ratings = data || [];
-    const count = ratings.length;
-    const average = count > 0
-        ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / count
-        : 0;
-
-    return { average, count };
+    const { data } = await response.json();
+    return data || { average: 0, count: 0 };
 }
 
 export async function getUserRating(userId: string, recipeId: string) {
-    const { data, error } = await supabase
-        .from("ratings")
-        .select("rating")
-        .eq("recipe_id", recipeId)
-        .eq("user_id", userId)
-        .single();
+    const user = auth.currentUser;
+    if (!user) return 0;
 
-    if (error && error.code !== 'PGRST116') throw error;
+    const token = await user.getIdToken();
+    const response = await fetch(`/api/ratings/${recipeId}/user`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        // If 404 or other error, return 0
+        return 0;
+    }
+
+    const { data } = await response.json();
     return data?.rating || 0;
 }
 
@@ -35,13 +37,13 @@ export async function upsertRating(recipeId: string, rating: number) {
     if (!user) throw new Error("User not authenticated");
     const token = await user.getIdToken();
 
-    const response = await fetch('/api/ratings', {
+    const response = await fetch(`/api/ratings/${recipeId}/user`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ recipeId, rating })
+        body: JSON.stringify({ rating })
     });
 
     if (!response.ok) {
