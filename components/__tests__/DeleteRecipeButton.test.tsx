@@ -94,7 +94,7 @@ describe("DeleteRecipeButton", () => {
 
         // Simulate modal confirm callback
         const modalConfig = mockOpen.mock.calls[0][0]
-        await modalConfig.onConfirm()
+        await expect(modalConfig.onConfirm()).rejects.toThrow("Failed")
 
         expect(deleteRecipe).toHaveBeenCalledWith("recipe123")
         expect(mockShowSnackbar).toHaveBeenCalledWith("Error al eliminar la receta", "error")

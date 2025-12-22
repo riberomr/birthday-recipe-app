@@ -35,6 +35,7 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
         } catch (error) {
             console.error("Error deleting recipe:", error)
             showSnackbar("Error al eliminar la receta", "error")
+            throw error
         }
     }
 

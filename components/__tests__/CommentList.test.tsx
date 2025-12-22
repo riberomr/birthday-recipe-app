@@ -220,7 +220,7 @@ describe('CommentList', () => {
 
         fireEvent.click(screen.getByLabelText('Eliminar comentario'));
         const { onConfirm } = mockOpenDeleteModal.mock.calls[0][0];
-        await onConfirm();
+        await expect(onConfirm()).rejects.toThrow("Delete failed");
 
         expect(mockShowSnackbar).toHaveBeenCalledWith('Delete failed', 'error');
     });
