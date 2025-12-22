@@ -10,18 +10,18 @@ export async function getComments(recipeId: string, page: number = 1, limit: num
         limit: limit.toString()
     });
 
-    const response = await fetch(`${getBaseUrl()}/api/comments?${params.toString()}`);
-
-    if (!response.ok) {
-        console.error("Error fetching comments");
-        return { comments: [], total: 0 };
-    }
-
     try {
+        const response = await fetch(`${getBaseUrl()}/api/comments?${params.toString()}`);
+
+        if (!response.ok) {
+            console.error("Error fetching comments");
+            return { comments: [], total: 0 };
+        }
+
         const { data } = await response.json();
         return { comments: data.comments || [], total: data.total || 0 };
     } catch (error) {
-        console.error("Error parsing comments response:", error);
+        console.error("Error fetching or parsing comments:", error);
         return { comments: [], total: 0 };
     }
 }
@@ -34,26 +34,30 @@ export async function postComment(formData: FormData): Promise<Comment> {
 
     const token = await user.getIdToken();
 
-    const response = await fetch(`${getBaseUrl()}/api/comments/create`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-    });
-
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const response = await fetch(`${getBaseUrl()}/api/comments/create`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error al publicar comentario');
-    }
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    return result.comment;
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al publicar comentario');
+        }
+
+        return result.comment;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error al publicar comentario');
+    }
 }
 
 export async function deleteComment(id: string): Promise<void> {
@@ -61,21 +65,25 @@ export async function deleteComment(id: string): Promise<void> {
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`${getBaseUrl()}/api/comments/${id}/delete`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const response = await fetch(`${getBaseUrl()}/api/comments/${id}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al eliminar el comentario');
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al eliminar el comentario');
+        }
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al eliminar el comentario');
     }
 }

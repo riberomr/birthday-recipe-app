@@ -13,7 +13,15 @@ export async function GET(request: Request) {
         }
 
         const decodedToken = await getUserFromRequest(request);
-        // Optional: Verify token matches userId if privacy is required.
+        console.log(decodedToken, "decodedToken");
+        if (!decodedToken) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const user = await getProfileFromFirebase(decodedToken.uid, decodedToken.email);
+        if (!user || user.id !== userId) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
 
         const { data, error } = await supabaseAdmin
             .from("favorites")

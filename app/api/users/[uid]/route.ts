@@ -42,12 +42,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ui
         }
         // Remove fields that must not be user-editable
         const forbiddenFields = ["id", "created_at", "firebase_uid"];
-        const safeUpdates: Record<string, unknown> = { ...updates };
-        for (const field of forbiddenFields) {
-            if (field in safeUpdates) {
-                delete (safeUpdates as any)[field];
-            }
-        }
+        const safeUpdates: Record<string, unknown> = Object.fromEntries(
+            Object.entries(updates).filter(([key]) => !forbiddenFields.includes(key))
+        );
         // If nothing remains after sanitization, there's nothing to update
         if (Object.keys(safeUpdates).length === 0) {
             return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });

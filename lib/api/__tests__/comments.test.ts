@@ -55,7 +55,7 @@ describe('lib/api/comments', () => {
             expect(result).toEqual({ comments: [], total: 0 })
         })
 
-        it('returns empty result on invalid JSON', async () => {
+        it('returns empty comments and 0 total on invalid JSON', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValue({
                 ok: true,
                 json: async () => { throw new Error('Invalid JSON') }
@@ -63,7 +63,7 @@ describe('lib/api/comments', () => {
 
             const result = await getComments('recipe1')
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing comments response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing comments:', expect.any(Error))
             expect(result).toEqual({ comments: [], total: 0 })
         })
 
@@ -132,6 +132,12 @@ describe('lib/api/comments', () => {
 
             await expect(postComment(mockFormData)).rejects.toThrow('Error al publicar comentario')
         })
+
+        it('throws default error message on non-Error rejection', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
+
+            await expect(postComment(mockFormData)).rejects.toThrow('Error al publicar comentario')
+        })
     })
 
     describe('deleteComment', () => {
@@ -139,6 +145,24 @@ describe('lib/api/comments', () => {
             // @ts-ignore
             auth.currentUser = null
             await expect(deleteComment('comment1')).rejects.toThrow('Usuario no autenticado')
+        })
+
+        it('throws generic error on unknown error', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(deleteComment('comment1')).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on non-Error rejection', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
+
+            await expect(deleteComment('comment1')).rejects.toThrow('Error desconocido al eliminar el comentario')
+        })
+
+        it('throws default error message on unknown error without message', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error())
+
+            await expect(deleteComment('comment1')).rejects.toThrow('Error desconocido al eliminar el comentario')
         })
 
         it('deletes comment successfully', async () => {

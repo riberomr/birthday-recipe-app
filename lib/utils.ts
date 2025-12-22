@@ -1,12 +1,13 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import imageCompression from 'browser-image-compression'
+import { Rating } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export function getAverageRating(ratings: any[]): { rating: number, count: number } {
+export function getAverageRating(ratings: Rating[]): { rating: number, count: number } {
     if (!ratings || ratings.length === 0) {
         return { rating: 0, count: 0 };
     }
@@ -54,8 +55,12 @@ export async function compressImage(file: File) {
     return compressedFile
 }
 
-export function getBaseUrl() {
+export const BASE_URL = (() => {
     if (typeof window !== 'undefined') return '';
     if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
     return `http://localhost:${process.env.PORT ?? 3000}`;
+})();
+
+export function getBaseUrl() {
+    return BASE_URL;
 }

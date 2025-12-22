@@ -3,16 +3,16 @@ import { auth } from "@/lib/firebase/client";
 import { getBaseUrl } from "@/lib/utils";
 
 export async function getCategories(): Promise<RecipeCategory[]> {
-    const response = await fetch(`${getBaseUrl()}/api/recipes/categories`);
-    if (!response.ok) {
-        console.error("Error fetching categories");
-        return [];
-    }
     try {
+        const response = await fetch(`${getBaseUrl()}/api/recipes/categories`);
+        if (!response.ok) {
+            console.error("Error fetching categories");
+            return [];
+        }
         const { data } = await response.json();
         return data || [];
     } catch (error) {
-        console.error("Error parsing categories response:", error);
+        console.error("Error fetching or parsing categories:", error);
         return [];
     }
 }
@@ -42,37 +42,35 @@ export async function getRecipes(
     if (filters.tags && filters.tags.length > 0) params.append('tags', filters.tags.join(','));
     if (filters.user_id) params.append('user_id', filters.user_id);
 
-    if (filters.user_id) params.append('user_id', filters.user_id);
-
-    const response = await fetch(`${getBaseUrl()}/api/recipes?${params.toString()}`);
-
-    if (!response.ok) {
-        console.error("Error fetching recipes");
-        return { recipes: [], total: 0 };
-    }
-
     try {
+        const response = await fetch(`${getBaseUrl()}/api/recipes?${params.toString()}`);
+
+        if (!response.ok) {
+            console.error("Error fetching recipes");
+            return { recipes: [], total: 0 };
+        }
+
         const { data } = await response.json();
         return { recipes: data.recipes || [], total: data.total || 0 };
     } catch (error) {
-        console.error("Error parsing recipes response:", error);
+        console.error("Error fetching or parsing recipes:", error);
         return { recipes: [], total: 0 };
     }
 }
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
-    const response = await fetch(`${getBaseUrl()}/api/recipes/${id}`);
-
-    if (!response.ok) {
-        console.error("Error fetching recipe");
-        return null;
-    }
-
     try {
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}`);
+
+        if (!response.ok) {
+            console.error("Error fetching recipe");
+            return null;
+        }
+
         const { data } = await response.json();
         return data;
     } catch (error) {
-        console.error("Error parsing recipe response:", error);
+        console.error("Error fetching or parsing recipe:", error);
         return null;
     }
 }
@@ -81,18 +79,18 @@ type RecipeCommunityPhoto = {
     image_url: string
 }
 export async function getRecipeCommunityPhotos(recipeId: string): Promise<RecipeCommunityPhoto[] | null> {
-    const response = await fetch(`${getBaseUrl()}/api/recipes/${recipeId}/photos`);
-
-    if (!response.ok) {
-        console.error("Error fetching community photos");
-        return null;
-    }
-
     try {
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${recipeId}/photos`);
+
+        if (!response.ok) {
+            console.error("Error fetching community photos");
+            return null;
+        }
+
         const { data } = await response.json();
         return data;
     } catch (error) {
-        console.error("Error parsing community photos response:", error);
+        console.error("Error fetching or parsing community photos:", error);
         return null;
     }
 }
@@ -100,28 +98,33 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
 export async function createRecipe(formData: FormData) {
     const user = auth.currentUser;
     if (!user) throw new Error("Usuario no autenticado");
-    const token = await user.getIdToken();
 
-    const response = await fetch('/api/create-recipe-with-image', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-    });
 
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const token = await user.getIdToken();
+        const response = await fetch(`${getBaseUrl()}/api/create-recipe-with-image`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al crear la receta');
-    }
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    return result;
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al crear la receta');
+        }
+
+        return result;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al crear la receta');
+    }
 }
 
 export async function updateRecipe(recipeId: string, formData: FormData) {
@@ -132,26 +135,30 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
     // Append recipe_id to formData
     formData.append('recipe_id', recipeId);
 
-    const response = await fetch('/api/update-recipe-with-image', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-    });
-
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const response = await fetch(`${getBaseUrl()}/api/update-recipe-with-image`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al actualizar la receta');
-    }
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    return result;
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al actualizar la receta');
+        }
+
+        return result;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al actualizar la receta');
+    }
 }
 
 /**
@@ -173,25 +180,29 @@ export async function deleteRecipe(id: string) {
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`/api/recipes/${id}/delete`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al eliminar la receta');
-    }
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    return result;
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al eliminar la receta');
+        }
+
+        return result;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al eliminar la receta');
+    }
 }
 
 /**
@@ -213,24 +224,28 @@ export async function deleteRecipePermanently(id: string) {
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`/api/recipes/${id}/permanent-delete`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    let result;
     try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error('Error al procesar la respuesta del servidor');
-    }
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}/permanent-delete`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al eliminar la receta permanentemente');
-    }
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    return result;
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al eliminar la receta permanentemente');
+        }
+
+        return result;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al eliminar la receta permanentemente');
+    }
 }
 

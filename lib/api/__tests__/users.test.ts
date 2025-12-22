@@ -70,7 +70,7 @@ describe('lib/api/users', () => {
 
             const result = await getUsers()
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing users response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing users:', expect.any(Error))
             expect(result).toEqual([])
         })
     })
@@ -118,7 +118,7 @@ describe('lib/api/users', () => {
 
             const result = await getUsersWithRecipes()
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing users with recipes response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing users with recipes:', expect.any(Error))
             expect(result).toEqual([])
         })
     })
@@ -156,7 +156,7 @@ describe('lib/api/users', () => {
 
             const result = await getUserProfile('fb1')
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing user profile response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing user profile:', expect.any(Error))
             expect(result).toBeNull()
         })
     })
@@ -179,6 +179,18 @@ describe('lib/api/users', () => {
                 })
             }))
             expect(result).toEqual(mockUser)
+        })
+
+        it('throws generic error on unknown error', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(updateUserProfile('fb1', {})).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on unknown error without message', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error())
+
+            await expect(updateUserProfile('fb1', {})).rejects.toThrow('Error updating user profile')
         })
 
         it('throws error on update failure', async () => {

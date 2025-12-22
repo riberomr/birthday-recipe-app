@@ -41,6 +41,7 @@ describe('app/api/favorites/route', () => {
             });
 
             (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
             const request = new Request('http://localhost/api/favorites?userId=user-1');
             const response = await GET(request);
@@ -49,6 +50,25 @@ describe('app/api/favorites/route', () => {
             expect(supabaseAdmin.from).toHaveBeenCalledWith('favorites');
             expect(json).toHaveLength(1);
             expect(json[0].average_rating).toEqual({ count: 1, rating: 5 });
+        });
+
+        it('returns empty array if no data found', async () => {
+            const mockOrder = jest.fn().mockResolvedValue({ data: null, error: null });
+
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                order: mockOrder
+            });
+
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(json).toEqual([]);
         });
 
         it('returns error on failure', async () => {
@@ -61,6 +81,7 @@ describe('app/api/favorites/route', () => {
             });
 
             (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
             const request = new Request('http://localhost/api/favorites?userId=user-1');
             const response = await GET(request);
@@ -77,6 +98,29 @@ describe('app/api/favorites/route', () => {
 
             expect(response.status).toBe(400);
             expect(json).toEqual({ error: 'Missing userId' });
+        });
+
+        it('returns 401 if not authenticated', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue(null);
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(401);
+            expect(json).toEqual({ error: 'Unauthorized' });
+        });
+
+        it('returns 403 if user is forbidden', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'other-user' });
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(403);
+            expect(json).toEqual({ error: 'Forbidden' });
         });
     });
 

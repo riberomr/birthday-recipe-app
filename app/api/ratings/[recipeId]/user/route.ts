@@ -56,8 +56,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ rec
         const user = await getProfileFromFirebase(decodedToken.uid, decodedToken.email);
         const { rating } = await request.json();
 
-        if (typeof rating !== 'number') {
-            return NextResponse.json({ error: 'Missing rating' }, { status: 400 });
+        if (typeof rating !== 'number' || Number.isNaN(rating)) {
+            return NextResponse.json({ error: 'Invalid rating' }, { status: 400 });
+        }
+        if (rating < 1 || rating > 5) {
+            return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
         }
 
         const { error } = await supabaseAdmin

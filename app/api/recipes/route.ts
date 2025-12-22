@@ -48,8 +48,20 @@ export async function GET(request: Request) {
         }
 
         if (search) {
+            // Normalize and sanitize the search term to prevent injection into the filter string
             const searchLower = search.toLowerCase();
-            query = query.or(`title.ilike.%${searchLower}%,description.ilike.%${searchLower}%`);
+            // Keep only letters, numbers, spaces, and a few safe punctuation characters; limit length
+            const sanitizedSearch = searchLower
+                .slice(0, 100)
+                .replace(/[^a-z0-9\s\-_'".]/gi, '');
+            if (sanitizedSearch) {
+                // Escape LIKE wildcards so they are treated literally
+                const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
+                const pattern = `%${escapedSearch}%`;
+                query = query.or(
+                    `title.ilike.${pattern},description.ilike.${pattern}`
+                );
+            }
         }
 
         if (time) {

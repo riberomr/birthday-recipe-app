@@ -144,6 +144,11 @@ describe('lib/api/ratings', () => {
                 json: async () => { throw new Error('Invalid JSON') }
             })
 
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating: Invalid response')
+        })
+
+        it('throws generic error on network failure', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
             await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
         })
     })

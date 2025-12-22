@@ -228,7 +228,23 @@ describe('app/api/ratings/[recipeId]/user/route', () => {
             const json = await response.json();
 
             expect(response.status).toBe(400);
-            expect(json).toEqual({ error: 'Missing rating' });
+            expect(json).toEqual({ error: 'Invalid rating' });
+        });
+
+        it('returns 400 if rating is out of range', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const request = new Request('http://localhost/api/ratings/1/user', {
+                method: 'POST',
+                body: JSON.stringify({ rating: 6 })
+            });
+            const params = Promise.resolve({ recipeId: '1' });
+            const response = await POST(request, { params });
+            const json = await response.json();
+
+            expect(response.status).toBe(400);
+            expect(json).toEqual({ error: 'Rating must be between 1 and 5' });
         });
 
         it('returns error on save failure', async () => {

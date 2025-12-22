@@ -76,7 +76,7 @@ describe('lib/api/recipes', () => {
 
             const result = await getCategories()
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing categories response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing categories:', expect.any(Error))
             expect(result).toEqual([])
         })
     })
@@ -150,7 +150,7 @@ describe('lib/api/recipes', () => {
 
             const result = await getRecipes()
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing recipes response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing recipes:', expect.any(Error))
             expect(result).toEqual({ recipes: [], total: 0 })
         })
     })
@@ -188,7 +188,7 @@ describe('lib/api/recipes', () => {
 
             const result = await getRecipe('1')
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing recipe response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing recipe:', expect.any(Error))
             expect(result).toBeNull()
         })
     })
@@ -226,7 +226,7 @@ describe('lib/api/recipes', () => {
 
             const result = await getRecipeCommunityPhotos('1')
 
-            expect(console.error).toHaveBeenCalledWith('Error parsing community photos response:', expect.any(Error))
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing community photos:', expect.any(Error))
             expect(result).toBeNull()
         })
     })
@@ -274,6 +274,20 @@ describe('lib/api/recipes', () => {
                     ok: false,
                     json: async () => ({})
                 })
+
+            await expect(createRecipe(formData)).rejects.toThrow('Error desconocido al crear la receta')
+        })
+
+        it('throws generic error on unknown error', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(createRecipe(formData)).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on non-Error rejection', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
 
             await expect(createRecipe(formData)).rejects.toThrow('Error desconocido al crear la receta')
         })
@@ -337,6 +351,20 @@ describe('lib/api/recipes', () => {
             await expect(updateRecipe('1', formData)).rejects.toThrow('Error desconocido al actualizar la receta')
         })
 
+        it('throws generic error on unknown error', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(updateRecipe('1', formData)).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on non-Error rejection', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
+
+            await expect(updateRecipe('1', formData)).rejects.toThrow('Error desconocido al actualizar la receta')
+        })
+
         it('throws error on invalid JSON response', async () => {
             const formData = new FormData()
                 ; (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -390,6 +418,18 @@ describe('lib/api/recipes', () => {
             await expect(deleteRecipe('1')).rejects.toThrow('Error desconocido al eliminar la receta')
         })
 
+        it('throws generic error on unknown error', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(deleteRecipe('1')).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on non-Error rejection', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
+
+            await expect(deleteRecipe('1')).rejects.toThrow('Error desconocido al eliminar la receta')
+        })
+
         it('throws error on invalid JSON response', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValueOnce({
                 ok: true,
@@ -438,6 +478,18 @@ describe('lib/api/recipes', () => {
                 ok: false,
                 json: async () => ({})
             })
+
+            await expect(deleteRecipePermanently('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
+        })
+
+        it('throws generic error on unknown error', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+
+            await expect(deleteRecipePermanently('1')).rejects.toThrow('Network error')
+        })
+
+        it('throws default error message on non-Error rejection', async () => {
+            ; (global.fetch as jest.Mock).mockRejectedValue('Some string error')
 
             await expect(deleteRecipePermanently('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
         })
