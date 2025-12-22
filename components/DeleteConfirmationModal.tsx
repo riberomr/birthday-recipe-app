@@ -3,7 +3,7 @@
 import { useModalContext } from "@/lib/contexts/ModalContext"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export function DeleteConfirmationModal() {
     const { isModalOpen, closeModal, getModalData } = useModalContext()
@@ -11,6 +11,12 @@ export function DeleteConfirmationModal() {
     const data = getModalData("delete-confirmation")
     const { onConfirm, title, description } = data || {}
     const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIsLoading(false)
+        }
+    }, [isOpen])
 
     if (!isOpen) return null
 

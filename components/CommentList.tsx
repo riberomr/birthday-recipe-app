@@ -66,7 +66,6 @@ export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
                     showSnackbar(error.message || "Error al eliminar comentario", "error")
                 }
             }
-
         })
     }
 

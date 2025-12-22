@@ -194,7 +194,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                 result = await createRecipeMutation.mutateAsync(submitData)
                 showSnackbar("Receta creada con éxito", "success")
             }
-
+            setIsSubmitting(false)
             router.push(`/recipes/${result.recipeId}`)
             router.refresh()
         } catch (error: any) {
