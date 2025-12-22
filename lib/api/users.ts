@@ -1,81 +1,82 @@
-import { supabase } from "../supabase/client"
 import { Profile } from "@/types"
+import { auth } from "@/lib/firebase/client"
 
 export async function getUsers(): Promise<Profile[]> {
-    const { data, error } = await supabase
-        .from("profiles")
-        .select("id, firebase_uid, email, full_name, avatar_url, updated_at")
-        .order("full_name")
-
-    if (error) {
-        console.error("Error fetching users:", error)
-        return []
+    try {
+        const response = await fetch(`/api/users`);
+        if (!response.ok) {
+            console.error("Error fetching users");
+            return [];
+        }
+        const { data } = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error("Error fetching or parsing users:", error);
+        return [];
     }
-
-    return data || []
 }
 
 export async function getUsersWithRecipes(): Promise<
     Array<Profile & { recipe_count: number }>
 > {
-    const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-      id,
-      firebase_uid,
-      email,
-      full_name,
-      avatar_url,
-      updated_at,
-      recipes (count)
-    `)
-        .order("full_name")
-
-    if (error) {
-        console.error("Error fetching users with recipes:", error)
-        return []
+    try {
+        const response = await fetch(`/api/users?withRecipes=true`);
+        if (!response.ok) {
+            console.error("Error fetching users with recipes");
+            return [];
+        }
+        const { data } = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error("Error fetching or parsing users with recipes:", error);
+        return [];
     }
-
-    const usersWithRecipes = (data || []).map(user => ({
-        id: user.id,
-        firebase_uid: user.firebase_uid,
-        email: user.email,
-        full_name: user.full_name,
-        avatar_url: user.avatar_url,
-        updated_at: user.updated_at,
-        recipe_count: user.recipes?.[0]?.count ?? 0
-    }))
-
-    return usersWithRecipes.filter(user => user.recipe_count > 0)
 }
 
 export async function getUserProfile(firebaseUid: string): Promise<Profile | null> {
-    const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("firebase_uid", firebaseUid)
-        .single()
-
-    if (error) {
-        console.error("Error fetching user profile:", error)
-        return null
+    try {
+        const response = await fetch(`/api/users/${firebaseUid}`);
+        if (!response.ok) {
+            console.error("Error fetching user profile");
+            return null;
+        }
+        const { data } = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching or parsing user profile:", error);
+        return null;
     }
-
-    return data
 }
 
 export async function updateUserProfile(firebaseUid: string, updates: Partial<Profile>): Promise<Profile | null> {
-    const { data, error } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("firebase_uid", firebaseUid)
-        .select()
-        .single()
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
 
-    if (error) {
-        console.error("Error updating user profile:", error)
-        throw error
+
+    try {
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/users/${firebaseUid}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(updates)
+        });
+
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
+
+        if (!response.ok) {
+            throw new Error(result.error || "Error updating user profile");
+        }
+
+        return result.data;
+    } catch (error: any) {
+        throw new Error(error.message || "Error updating user profile");
     }
-
-    return data
 }

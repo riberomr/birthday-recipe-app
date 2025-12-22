@@ -26,7 +26,7 @@ describe('useUserRating', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
         expect(result.current.data).toBe(5);
-        expect(getUserRating).toHaveBeenCalledWith('user-1', 'recipe-1');
+        expect(getUserRating).toHaveBeenCalledWith('recipe-1');
     });
 
     it('does not fetch if userId is missing', () => {

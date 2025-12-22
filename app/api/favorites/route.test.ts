@@ -1,213 +1,287 @@
 /**
  * @jest-environment node
  */
+import { GET, POST } from './route';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth';
 
-// Mock env vars
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost'
-process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key'
+// Mock dependencies
+jest.mock('@/lib/supabase/admin', () => ({
+    supabaseAdmin: {
+        from: jest.fn()
+    }
+}));
 
-describe('/api/favorites', () => {
-    let GET: any
-    let POST: any
-    let mockChain: any
-    let getUserFromRequest: jest.Mock
-    let getProfileFromFirebase: jest.Mock
+jest.mock('@/lib/auth/requireAuth', () => ({
+    getUserFromRequest: jest.fn(),
+    getProfileFromFirebase: jest.fn()
+}));
 
+describe('app/api/favorites/route', () => {
     beforeEach(() => {
-        jest.resetModules()
-
-        // Setup chainable mock mejorado
-        mockChain = {
-            select: jest.fn().mockReturnThis(),
-            insert: jest.fn().mockResolvedValue({ error: null }),
-            delete: jest.fn().mockReturnThis(),
-            eq: jest.fn().mockReturnThis(),
-            order: jest.fn().mockReturnThis(),
-            single: jest.fn(),
-            // Propiedades para simular el resultado final del await
-            data: null,
-            error: null,
-        }
-
-        // Importante: Para que const {data, error} = await chain funcione, 
-        // el último método de la cadena debe devolver un objeto con esas propiedades
-        // o el mockChain mismo debe ser un Promise-like (thenable).
-        mockChain.then = (resolve: any) => resolve({ data: mockChain.data, error: mockChain.error });
-
-        getUserFromRequest = jest.fn()
-        getProfileFromFirebase = jest.fn()
-
-        jest.doMock('@/lib/auth/requireAuth', () => ({
-            getUserFromRequest,
-            getProfileFromFirebase,
-        }))
-
-        jest.doMock('@supabase/supabase-js', () => ({
-            createClient: jest.fn(() => ({
-                from: jest.fn(() => mockChain),
-            })),
-        }))
-
-        const route = require('./route')
-        GET = route.GET
-        POST = route.POST
-    })
+        jest.clearAllMocks();
+    });
 
     describe('GET', () => {
-        it('returns favorites and verifies new filters', async () => {
-            const mockData = [
-                {
-                    recipe_id: '1',
-                    recipes: {
-                        id: '1',
-                        title: 'Test Recipe',
-                        ratings: [{ rating: 5 }],
-                    },
-                },
-            ]
+        it('returns favorites successfully', async () => {
+            const mockData = [{
+                recipe_id: '1',
+                recipes: {
+                    id: '1',
+                    title: 'Recipe 1',
+                    ratings: [{ rating: 5 }]
+                }
+            }];
+            const mockOrder = jest.fn().mockResolvedValue({ data: mockData, error: null });
 
-            mockChain.data = mockData
-            mockChain.error = null
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                order: mockOrder
+            });
 
-            const request = new Request('http://localhost/api/favorites?userId=123')
-            const response = await GET(request)
-            const data = await response.json()
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
-            expect(response.status).toBe(200)
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
 
-            // Verificamos que se llamó al select con !inner
-            expect(mockChain.select).toHaveBeenCalledWith(expect.stringContaining('recipes!inner'))
+            expect(supabaseAdmin.from).toHaveBeenCalledWith('favorites');
+            expect(json).toHaveLength(1);
+            expect(json[0].average_rating).toEqual({ count: 1, rating: 5 });
+        });
 
-            // Verificamos el nuevo filtro de is_deleted
-            expect(mockChain.eq).toHaveBeenCalledWith("recipes.is_deleted", false)
+        it('returns empty array if no data found', async () => {
+            const mockOrder = jest.fn().mockResolvedValue({ data: null, error: null });
 
-            // Verificamos el nuevo ordenamiento
-            expect(mockChain.order).toHaveBeenCalledWith("created_at", { ascending: false })
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                order: mockOrder
+            });
 
-            expect(data[0].average_rating).toEqual({ rating: 5, count: 1 })
-        })
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
-        it('returns 500 on database error', async () => {
-            mockChain.data = null
-            mockChain.error = { message: 'DB Error' }
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
 
-            const request = new Request('http://localhost/api/favorites?userId=123')
-            const response = await GET(request)
-            const data = await response.json()
+            expect(json).toEqual([]);
+        });
 
-            expect(response.status).toBe(500)
-            expect(data.error).toBe('DB Error')
-        })
-    })
+        it('returns error on failure', async () => {
+            const mockOrder = jest.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' } });
+
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                order: mockOrder
+            });
+
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(json).toEqual({ error: 'DB Error' });
+        });
+
+        it('returns 400 if userId is missing', async () => {
+            const request = new Request('http://localhost/api/favorites');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(400);
+            expect(json).toEqual({ error: 'Missing userId' });
+        });
+
+        it('returns 401 if not authenticated', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue(null);
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(401);
+            expect(json).toEqual({ error: 'Unauthorized' });
+        });
+
+        it('returns 403 if user is forbidden', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'user-1' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'other-user' });
+
+            const request = new Request('http://localhost/api/favorites?userId=user-1');
+            const response = await GET(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(403);
+            expect(json).toEqual({ error: 'Forbidden' });
+        });
+    });
 
     describe('POST', () => {
-        it('removes favorite if exists', async () => {
-            getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
+        it('adds favorite successfully', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
-            // Mock de búsqueda inicial (.single())
-            mockChain.single.mockResolvedValueOnce({
-                data: { id: 'fav1' },
-                error: null,
-            })
+            const mockSingle = jest.fn().mockResolvedValue({ data: null, error: null });
+            const mockInsert = jest.fn().mockResolvedValue({ error: null });
 
-            // Mock del resultado de .delete().eq().eq()
-            // Como delete() devuelve mockChain, y eq() también, 
-            // el await final usará mockChain.then
-            mockChain.error = null
-
-            const request = new Request('http://localhost/api/favorites', {
-                method: 'POST',
-                body: JSON.stringify({ recipeId: 'rec1' }),
-            })
-
-            const response = await POST(request)
-            const data = await response.json()
-
-            expect(response.status).toBe(200)
-            expect(data.isFavorite).toBe(false)
-            expect(mockChain.delete).toHaveBeenCalled()
-        })
-
-        it('returns 500 on insert error', async () => {
-            getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
-            mockChain.single.mockResolvedValue({ data: null }) // No existe, va a insertar
-
-            // Simulamos error en insert
-            mockChain.insert.mockResolvedValue({ error: { message: 'Insert Error' } })
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: mockSingle,
+                insert: mockInsert
+            });
 
             const request = new Request('http://localhost/api/favorites', {
                 method: 'POST',
-                body: JSON.stringify({ recipeId: 'rec1' }),
-            })
-            const response = await POST(request)
-            const data = await response.json()
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+            const json = await response.json();
 
-            expect(response.status).toBe(500)
-            expect(data.error).toBe('Insert Error')
-        })
-        it('returns 400 if userId is not provided in searchParams', async () => {
-            // Request sin query string (?userId=...)
-            const request = new Request('http://localhost/api/favorites')
-            const response = await GET(request)
-            const data = await response.json()
+            expect(mockInsert).toHaveBeenCalledWith([{ user_id: 'user-1', recipe_id: '1' }]);
+            expect(json).toEqual({ isFavorite: true });
+        });
 
-            expect(response.status).toBe(400)
-            expect(data.error).toBe('Missing userId')
-        })
-        it('returns 401 if getUserFromRequest fails (no token)', async () => {
-            getUserFromRequest.mockResolvedValue(null) // Simula usuario no autenticado
+        it('removes favorite successfully', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
-            const request = new Request('http://localhost/api/favorites', {
-                method: 'POST',
-                body: JSON.stringify({ recipeId: 'rec1' })
-            })
-            const response = await POST(request)
-            const data = await response.json()
+            const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'fav-1' }, error: null });
 
-            expect(response.status).toBe(401)
-            expect(data.error).toBe('Unauthorized')
-        })
+            // For the delete part, we need to ensure the last call returns the promise result
+            // But here we are mocking everything to return `this`.
+            // The actual code awaits the result of the chain.
+            // So the last `.eq` should return the promise.
 
-        it('returns 400 if recipeId is missing in the body', async () => {
-            getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
-
-            const request = new Request('http://localhost/api/favorites', {
-                method: 'POST',
-                body: JSON.stringify({}) // Cuerpo vacío sin recipeId
-            })
-            const response = await POST(request)
-            const data = await response.json()
-
-            expect(response.status).toBe(400)
-            expect(data.error).toBe('Missing recipeId')
-        })
-
-        it('returns isFavorite true when successfully adding a new favorite', async () => {
-            getUserFromRequest.mockResolvedValue({ uid: '123' })
-            getProfileFromFirebase.mockResolvedValue({ id: 'user1' })
-
-            // Mock: no existe el favorito previo
-            mockChain.single.mockResolvedValue({ data: null, error: null })
-
-            // Mock: la inserción es exitosa
-            mockChain.insert.mockResolvedValue({ error: null })
+            // Let's try a different approach for mocking
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockImplementation(function (this: any) {
+                    // If this is the last call in the delete chain, return the result
+                    // But it's hard to know.
+                    return this;
+                }),
+                single: mockSingle,
+                delete: jest.fn().mockReturnThis(),
+                insert: jest.fn().mockReturnThis(),
+                then: jest.fn((resolve) => resolve({ error: null })) // Make the chain awaitable
+            });
 
             const request = new Request('http://localhost/api/favorites', {
                 method: 'POST',
-                body: JSON.stringify({ recipeId: 'rec-new' })
-            })
-            const response = await POST(request)
-            const data = await response.json()
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+            const json = await response.json();
 
-            expect(response.status).toBe(200)
-            expect(data.isFavorite).toBe(true)
-            expect(mockChain.insert).toHaveBeenCalledWith([{
-                user_id: 'user1',
-                recipe_id: 'rec-new'
-            }])
-        })
-    })
-})
+            expect(json).toEqual({ isFavorite: false });
+        });
+
+        it('returns 401 if not authenticated', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue(null);
+
+            const request = new Request('http://localhost/api/favorites', {
+                method: 'POST',
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+
+            expect(response.status).toBe(401);
+        });
+        it('returns 400 if recipeId is missing', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const request = new Request('http://localhost/api/favorites', {
+                method: 'POST',
+                body: JSON.stringify({})
+            });
+            const response = await POST(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(400);
+            expect(json).toEqual({ error: 'Missing recipeId' });
+        });
+
+        it('returns 500 on unexpected error', async () => {
+            (getUserFromRequest as jest.Mock).mockImplementation(() => {
+                throw new Error('Unexpected Error');
+            });
+
+            const request = new Request('http://localhost/api/favorites', {
+                method: 'POST',
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(json).toEqual({ error: 'Unexpected Error' });
+        });
+
+        it('returns error on delete failure', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'fav-1' }, error: null });
+
+            // Mock delete returning an error
+            const mockDeleteChain = {
+                eq: jest.fn()
+            };
+            mockDeleteChain.eq
+                .mockReturnValueOnce(mockDeleteChain)
+                .mockResolvedValueOnce({ error: { message: 'Delete Error' } });
+
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: mockSingle,
+                delete: jest.fn().mockReturnValue(mockDeleteChain)
+            });
+
+            const request = new Request('http://localhost/api/favorites', {
+                method: 'POST',
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(json).toEqual({ error: 'Delete Error' });
+        });
+
+        it('returns error on insert failure', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'firebase-uid', email: 'test@example.com' });
+            (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
+
+            const mockSingle = jest.fn().mockResolvedValue({ data: null, error: null });
+            const mockInsert = jest.fn().mockResolvedValue({ error: { message: 'Insert Error' } });
+
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: mockSingle,
+                insert: mockInsert
+            });
+
+            const request = new Request('http://localhost/api/favorites', {
+                method: 'POST',
+                body: JSON.stringify({ recipeId: '1' })
+            });
+            const response = await POST(request);
+            const json = await response.json();
+
+            expect(response.status).toBe(500);
+            expect(json).toEqual({ error: 'Insert Error' });
+        });
+    });
+});

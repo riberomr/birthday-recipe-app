@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth';
 import { getAverageRating } from '@/lib/utils';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: Request) {
     try {
@@ -16,16 +12,15 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
         }
 
-        // Note: Favorites are public? Or should we verify token?
-        // For now, let's allow reading favorites if we have the userId, 
-        // but ideally we should verify if the requester is the user or if favorites are public.
-        // Given the app type, maybe favorites are private. Let's verify token.
-
         const decodedToken = await getUserFromRequest(request);
-        // If we want strict privacy:
-        // if (!decodedToken || decodedToken.uid !== userId) ...
-        // But the current code passes userId explicitly. 
-        // Let's assume for now we just return the data, but using Service Role to bypass RLS.
+        if (!decodedToken) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const user = await getProfileFromFirebase(decodedToken.uid, decodedToken.email);
+        if (!user || user.id !== userId) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
 
         const { data, error } = await supabaseAdmin
             .from("favorites")

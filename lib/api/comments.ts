@@ -1,28 +1,28 @@
-import { supabase } from "@/lib/supabase/client";
+
 import { auth } from "@/lib/firebase/client";
 import { Comment } from "@/types";
 
 export async function getComments(recipeId: string, page: number = 1, limit: number = 5): Promise<{ comments: Comment[], total: number }> {
-    const from = (page - 1) * limit
-    const to = from + limit - 1
+    const params = new URLSearchParams({
+        recipeId,
+        page: page.toString(),
+        limit: limit.toString()
+    });
 
-    const { data, error, count } = await supabase
-        .from("comments")
-        .select(`
-            *,
-            profiles (
-                full_name,
-                avatar_url
-            )
-        `, { count: 'exact' })
-        .eq("recipe_id", recipeId)
-        .eq("is_deleted", false)
-        .order("created_at", { ascending: false })
-        .range(from, to)
+    try {
+        const response = await fetch(`/api/comments?${params.toString()}`);
 
-    if (error) throw error;
+        if (!response.ok) {
+            console.error("Error fetching comments");
+            return { comments: [], total: 0 };
+        }
 
-    return { comments: (data as any[]) || [], total: count || 0 };
+        const { data } = await response.json();
+        return { comments: data.comments || [], total: data.total || 0 };
+    } catch (error) {
+        console.error("Error fetching or parsing comments:", error);
+        return { comments: [], total: 0 };
+    }
 }
 
 export async function postComment(formData: FormData): Promise<Comment> {
@@ -33,21 +33,30 @@ export async function postComment(formData: FormData): Promise<Comment> {
 
     const token = await user.getIdToken();
 
-    const response = await fetch('/api/comments/create', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-    });
+    try {
+        const response = await fetch(`/api/comments/create`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData,
+        });
 
-    const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
+        }
 
-    if (!response.ok) {
-        throw new Error(result.error || 'Error al publicar comentario');
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al publicar comentario');
+        }
+
+        return result.comment;
+    } catch (error: any) {
+        throw new Error(error.message || 'Error al publicar comentario');
     }
-
-    return result.comment;
 }
 
 export async function deleteComment(id: string): Promise<void> {
@@ -55,16 +64,25 @@ export async function deleteComment(id: string): Promise<void> {
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`/api/comments/${id}/delete`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
+    try {
+        const response = await fetch(`/api/comments/${id}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error('Error al procesar la respuesta del servidor');
         }
-    });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        throw new Error(result.error || 'Error desconocido al eliminar el comentario');
+        if (!response.ok) {
+            throw new Error(result.error || 'Error desconocido al eliminar el comentario');
+        }
+    } catch (error: any) {
+        throw new Error(error.message || 'Error desconocido al eliminar el comentario');
     }
 }

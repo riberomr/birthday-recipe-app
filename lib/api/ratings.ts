@@ -1,53 +1,81 @@
 import { auth } from "@/lib/firebase/client";
-import { supabase } from "@/lib/supabase/client";
 
 export async function getRecipeRating(recipeId: string) {
-    const { data, error } = await supabase
-        .from("ratings")
-        .select("rating")
-        .eq("recipe_id", recipeId);
 
-    if (error) throw error;
+    try {
+        const response = await fetch(`/api/ratings/${recipeId}`);
 
-    const ratings = data || [];
-    const count = ratings.length;
-    const average = count > 0
-        ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / count
-        : 0;
+        if (!response.ok) {
+            console.error("Error fetching recipe rating");
+            return { average: 0, count: 0 };
+        }
 
-    return { average, count };
+        const { data } = await response.json();
+        return data || { average: 0, count: 0 };
+    } catch (error) {
+        console.error("Error parsing recipe rating response:", error);
+        return { average: 0, count: 0 };
+    }
 }
 
-export async function getUserRating(userId: string, recipeId: string) {
-    const { data, error } = await supabase
-        .from("ratings")
-        .select("rating")
-        .eq("recipe_id", recipeId)
-        .eq("user_id", userId)
-        .single();
+export async function getUserRating(recipeId: string) {
+    const user = auth.currentUser;
+    if (!user) return 0;
 
-    if (error && error.code !== 'PGRST116') throw error;
-    return data?.rating || 0;
+    try {
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/ratings/${recipeId}/user`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            // If 404 or other error, return 0
+            return 0;
+        }
+        const { data } = await response.json();
+        return data?.rating || 0;
+    } catch (error) {
+        console.error("Error fetching user rating:", error);
+        return 0;
+    }
 }
 
 export async function upsertRating(recipeId: string, rating: number) {
     const user = auth.currentUser;
     if (!user) throw new Error("User not authenticated");
+
     const token = await user.getIdToken();
 
-    const response = await fetch('/api/ratings', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ recipeId, rating })
-    });
+    let response;
+    try {
+        response = await fetch(`/api/ratings/${recipeId}/user`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ rating })
+        });
+    } catch (error) {
+        console.error("Error saving rating:", error);
+        throw new Error("Error saving rating");
+    }
 
     if (!response.ok) {
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error("Error saving rating");
+        }
         throw new Error(result.error || "Error saving rating");
     }
 
-    return await response.json();
+    try {
+        return await response.json();
+    } catch (error) {
+        throw new Error("Error saving rating: Invalid response");
+    }
 }

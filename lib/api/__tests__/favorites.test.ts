@@ -22,6 +22,7 @@ describe('lib/api/favorites', () => {
     })
 
     describe('getFavorites', () => {
+
         it('fetches favorites successfully', async () => {
             const mockFavorites = [{ id: '1', title: 'Recipe 1' }]
                 ; (global.fetch as jest.Mock).mockResolvedValueOnce({
@@ -30,7 +31,7 @@ describe('lib/api/favorites', () => {
                 })
 
             const result = await getFavorites('user1')
-            expect(global.fetch).toHaveBeenCalledWith('/api/favorites?userId=user1')
+            expect(global.fetch).toHaveBeenCalledWith('/api/favorites?userId=user1', { "headers": { "Authorization": "Bearer mock-token", "Content-Type": "application/json" }, "method": "GET" })
             expect(result).toEqual(mockFavorites)
         })
 
@@ -39,8 +40,28 @@ describe('lib/api/favorites', () => {
                 ok: false
             })
 
-            await expect(getFavorites('user1')).rejects.toThrow('Error fetching favorites')
+            await expect(getFavorites('user1')).resolves.toEqual([])
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing favorites:', expect.any(Error))
         })
+
+        it('returns empty array on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getFavorites('user1')
+
+            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing favorites:', expect.any(Error))
+            expect(result).toEqual([])
+        })
+
+        it('throws error if user is not authenticated', async () => {
+            // @ts-ignore
+            auth.currentUser = null
+            await expect(getFavorites('user1')).rejects.toThrow('User not authenticated')
+        })
+
     })
 
     describe('toggleFavorite', () => {
@@ -75,6 +96,15 @@ describe('lib/api/favorites', () => {
         it('throws error on toggle failure', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValueOnce({
                 ok: false
+            })
+
+            await expect(toggleFavorite('1')).rejects.toThrow('Error toggling favorite')
+        })
+
+        it('throws error on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
             })
 
             await expect(toggleFavorite('1')).rejects.toThrow('Error toggling favorite')
