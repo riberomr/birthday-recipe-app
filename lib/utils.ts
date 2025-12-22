@@ -54,13 +54,3 @@ export async function compressImage(file: File) {
     const compressedFile = await imageCompression(file, options)
     return compressedFile
 }
-
-export const BASE_URL = (() => {
-    if (typeof window !== 'undefined') return '';
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-    return `http://localhost:${process.env.PORT ?? 3000}`;
-})();
-
-export function getBaseUrl() {
-    return BASE_URL;
-}

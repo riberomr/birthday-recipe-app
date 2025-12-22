@@ -1,13 +1,12 @@
 import { auth } from "@/lib/firebase/client";
 import { Recipe } from "@/types";
-import { getBaseUrl } from "@/lib/utils";
 
 export async function getFavorites(userId: string): Promise<Recipe[]> {
     const user = auth.currentUser;
     if (!user) throw new Error("User not authenticated");
     try {
         const token = await user.getIdToken();
-        const response = await fetch(`${getBaseUrl()}/api/favorites?userId=${userId}`, {
+        const response = await fetch(`/api/favorites?userId=${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,7 +30,7 @@ export async function toggleFavorite(recipeId: string): Promise<{ isFavorite: bo
 
     try {
         const token = await user.getIdToken();
-        const response = await fetch(`${getBaseUrl()}/api/favorites`, {
+        const response = await fetch(`/api/favorites`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

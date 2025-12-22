@@ -13,7 +13,6 @@ export async function GET(request: Request) {
         }
 
         const decodedToken = await getUserFromRequest(request);
-        console.log(decodedToken, "decodedToken");
         if (!decodedToken) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

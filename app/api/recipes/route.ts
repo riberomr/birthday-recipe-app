@@ -56,8 +56,7 @@ export async function GET(request: Request) {
                 .replace(/[^a-z0-9\s\-_'".]/gi, '');
             if (sanitizedSearch) {
                 // Escape LIKE wildcards so they are treated literally
-                const escapedSearch = sanitizedSearch.replace(/[%_]/g, '\\$&');
-                const pattern = `%${escapedSearch}%`;
+                const pattern = `%${sanitizedSearch}%`;
                 query = query.or(
                     `title.ilike.${pattern},description.ilike.${pattern}`
                 );

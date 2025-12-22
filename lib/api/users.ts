@@ -1,10 +1,9 @@
 import { Profile } from "@/types"
 import { auth } from "@/lib/firebase/client"
-import { getBaseUrl } from "@/lib/utils"
 
 export async function getUsers(): Promise<Profile[]> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/users`);
+        const response = await fetch(`/api/users`);
         if (!response.ok) {
             console.error("Error fetching users");
             return [];
@@ -21,7 +20,7 @@ export async function getUsersWithRecipes(): Promise<
     Array<Profile & { recipe_count: number }>
 > {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/users?withRecipes=true`);
+        const response = await fetch(`/api/users?withRecipes=true`);
         if (!response.ok) {
             console.error("Error fetching users with recipes");
             return [];
@@ -36,7 +35,7 @@ export async function getUsersWithRecipes(): Promise<
 
 export async function getUserProfile(firebaseUid: string): Promise<Profile | null> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/users/${firebaseUid}`);
+        const response = await fetch(`/api/users/${firebaseUid}`);
         if (!response.ok) {
             console.error("Error fetching user profile");
             return null;
@@ -56,7 +55,7 @@ export async function updateUserProfile(firebaseUid: string, updates: Partial<Pr
 
     try {
         const token = await user.getIdToken();
-        const response = await fetch(`${getBaseUrl()}/api/users/${firebaseUid}`, {
+        const response = await fetch(`/api/users/${firebaseUid}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

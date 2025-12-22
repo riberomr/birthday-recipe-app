@@ -1,10 +1,9 @@
 import { Recipe, RecipeCategory } from "@/types"
 import { auth } from "@/lib/firebase/client";
-import { getBaseUrl } from "@/lib/utils";
 
 export async function getCategories(): Promise<RecipeCategory[]> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/categories`);
+        const response = await fetch(`/api/recipes/categories`);
         if (!response.ok) {
             console.error("Error fetching categories");
             return [];
@@ -43,7 +42,7 @@ export async function getRecipes(
     if (filters.user_id) params.append('user_id', filters.user_id);
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes?${params.toString()}`);
+        const response = await fetch(`/api/recipes?${params.toString()}`);
 
         if (!response.ok) {
             console.error("Error fetching recipes");
@@ -60,7 +59,7 @@ export async function getRecipes(
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}`);
+        const response = await fetch(`/api/recipes/${id}`);
 
         if (!response.ok) {
             console.error("Error fetching recipe");
@@ -80,7 +79,7 @@ type RecipeCommunityPhoto = {
 }
 export async function getRecipeCommunityPhotos(recipeId: string): Promise<RecipeCommunityPhoto[] | null> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${recipeId}/photos`);
+        const response = await fetch(`/api/recipes/${recipeId}/photos`);
 
         if (!response.ok) {
             console.error("Error fetching community photos");
@@ -102,7 +101,7 @@ export async function createRecipe(formData: FormData) {
 
     try {
         const token = await user.getIdToken();
-        const response = await fetch(`${getBaseUrl()}/api/create-recipe-with-image`, {
+        const response = await fetch(`/api/create-recipe-with-image`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -136,7 +135,7 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
     formData.append('recipe_id', recipeId);
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/update-recipe-with-image`, {
+        const response = await fetch(`/api/update-recipe-with-image`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -181,7 +180,7 @@ export async function deleteRecipe(id: string) {
     const token = await user.getIdToken();
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}/delete`, {
+        const response = await fetch(`/api/recipes/${id}/delete`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -225,7 +224,7 @@ export async function deleteRecipePermanently(id: string) {
     const token = await user.getIdToken();
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}/permanent-delete`, {
+        const response = await fetch(`/api/recipes/${id}/permanent-delete`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`

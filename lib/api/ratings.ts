@@ -1,10 +1,9 @@
 import { auth } from "@/lib/firebase/client";
-import { getBaseUrl } from "@/lib/utils";
 
 export async function getRecipeRating(recipeId: string) {
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/ratings/${recipeId}`);
+        const response = await fetch(`/api/ratings/${recipeId}`);
 
         if (!response.ok) {
             console.error("Error fetching recipe rating");
@@ -25,7 +24,7 @@ export async function getUserRating(recipeId: string) {
 
     try {
         const token = await user.getIdToken();
-        const response = await fetch(`${getBaseUrl()}/api/ratings/${recipeId}/user`, {
+        const response = await fetch(`/api/ratings/${recipeId}/user`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -51,7 +50,7 @@ export async function upsertRating(recipeId: string, rating: number) {
 
     let response;
     try {
-        response = await fetch(`${getBaseUrl()}/api/ratings/${recipeId}/user`, {
+        response = await fetch(`/api/ratings/${recipeId}/user`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
