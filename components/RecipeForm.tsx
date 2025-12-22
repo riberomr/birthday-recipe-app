@@ -27,7 +27,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     const createRecipeMutation = useCreateRecipe()
     const updateRecipeMutation = useUpdateRecipe()
 
-    const isPending = createRecipeMutation.isPending || updateRecipeMutation.isPending
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const [tags, setTags] = useState<{ id: string, name: string }[]>([])
     const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -143,16 +143,20 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
             return
         }
 
+        setIsSubmitting(true)
+
         // Custom Validation
         const validIngredients = formData.ingredients.filter(ing => ing.name.trim() !== "")
         if (validIngredients.length === 0) {
             showSnackbar("Agrega al menos un ingrediente", "error")
+            setIsSubmitting(false)
             return
         }
 
         const validSteps = formData.steps.filter(step => step.content.trim() !== "")
         if (validSteps.length === 0) {
             showSnackbar("Agrega al menos un paso de preparación", "error")
+            setIsSubmitting(false)
             return
         }
 
@@ -196,6 +200,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
         } catch (error: any) {
             console.error("Error saving recipe:", error)
             showSnackbar(error.message || "Error al guardar la receta. Por favor intenta de nuevo.", "error")
+            setIsSubmitting(false)
         }
     }
 
@@ -471,6 +476,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                     type="button"
                     variant="outline"
                     onClick={() => router.back()}
+                    disabled={isSubmitting}
                     className="h-14 text-sm border-2 border-input text-muted-foreground [@media(hover:hover)]:hover:bg-accent [@media(hover:hover)]:hover:text-accent-foreground"
                 >
                     Cancelar
@@ -478,9 +484,9 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                 <Button
                     type="submit"
                     className="h-14 text-sm bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all [@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98]"
-                    disabled={isPending}
+                    disabled={isSubmitting}
                 >
-                    {isPending ? "Guardando..." : (
+                    {isSubmitting ? "Guardando..." : (
                         <>
                             {isEditing ? "Actualizar Receta" : "Guardar Receta"}
                         </>

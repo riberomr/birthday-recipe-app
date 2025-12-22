@@ -19,7 +19,6 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
     const router = useRouter()
     const deleteModal = useModal("delete-confirmation")
     const { showSnackbar } = useSnackbar()
-    const [isDeleting, setIsDeleting] = useState(false)
 
     // Check if user is the owner
     // We need to check against the profile id that matches the firebase uid
@@ -29,17 +28,13 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
     if (profile.id !== ownerId) return null
 
     const handleDelete = async () => {
-        setIsDeleting(true)
         try {
             await deleteRecipe(recipeId)
             showSnackbar("Receta eliminada correctamente", "success")
             router.push("/recipes")
-            deleteModal.close()
         } catch (error) {
             console.error("Error deleting recipe:", error)
             showSnackbar("Error al eliminar la receta", "error")
-        } finally {
-            setIsDeleting(false)
         }
     }
 
@@ -47,8 +42,7 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
         deleteModal.open({
             onConfirm: handleDelete,
             title: "¿Eliminar receta?",
-            description: "¿Estás seguro de que quieres eliminar esta receta? Esta acción moverá la receta a la papelera.",
-            isDeleting: isDeleting
+            description: "¿Estás seguro de que quieres eliminar esta receta? Esta acción moverá la receta a la papelera."
         })
     }
 

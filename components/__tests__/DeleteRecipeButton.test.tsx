@@ -84,7 +84,6 @@ describe("DeleteRecipeButton", () => {
         expect(deleteRecipe).toHaveBeenCalledWith("recipe123")
         expect(mockShowSnackbar).toHaveBeenCalledWith("Receta eliminada correctamente", "success")
         expect(mockPush).toHaveBeenCalledWith("/recipes")
-        expect(mockClose).toHaveBeenCalled()
     })
 
     it("handles delete confirmation error", async () => {
