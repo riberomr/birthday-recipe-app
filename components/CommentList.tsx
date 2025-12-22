@@ -61,7 +61,6 @@ export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
                 try {
                     await deleteComment(commentId)
                     showSnackbar("Comentario eliminado", "success")
-                    closeDeleteModal()
                 } catch (error: any) {
                     showSnackbar(error.message || "Error al eliminar comentario", "error")
                 }

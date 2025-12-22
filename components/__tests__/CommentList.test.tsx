@@ -202,7 +202,6 @@ describe('CommentList', () => {
 
         expect(mockDeleteMutate).toHaveBeenCalledWith('1');
         expect(mockShowSnackbar).toHaveBeenCalledWith('Comentario eliminado', 'success');
-        expect(mockCloseDeleteModal).toHaveBeenCalled();
     });
 
     it('handles delete error', async () => {
