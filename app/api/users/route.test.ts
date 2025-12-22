@@ -3,7 +3,6 @@
  */
 import { GET } from './route';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-import { NextResponse } from 'next/server';
 
 // Mock Supabase
 jest.mock('@/lib/supabase/admin', () => ({

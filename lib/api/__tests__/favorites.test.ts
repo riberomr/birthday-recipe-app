@@ -41,6 +41,16 @@ describe('lib/api/favorites', () => {
 
             await expect(getFavorites('user1')).rejects.toThrow('Error fetching favorites')
         })
+
+        it('returns empty array on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getFavorites('user1')
+            expect(result).toEqual([])
+        })
     })
 
     describe('toggleFavorite', () => {
@@ -75,6 +85,15 @@ describe('lib/api/favorites', () => {
         it('throws error on toggle failure', async () => {
             ; (global.fetch as jest.Mock).mockResolvedValueOnce({
                 ok: false
+            })
+
+            await expect(toggleFavorite('1')).rejects.toThrow('Error toggling favorite')
+        })
+
+        it('throws error on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
             })
 
             await expect(toggleFavorite('1')).rejects.toThrow('Error toggling favorite')

@@ -8,11 +8,16 @@ export async function getRecipeRating(recipeId: string) {
         return { average: 0, count: 0 };
     }
 
-    const { data } = await response.json();
-    return data || { average: 0, count: 0 };
+    try {
+        const { data } = await response.json();
+        return data || { average: 0, count: 0 };
+    } catch (error) {
+        console.error("Error parsing recipe rating response:", error);
+        return { average: 0, count: 0 };
+    }
 }
 
-export async function getUserRating(userId: string, recipeId: string) {
+export async function getUserRating(recipeId: string) {
     const user = auth.currentUser;
     if (!user) return 0;
 
@@ -28,8 +33,12 @@ export async function getUserRating(userId: string, recipeId: string) {
         return 0;
     }
 
-    const { data } = await response.json();
-    return data?.rating || 0;
+    try {
+        const { data } = await response.json();
+        return data?.rating || 0;
+    } catch (error) {
+        return 0;
+    }
 }
 
 export async function upsertRating(recipeId: string, rating: number) {
@@ -47,9 +56,18 @@ export async function upsertRating(recipeId: string, rating: number) {
     });
 
     if (!response.ok) {
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (error) {
+            throw new Error("Error saving rating");
+        }
         throw new Error(result.error || "Error saving rating");
     }
 
-    return await response.json();
+    try {
+        return await response.json();
+    } catch (error) {
+        throw new Error("Error saving rating");
+    }
 }

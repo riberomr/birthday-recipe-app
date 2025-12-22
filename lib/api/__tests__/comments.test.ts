@@ -54,6 +54,28 @@ describe('lib/api/comments', () => {
             expect(console.error).toHaveBeenCalledWith('Error fetching comments')
             expect(result).toEqual({ comments: [], total: 0 })
         })
+
+        it('returns empty result on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getComments('recipe1')
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing comments response:', expect.any(Error))
+            expect(result).toEqual({ comments: [], total: 0 })
+        })
+
+        it('returns empty comments and 0 total if data properties are null', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: { comments: null, total: null } })
+            })
+
+            const result = await getComments('recipe1')
+            expect(result).toEqual({ comments: [], total: 0 })
+        })
     })
 
     describe('postComment', () => {
@@ -92,6 +114,24 @@ describe('lib/api/comments', () => {
 
             await expect(postComment(mockFormData)).rejects.toThrow('Inappropriate content')
         })
+
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(postComment(mockFormData)).rejects.toThrow('Error al procesar la respuesta del servidor')
+        })
+
+        it('throws default error if no error message from server', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: false,
+                json: async () => ({})
+            })
+
+            await expect(postComment(mockFormData)).rejects.toThrow('Error al publicar comentario')
+        })
     })
 
     describe('deleteComment', () => {
@@ -124,6 +164,24 @@ describe('lib/api/comments', () => {
             })
 
             await expect(deleteComment('comment1')).rejects.toThrow('Not authorized to delete')
+        })
+
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(deleteComment('comment1')).rejects.toThrow('Error al procesar la respuesta del servidor')
+        })
+
+        it('throws default error if no error message from server', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: false,
+                json: async () => ({})
+            })
+
+            await expect(deleteComment('comment1')).rejects.toThrow('Error desconocido al eliminar el comentario')
         })
     })
 })

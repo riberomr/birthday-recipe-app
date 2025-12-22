@@ -106,6 +106,81 @@ describe('app/api/users/[uid]/route', () => {
             expect(json).toEqual({ error: 'Unauthorized' });
         });
 
+        it('returns 400 for invalid payload', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'fb1' });
+
+            const invalidPayloads = [null, [], 'string', 123];
+
+            for (const payload of invalidPayloads) {
+                const request = new Request('http://localhost/api/users/fb1', {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+                const params = Promise.resolve({ uid: 'fb1' });
+                const response = await PATCH(request, { params });
+                const json = await response.json();
+
+                expect(response.status).toBe(400);
+                expect(json).toEqual({ error: 'Invalid update payload' });
+            }
+        });
+
+        it('returns 400 if no valid fields to update', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'fb1' });
+
+            const request = new Request('http://localhost/api/users/fb1', {
+                method: 'PATCH',
+                body: JSON.stringify({})
+            });
+            const params = Promise.resolve({ uid: 'fb1' });
+            const response = await PATCH(request, { params });
+            const json = await response.json();
+
+            expect(response.status).toBe(400);
+            expect(json).toEqual({ error: 'No valid fields to update' });
+        });
+
+        it('filters out forbidden fields', async () => {
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'fb1' });
+
+            // Payload with only forbidden fields
+            const request = new Request('http://localhost/api/users/fb1', {
+                method: 'PATCH',
+                body: JSON.stringify({ id: '123', created_at: 'date', firebase_uid: 'fb2' })
+            });
+            const params = Promise.resolve({ uid: 'fb1' });
+            const response = await PATCH(request, { params });
+            const json = await response.json();
+
+            expect(response.status).toBe(400);
+            expect(json).toEqual({ error: 'No valid fields to update' });
+        });
+
+        it('updates only allowed fields', async () => {
+            const mockUser = { id: '1', full_name: 'Updated Name' };
+            const mockSingle = jest.fn().mockResolvedValue({ data: mockUser, error: null });
+            const updateMock = jest.fn().mockReturnThis();
+
+            (getUserFromRequest as jest.Mock).mockResolvedValue({ uid: 'fb1' });
+            (supabaseAdmin.from as jest.Mock).mockReturnValue({
+                update: updateMock,
+                eq: jest.fn().mockReturnThis(),
+                select: jest.fn().mockReturnThis(),
+                single: mockSingle
+            });
+
+            const request = new Request('http://localhost/api/users/fb1', {
+                method: 'PATCH',
+                body: JSON.stringify({ full_name: 'Updated Name', id: 'bad-id' })
+            });
+            const params = Promise.resolve({ uid: 'fb1' });
+            const response = await PATCH(request, { params });
+            const json = await response.json();
+
+            expect(updateMock).toHaveBeenCalledWith({ full_name: 'Updated Name' });
+            expect(json).toEqual({ data: mockUser, error: null });
+        });
+
         it('returns error on DB failure', async () => {
             const mockSingle = jest.fn().mockResolvedValue({ data: null, error: { message: 'DB Error' } });
 

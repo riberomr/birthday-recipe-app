@@ -14,11 +14,11 @@ describe('cn', () => {
 describe('getAverageRating', () => {
     it('should calculate average rating correctly', () => {
         const ratings: any[] = [{ rating: 5 }, { rating: 3 }];
-        expect(getAverageRating(ratings)).toEqual({ rating: 4, count: 2 });
+        expect(getAverageRating(ratings)).toBe(4);
     });
 
     it('should return 0 for empty ratings', () => {
-        expect(getAverageRating([])).toEqual({ rating: 0, count: 0 });
+        expect(getAverageRating([])).toBe(0);
     });
 });
 

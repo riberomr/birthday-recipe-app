@@ -39,7 +39,7 @@ describe('lib/api/ratings', () => {
                 json: async () => ({ data: { rating: 5 } })
             })
 
-            const rating = await getUserRating('user1', 'recipe1')
+            const rating = await getUserRating('recipe1')
             expect(rating).toBe(5)
             expect(global.fetch).toHaveBeenCalledWith('/api/ratings/recipe1/user', expect.objectContaining({
                 headers: {
@@ -54,14 +54,34 @@ describe('lib/api/ratings', () => {
                 status: 404
             })
 
-            const rating = await getUserRating('user1', 'recipe1')
+            const rating = await getUserRating('recipe1')
             expect(rating).toBe(0)
         })
 
         it('returns 0 when user is not authenticated', async () => {
             // @ts-ignore
             auth.currentUser = null
-            const rating = await getUserRating('user1', 'recipe1')
+            const rating = await getUserRating('recipe1')
+            expect(rating).toBe(0)
+        })
+
+        it('returns 0 on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const rating = await getUserRating('recipe1')
+            expect(rating).toBe(0)
+        })
+
+        it('returns 0 if data is null', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: null })
+            })
+
+            const rating = await getUserRating('recipe1')
             expect(rating).toBe(0)
         })
     })
@@ -108,6 +128,24 @@ describe('lib/api/ratings', () => {
 
             await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
         })
+
+        it('throws error if response is not ok and json parsing fails', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: false,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
+        })
+
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(upsertRating('recipe1', 5)).rejects.toThrow('Error saving rating')
+        })
     })
 
     describe('getRecipeRating', () => {
@@ -129,6 +167,27 @@ describe('lib/api/ratings', () => {
 
             const result = await getRecipeRating('recipe1')
             expect(console.error).toHaveBeenCalledWith('Error fetching recipe rating')
+            expect(result).toEqual({ average: 0, count: 0 })
+        })
+
+        it('returns 0 on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getRecipeRating('recipe1')
+            expect(console.error).toHaveBeenCalledWith('Error parsing recipe rating response:', expect.any(Error))
+            expect(result).toEqual({ average: 0, count: 0 })
+        })
+
+        it('returns default if data is null', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: null })
+            })
+
+            const result = await getRecipeRating('recipe1')
             expect(result).toEqual({ average: 0, count: 0 })
         })
     })

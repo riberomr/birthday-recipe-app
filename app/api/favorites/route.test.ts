@@ -111,21 +111,6 @@ describe('app/api/favorites/route', () => {
             (getProfileFromFirebase as jest.Mock).mockResolvedValue({ id: 'user-1' });
 
             const mockSingle = jest.fn().mockResolvedValue({ data: { id: 'fav-1' }, error: null });
-            const mockDelete = jest.fn().mockReturnThis();
-            const mockEq2 = jest.fn().mockResolvedValue({ error: null });
-
-            // We need to handle the chain: from -> delete -> eq -> eq
-            // But wait, the code is:
-            // supabaseAdmin.from("favorites").delete().eq(...).eq(...)
-
-            // Let's mock the chain properly
-            const mockChain = {
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: mockSingle,
-                delete: jest.fn().mockReturnThis(),
-                insert: jest.fn().mockReturnThis()
-            };
 
             // For the delete part, we need to ensure the last call returns the promise result
             // But here we are mocking everything to return `this`.

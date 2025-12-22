@@ -51,6 +51,28 @@ describe('lib/api/users', () => {
             expect(console.error).toHaveBeenCalledWith('Error fetching users')
             expect(result).toEqual([])
         })
+
+        it('getUsers returns empty array if data is null', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: null })
+            })
+
+            const result = await getUsers()
+            expect(result).toEqual([])
+        })
+
+        it('returns empty array on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getUsers()
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing users response:', expect.any(Error))
+            expect(result).toEqual([])
+        })
     })
 
     describe('getUsersWithRecipes', () => {
@@ -77,6 +99,28 @@ describe('lib/api/users', () => {
             expect(console.error).toHaveBeenCalledWith('Error fetching users with recipes')
             expect(result).toEqual([])
         })
+
+        it('getUsersWithRecipes returns empty array if data is null', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => ({ data: null })
+            })
+
+            const result = await getUsersWithRecipes()
+            expect(result).toEqual([])
+        })
+
+        it('returns empty array on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getUsersWithRecipes()
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing users with recipes response:', expect.any(Error))
+            expect(result).toEqual([])
+        })
     })
 
     describe('getUserProfile', () => {
@@ -101,6 +145,18 @@ describe('lib/api/users', () => {
             const result = await getUserProfile('fb1')
 
             expect(console.error).toHaveBeenCalledWith('Error fetching user profile')
+            expect(result).toBeNull()
+        })
+
+        it('returns null on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getUserProfile('fb1')
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing user profile response:', expect.any(Error))
             expect(result).toBeNull()
         })
     })
@@ -151,25 +207,17 @@ describe('lib/api/users', () => {
 
             await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('Error updating user profile')
         })
-    })
 
-    it('getUsers returns empty array if data is null', async () => {
-        ; (global.fetch as jest.Mock).mockResolvedValue({
-            ok: true,
-            json: async () => ({ data: null })
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            // @ts-ignore
+            auth.currentUser = { getIdToken: jest.fn().mockResolvedValue('token') }
+
+            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('Error al procesar la respuesta del servidor')
         })
-
-        const result = await getUsers()
-        expect(result).toEqual([])
-    })
-
-    it('getUsersWithRecipes returns empty array if data is null', async () => {
-        ; (global.fetch as jest.Mock).mockResolvedValue({
-            ok: true,
-            json: async () => ({ data: null })
-        })
-
-        const result = await getUsersWithRecipes()
-        expect(result).toEqual([])
     })
 })

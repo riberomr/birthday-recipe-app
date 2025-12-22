@@ -6,7 +6,12 @@ export async function getFavorites(userId: string): Promise<Recipe[]> {
     if (!response.ok) {
         throw new Error("Error fetching favorites");
     }
-    return response.json();
+    try {
+        return await response.json();
+    } catch (error) {
+        console.error("Error parsing favorites response:", error);
+        return [];
+    }
 }
 
 export async function toggleFavorite(recipeId: string): Promise<{ isFavorite: boolean }> {
@@ -26,5 +31,9 @@ export async function toggleFavorite(recipeId: string): Promise<{ isFavorite: bo
     if (!response.ok) {
         throw new Error("Error toggling favorite");
     }
-    return response.json();
+    try {
+        return await response.json();
+    } catch (error) {
+        throw new Error("Error toggling favorite");
+    }
 }

@@ -7,11 +7,14 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
 
-export function getAverageRating(ratings: Rating[]): AverageRating {
-    const totalRatings = ratings.length
-    const totalRating = ratings.reduce((acc, rating) => acc + rating.rating, 0)
-    const averageRating = totalRating / totalRatings
-    return { rating: averageRating || 0, count: totalRatings }
+export function getAverageRating(ratings: any[]): number {
+    if (!ratings || ratings.length === 0) {
+        return 0;
+    }
+    const totalRatings = ratings.length;
+    const totalRating = ratings.reduce((acc, rating) => acc + rating.rating, 0);
+    const averageRating = totalRating / totalRatings;
+    return averageRating;
 }
 
 export function scaleAmount(amount: string | null, factor: number): string {

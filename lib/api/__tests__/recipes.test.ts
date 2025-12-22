@@ -67,6 +67,18 @@ describe('lib/api/recipes', () => {
 
             expect(result).toEqual([])
         })
+
+        it('returns empty array on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getCategories()
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing categories response:', expect.any(Error))
+            expect(result).toEqual([])
+        })
     })
 
     describe('getRecipes', () => {
@@ -129,6 +141,18 @@ describe('lib/api/recipes', () => {
 
             expect(result).toEqual({ recipes: [], total: 0 })
         })
+
+        it('returns empty result on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getRecipes()
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing recipes response:', expect.any(Error))
+            expect(result).toEqual({ recipes: [], total: 0 })
+        })
     })
 
     describe('getRecipe', () => {
@@ -155,6 +179,18 @@ describe('lib/api/recipes', () => {
             expect(console.error).toHaveBeenCalledWith('Error fetching recipe')
             expect(result).toBeNull()
         })
+
+        it('returns null on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getRecipe('1')
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing recipe response:', expect.any(Error))
+            expect(result).toBeNull()
+        })
     })
 
     describe('getRecipeCommunityPhotos', () => {
@@ -179,6 +215,18 @@ describe('lib/api/recipes', () => {
             const result = await getRecipeCommunityPhotos('1')
 
             expect(console.error).toHaveBeenCalledWith('Error fetching community photos')
+            expect(result).toBeNull()
+        })
+
+        it('returns null on invalid JSON', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValue({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            const result = await getRecipeCommunityPhotos('1')
+
+            expect(console.error).toHaveBeenCalledWith('Error parsing community photos response:', expect.any(Error))
             expect(result).toBeNull()
         })
     })
@@ -229,6 +277,16 @@ describe('lib/api/recipes', () => {
 
             await expect(createRecipe(formData)).rejects.toThrow('Error desconocido al crear la receta')
         })
+
+        it('throws error on invalid JSON response', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => { throw new Error('Invalid JSON') }
+                })
+
+            await expect(createRecipe(formData)).rejects.toThrow('Error al procesar la respuesta del servidor')
+        })
     })
 
     describe('updateRecipe', () => {
@@ -278,6 +336,16 @@ describe('lib/api/recipes', () => {
 
             await expect(updateRecipe('1', formData)).rejects.toThrow('Error desconocido al actualizar la receta')
         })
+
+        it('throws error on invalid JSON response', async () => {
+            const formData = new FormData()
+                ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                    ok: true,
+                    json: async () => { throw new Error('Invalid JSON') }
+                })
+
+            await expect(updateRecipe('1', formData)).rejects.toThrow('Error al procesar la respuesta del servidor')
+        })
     })
 
     describe('deleteRecipe', () => {
@@ -321,6 +389,15 @@ describe('lib/api/recipes', () => {
 
             await expect(deleteRecipe('1')).rejects.toThrow('Error desconocido al eliminar la receta')
         })
+
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(deleteRecipe('1')).rejects.toThrow('Error al procesar la respuesta del servidor')
+        })
     })
 
     describe('deleteRecipePermanently', () => {
@@ -363,6 +440,15 @@ describe('lib/api/recipes', () => {
             })
 
             await expect(deleteRecipePermanently('1')).rejects.toThrow('Error desconocido al eliminar la receta permanentemente')
+        })
+
+        it('throws error on invalid JSON response', async () => {
+            ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+                ok: true,
+                json: async () => { throw new Error('Invalid JSON') }
+            })
+
+            await expect(deleteRecipePermanently('1')).rejects.toThrow('Error al procesar la respuesta del servidor')
         })
     })
 })

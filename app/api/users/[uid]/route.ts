@@ -36,9 +36,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ui
 
         const updates = await request.json();
 
+        // Ensure the request body is a plain object
+        if (updates === null || typeof updates !== "object" || Array.isArray(updates)) {
+            return NextResponse.json({ error: "Invalid update payload" }, { status: 400 });
+        }
+        // Remove fields that must not be user-editable
+        const forbiddenFields = ["id", "created_at", "firebase_uid"];
+        const safeUpdates: Record<string, unknown> = { ...updates };
+        for (const field of forbiddenFields) {
+            if (field in safeUpdates) {
+                delete (safeUpdates as any)[field];
+            }
+        }
+        // If nothing remains after sanitization, there's nothing to update
+        if (Object.keys(safeUpdates).length === 0) {
+            return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+        }
         const { data, error } = await supabaseAdmin
             .from("profiles")
-            .update(updates)
+            .update(safeUpdates)
             .eq("firebase_uid", uid)
             .select()
             .single();

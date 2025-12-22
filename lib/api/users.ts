@@ -7,8 +7,13 @@ export async function getUsers(): Promise<Profile[]> {
         console.error("Error fetching users");
         return [];
     }
-    const { data } = await response.json();
-    return data || [];
+    try {
+        const { data } = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error("Error parsing users response:", error);
+        return [];
+    }
 }
 
 export async function getUsersWithRecipes(): Promise<
@@ -19,8 +24,13 @@ export async function getUsersWithRecipes(): Promise<
         console.error("Error fetching users with recipes");
         return [];
     }
-    const { data } = await response.json();
-    return data || [];
+    try {
+        const { data } = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error("Error parsing users with recipes response:", error);
+        return [];
+    }
 }
 
 export async function getUserProfile(firebaseUid: string): Promise<Profile | null> {
@@ -29,8 +39,13 @@ export async function getUserProfile(firebaseUid: string): Promise<Profile | nul
         console.error("Error fetching user profile");
         return null;
     }
-    const { data } = await response.json();
-    return data;
+    try {
+        const { data } = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error parsing user profile response:", error);
+        return null;
+    }
 }
 
 export async function updateUserProfile(firebaseUid: string, updates: Partial<Profile>): Promise<Profile | null> {
@@ -47,11 +62,16 @@ export async function updateUserProfile(firebaseUid: string, updates: Partial<Pr
         body: JSON.stringify(updates)
     });
 
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
+
     if (!response.ok) {
-        const result = await response.json();
         throw new Error(result.error || "Error updating user profile");
     }
 
-    const { data } = await response.json();
-    return data;
+    return result.data;
 }

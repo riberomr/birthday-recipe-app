@@ -7,8 +7,13 @@ export async function getCategories(): Promise<RecipeCategory[]> {
         console.error("Error fetching categories");
         return [];
     }
-    const { data } = await response.json();
-    return data || [];
+    try {
+        const { data } = await response.json();
+        return data || [];
+    } catch (error) {
+        console.error("Error parsing categories response:", error);
+        return [];
+    }
 }
 
 export type RecipeFilters = {
@@ -43,8 +48,13 @@ export async function getRecipes(
         return { recipes: [], total: 0 };
     }
 
-    const { data } = await response.json();
-    return { recipes: data.recipes || [], total: data.total || 0 };
+    try {
+        const { data } = await response.json();
+        return { recipes: data.recipes || [], total: data.total || 0 };
+    } catch (error) {
+        console.error("Error parsing recipes response:", error);
+        return { recipes: [], total: 0 };
+    }
 }
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
@@ -55,8 +65,13 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
         return null;
     }
 
-    const { data } = await response.json();
-    return data;
+    try {
+        const { data } = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error parsing recipe response:", error);
+        return null;
+    }
 }
 
 type RecipeCommunityPhoto = {
@@ -70,8 +85,13 @@ export async function getRecipeCommunityPhotos(recipeId: string): Promise<Recipe
         return null;
     }
 
-    const { data } = await response.json();
-    return data;
+    try {
+        const { data } = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error parsing community photos response:", error);
+        return null;
+    }
 }
 
 export async function createRecipe(formData: FormData) {
@@ -87,7 +107,12 @@ export async function createRecipe(formData: FormData) {
         body: formData,
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al crear la receta');
@@ -112,7 +137,12 @@ export async function updateRecipe(recipeId: string, formData: FormData) {
         body: formData,
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al actualizar la receta');
@@ -147,7 +177,12 @@ export async function deleteRecipe(id: string) {
         }
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al eliminar la receta');
@@ -182,7 +217,12 @@ export async function deleteRecipePermanently(id: string) {
         }
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al eliminar la receta permanentemente');

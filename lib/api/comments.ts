@@ -16,8 +16,13 @@ export async function getComments(recipeId: string, page: number = 1, limit: num
         return { comments: [], total: 0 };
     }
 
-    const { data } = await response.json();
-    return { comments: data.comments || [], total: data.total || 0 };
+    try {
+        const { data } = await response.json();
+        return { comments: data.comments || [], total: data.total || 0 };
+    } catch (error) {
+        console.error("Error parsing comments response:", error);
+        return { comments: [], total: 0 };
+    }
 }
 
 export async function postComment(formData: FormData): Promise<Comment> {
@@ -36,7 +41,12 @@ export async function postComment(formData: FormData): Promise<Comment> {
         body: formData,
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error al publicar comentario');
@@ -57,7 +67,12 @@ export async function deleteComment(id: string): Promise<void> {
         }
     });
 
-    const result = await response.json();
+    let result;
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error('Error al procesar la respuesta del servidor');
+    }
 
     if (!response.ok) {
         throw new Error(result.error || 'Error desconocido al eliminar el comentario');
