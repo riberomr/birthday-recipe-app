@@ -3,15 +3,36 @@
 import { useModalContext } from "@/lib/contexts/ModalContext"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export function DeleteConfirmationModal() {
     const { isModalOpen, closeModal, getModalData } = useModalContext()
     const isOpen = isModalOpen("delete-confirmation")
     const data = getModalData("delete-confirmation")
+    const { onConfirm, title, description } = data || {}
+    const [isLoading, setIsLoading] = useState(false)
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIsLoading(false)
+        }
+    }, [isOpen])
 
     if (!isOpen) return null
 
-    const { onConfirm, title, description, isDeleting } = data || {}
+    const handleConfirm = async () => {
+        if (!onConfirm) return
+
+        setIsLoading(true)
+        try {
+            await onConfirm()
+            closeModal("delete-confirmation")
+        } catch (error) {
+            console.error("Error in delete confirmation:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -34,17 +55,17 @@ export function DeleteConfirmationModal() {
                             variant="outline"
                             className="flex-1 rounded-xl h-12 text-base"
                             onClick={() => closeModal("delete-confirmation")}
-                            disabled={isDeleting}
+                            disabled={isLoading}
                         >
                             Cancelar
                         </Button>
                         <Button
                             variant="destructive"
                             className="flex-1 rounded-xl h-12 text-base shadow-lg shadow-destructive/20"
-                            onClick={onConfirm}
-                            disabled={isDeleting}
+                            onClick={handleConfirm}
+                            disabled={isLoading}
                         >
-                            {isDeleting ? "Eliminando..." : "Eliminar"}
+                            {isLoading ? "Eliminando..." : "Eliminar"}
                         </Button>
                     </div>
                 </div>

@@ -144,17 +144,24 @@ describe('CommentForm', () => {
         expect(global.URL.revokeObjectURL).toHaveBeenCalled();
     });
 
-    it('shows loading state', () => {
-        mockUseCreateComment.mockReturnValue({
-            mutate: mockMutate,
-            isPending: true,
-        });
+    it('shows loading state', async () => {
+        mockMutate.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
         render(<CommentForm recipeId="recipe1" />);
 
+        fireEvent.change(screen.getByPlaceholderText('Escribe un comentario...'), {
+            target: { value: 'Test' },
+        });
+
         const submitButton = screen.getByTestId('submit-button');
+        fireEvent.click(submitButton);
+
         expect(submitButton).toBeDisabled();
         expect(submitButton).toHaveTextContent('Publicando...');
+
+        await waitFor(() => {
+            expect(mockMutate).toHaveBeenCalled();
+        });
     });
 
     it('handles submission error', async () => {

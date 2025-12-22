@@ -53,16 +53,22 @@ describe("DeleteConfirmationModal", () => {
         expect(mockOnConfirm).toHaveBeenCalled()
     })
 
-    it("shows loading state when isDeleting is true", () => {
-        ; (useModalContext as jest.Mock).mockReturnValue({
-            isModalOpen: jest.fn().mockReturnValue(true),
-            closeModal: mockCloseModal,
-            getModalData: jest.fn().mockReturnValue({
-                onConfirm: mockOnConfirm,
-                isDeleting: true
+    it("shows loading state when confirming", async () => {
+        const delayedConfirm = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
+
+            ; (useModalContext as jest.Mock).mockReturnValue({
+                isModalOpen: jest.fn().mockReturnValue(true),
+                closeModal: mockCloseModal,
+                getModalData: jest.fn().mockReturnValue({
+                    onConfirm: delayedConfirm,
+                })
             })
-        })
+
         render(<DeleteConfirmationModal />)
+
+        const deleteBtn = screen.getByText("Eliminar")
+        fireEvent.click(deleteBtn)
+
         expect(screen.getByText("Eliminando...")).toBeInTheDocument()
         expect(screen.getByText("Cancelar")).toBeDisabled()
         expect(screen.getByText("Eliminando...")).toBeDisabled()
@@ -81,5 +87,63 @@ describe("DeleteConfirmationModal", () => {
         expect(
             screen.getByText(/¿Estás seguro de que quieres eliminar esta receta\?/)
         ).toBeInTheDocument()
+    })
+
+    it("handles error during confirmation", async () => {
+        const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => { })
+        const error = new Error("Delete failed")
+        const mockRejectConfirm = jest.fn().mockRejectedValue(error)
+
+            ; (useModalContext as jest.Mock).mockReturnValue({
+                isModalOpen: jest.fn().mockReturnValue(true),
+                closeModal: jest.fn(),
+                getModalData: jest.fn().mockReturnValue({
+                    onConfirm: mockRejectConfirm,
+                })
+            })
+
+        render(<DeleteConfirmationModal />)
+
+        fireEvent.click(screen.getByText("Eliminar"))
+
+        // Wait for async action
+        await screen.findByText("Eliminar")
+
+        expect(consoleSpy).toHaveBeenCalledWith("Error in delete confirmation:", error)
+        expect(screen.getByText("Eliminar")).toBeEnabled()
+
+        consoleSpy.mockRestore()
+    })
+
+    it("resets loading state when modal closes", async () => {
+        // 1. Start with modal open and loading
+        const delayedConfirm = jest.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
+        const mockCloseModal = jest.fn()
+        const mockIsModalOpen = jest.fn().mockReturnValue(true)
+
+            ; (useModalContext as jest.Mock).mockReturnValue({
+                isModalOpen: mockIsModalOpen,
+                closeModal: mockCloseModal,
+                getModalData: jest.fn().mockReturnValue({
+                    onConfirm: delayedConfirm,
+                })
+            })
+
+        const { rerender } = render(<DeleteConfirmationModal />)
+
+        fireEvent.click(screen.getByText("Eliminar"))
+        expect(screen.getByText("Eliminando...")).toBeInTheDocument()
+
+        // 2. Close modal
+        mockIsModalOpen.mockReturnValue(false)
+        rerender(<DeleteConfirmationModal />)
+
+        // 3. Re-open modal
+        mockIsModalOpen.mockReturnValue(true)
+        rerender(<DeleteConfirmationModal />)
+
+        // Should be reset to "Eliminar"
+        expect(screen.getByText("Eliminar")).toBeInTheDocument()
+        expect(screen.queryByText("Eliminando...")).not.toBeInTheDocument()
     })
 })

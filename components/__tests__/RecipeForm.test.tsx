@@ -211,15 +211,36 @@ describe('RecipeForm', () => {
         })
     })
 
-    it('shows loading state during submission', () => {
-        ; (useCreateRecipe as jest.Mock).mockReturnValue({
-            mutateAsync: mockCreateMutateAsync,
-            isPending: true,
-        })
+    it('shows loading state during submission', async () => {
+        const user = userEvent.setup()
+
+        // Mock mutate to hang so we can check loading state
+        mockCreateMutateAsync.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
 
         render(<RecipeForm />)
+
+        // Fill required fields to enable submission
+        await user.type(screen.getByPlaceholderText('Ej: Pastel de Fresas Kawaii'), 'Test Recipe')
+        await user.type(screen.getByPlaceholderText('Cuéntanos un poco sobre esta delicia...'), 'Description')
+        const inputs = screen.getAllByRole('spinbutton')
+        await user.type(inputs[0], '10')
+        await user.type(inputs[1], '20')
+        await user.type(inputs[2], '4')
+        await user.type(screen.getByPlaceholderText('Ingrediente'), 'Flour')
+        await user.type(screen.getByPlaceholderText('Paso 1'), 'Mix')
+
+        // Click submit
+        const submitBtn = screen.getByText('Guardar Receta')
+        await user.click(submitBtn)
+
+        // Check for loading state
         expect(screen.getByText('Guardando...')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: /Guardando/i })).toBeDisabled()
+
+        // Wait for it to finish to avoid "act" warnings
+        await waitFor(() => {
+            expect(mockCreateMutateAsync).toHaveBeenCalled()
+        })
     })
 
     it('filters out partial nutrition fields', async () => {

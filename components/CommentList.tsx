@@ -50,23 +50,21 @@ export function CommentList({ recipeId, recipeOwnerId }: CommentListProps) {
     const comments = data?.comments || []
     const total = data?.total || 0
 
-    const { mutate: deleteComment } = useDeleteComment(recipeId)
+    const { mutateAsync: deleteComment } = useDeleteComment(recipeId)
     const { open: openDeleteModal, close: closeDeleteModal } = useModal('delete-confirmation')
 
     const handleDeleteComment = (commentId: string) => {
         openDeleteModal({
             title: "¿Eliminar comentario?",
             description: "¿Estás seguro de que quieres eliminar este comentario? Esta acción no se puede deshacer.",
-            onConfirm: () => {
-                deleteComment(commentId, {
-                    onSuccess: () => {
-                        showSnackbar("Comentario eliminado", "success")
-                        closeDeleteModal()
-                    },
-                    onError: (error: any) => {
-                        showSnackbar(error.message || "Error al eliminar comentario", "error")
-                    }
-                })
+            onConfirm: async () => {
+                try {
+                    await deleteComment(commentId)
+                    showSnackbar("Comentario eliminado", "success")
+                } catch (error: any) {
+                    showSnackbar(error.message || "Error al eliminar comentario", "error")
+                    throw error
+                }
             }
         })
     }

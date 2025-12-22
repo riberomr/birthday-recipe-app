@@ -22,7 +22,8 @@ export function CommentForm({ recipeId }: CommentFormProps) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
     const { open: openLoginModal } = useModal('login-confirmation')
 
-    const { mutate: createComment, isPending } = useCreateComment()
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const { mutate: createComment } = useCreateComment()
 
     // Cleanup preview URL
     useEffect(() => {
@@ -52,6 +53,8 @@ export function CommentForm({ recipeId }: CommentFormProps) {
 
         if (!user) return
 
+        setIsSubmitting(true)
+
         try {
             const formData = new FormData()
             formData.append('content', comment)
@@ -68,15 +71,18 @@ export function CommentForm({ recipeId }: CommentFormProps) {
                     setComment("")
                     clearImage()
                     showSnackbar("¡Comentario publicado!", "success")
+                    setIsSubmitting(false)
                 },
                 onError: (error: any) => {
                     console.error("Error saving comment:", error)
                     showSnackbar(error.message || "Error al publicar comentario", "error")
+                    setIsSubmitting(false)
                 }
             })
         } catch (error: any) {
             console.error("Error preparing comment:", error)
             showSnackbar(error.message || "Error al preparar comentario", "error")
+            setIsSubmitting(false)
         }
     }
 
@@ -157,10 +163,10 @@ export function CommentForm({ recipeId }: CommentFormProps) {
                     <Button
                         data-testid="submit-button"
                         type="submit"
-                        disabled={(!comment.trim() && !selectedImage) || isPending}
+                        disabled={(!comment.trim() && !selectedImage) || isSubmitting}
                         className="bg-primary [@media(hover:hover)]:hover:bg-primary/90 text-primary-foreground"
                     >
-                        {isPending ? "Publicando..." : <Send className="w-4 h-4" />}
+                        {isSubmitting ? "Publicando..." : <Send className="w-4 h-4" />}
                     </Button>
                 </div>
             </div>

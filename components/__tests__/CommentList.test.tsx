@@ -32,7 +32,7 @@ describe('CommentList', () => {
             error: null,
         });
         mockUseDeleteComment.mockReturnValue({
-            mutate: mockDeleteMutate,
+            mutateAsync: mockDeleteMutate,
         });
         mockUseAuth.mockReturnValue({
             profile: { id: 'user1' },
@@ -198,19 +198,13 @@ describe('CommentList', () => {
 
         // Simulate confirm
         const { onConfirm } = mockOpenDeleteModal.mock.calls[0][0];
-        onConfirm();
+        await onConfirm();
 
-        expect(mockDeleteMutate).toHaveBeenCalledWith('1', expect.any(Object));
-
-        // Simulate success callback
-        const { onSuccess } = mockDeleteMutate.mock.calls[0][1];
-        onSuccess();
-
+        expect(mockDeleteMutate).toHaveBeenCalledWith('1');
         expect(mockShowSnackbar).toHaveBeenCalledWith('Comentario eliminado', 'success');
-        expect(mockCloseDeleteModal).toHaveBeenCalled();
     });
 
-    it('handles delete error', () => {
+    it('handles delete error', async () => {
         mockUseComments.mockReturnValue({
             data: {
                 comments: [{ id: '1', content: 'Test', created_at: '', user_id: 'user1' }],
@@ -220,15 +214,13 @@ describe('CommentList', () => {
             error: null,
         });
 
+        mockDeleteMutate.mockRejectedValue(new Error('Delete failed'));
+
         render(<CommentList recipeId="recipe1" recipeOwnerId="owner1" />);
 
         fireEvent.click(screen.getByLabelText('Eliminar comentario'));
         const { onConfirm } = mockOpenDeleteModal.mock.calls[0][0];
-        onConfirm();
-
-        // Simulate error callback
-        const { onError } = mockDeleteMutate.mock.calls[0][1];
-        onError(new Error('Delete failed'));
+        await expect(onConfirm()).rejects.toThrow("Delete failed");
 
         expect(mockShowSnackbar).toHaveBeenCalledWith('Delete failed', 'error');
     });
