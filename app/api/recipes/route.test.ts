@@ -62,7 +62,7 @@ describe('app/api/recipes/route', () => {
         const response = await GET(request);
         const json = await response.json();
 
-        expect(json.data.recipes[0].average_rating).toBe(0);
+        expect(json.data.recipes[0].average_rating).toEqual({ count: 0, rating: 0 });
     });
 
     it('GET returns empty list if no recipes found', async () => {

@@ -1,6 +1,7 @@
 
 import { auth } from "@/lib/firebase/client";
 import { Comment } from "@/types";
+import { getBaseUrl } from "@/lib/utils";
 
 export async function getComments(recipeId: string, page: number = 1, limit: number = 5): Promise<{ comments: Comment[], total: number }> {
     const params = new URLSearchParams({
@@ -9,7 +10,7 @@ export async function getComments(recipeId: string, page: number = 1, limit: num
         limit: limit.toString()
     });
 
-    const response = await fetch(`/api/comments?${params.toString()}`);
+    const response = await fetch(`${getBaseUrl()}/api/comments?${params.toString()}`);
 
     if (!response.ok) {
         console.error("Error fetching comments");
@@ -33,7 +34,7 @@ export async function postComment(formData: FormData): Promise<Comment> {
 
     const token = await user.getIdToken();
 
-    const response = await fetch('/api/comments/create', {
+    const response = await fetch(`${getBaseUrl()}/api/comments/create`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -60,7 +61,7 @@ export async function deleteComment(id: string): Promise<void> {
     if (!user) throw new Error("Usuario no autenticado");
     const token = await user.getIdToken();
 
-    const response = await fetch(`/api/comments/${id}/delete`, {
+    const response = await fetch(`${getBaseUrl()}/api/comments/${id}/delete`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`

@@ -48,7 +48,7 @@ describe('app/api/favorites/route', () => {
 
             expect(supabaseAdmin.from).toHaveBeenCalledWith('favorites');
             expect(json).toHaveLength(1);
-            expect(json[0].average_rating).toEqual({ rating: 5, count: 1 });
+            expect(json[0].average_rating).toEqual({ count: 1, rating: 5 });
         });
 
         it('returns error on failure', async () => {

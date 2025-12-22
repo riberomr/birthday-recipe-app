@@ -65,7 +65,7 @@ describe('app/api/recipes/[id]/route', () => {
         const response = await GET(request, { params });
         const json = await response.json();
 
-        expect(json.data.average_rating).toBe(0);
+        expect(json.data.average_rating).toEqual({ count: 0, rating: 0 });
         expect(json.data.recipe_steps).toBeNull();
     });
 

@@ -39,7 +39,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ data: null, error: null });
         }
 
-        data.average_rating = getAverageRating(data.ratings || []);
+        data.average_rating = getAverageRating(data.ratings || [])
 
         // Sort steps by order
         if (data.recipe_steps) {
