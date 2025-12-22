@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
-
-function getAverageRating(ratings: any[]): number {
-    const totalRatings = ratings.length;
-    const totalRating = ratings.reduce((acc, rating) => acc + rating.rating, 0);
-    const averageRating = totalRating / totalRatings;
-    return averageRating || 0;
-}
+import { getAverageRating } from '@/lib/utils';
 
 export async function GET(request: Request) {
     try {

@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { getUserFromRequest, getProfileFromFirebase } from '@/lib/auth/requireAuth';
-
-function getAverageRating(ratings: any[]) {
-    if (!ratings || ratings.length === 0) return { rating: 0, count: 0 };
-    const totalRating = ratings.reduce((acc, curr) => acc + curr.rating, 0);
-    return {
-        rating: totalRating / ratings.length,
-        count: ratings.length
-    };
-}
+import { getAverageRating } from '@/lib/utils';
 
 export async function GET(request: Request) {
     try {
