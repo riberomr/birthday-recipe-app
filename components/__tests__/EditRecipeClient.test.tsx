@@ -17,12 +17,27 @@ jest.mock('@/components/RecipeForm', () => ({
     )
 }))
 
+// Mock Snackbar
+const mockShowSnackbar = jest.fn()
+jest.mock('@/components/ui/Snackbar', () => ({
+    useSnackbar: () => ({
+        showSnackbar: mockShowSnackbar
+    })
+}))
+
+// Mock AuthContext
+const mockUseAuth = jest.fn()
+jest.mock('@/components/AuthContext', () => ({
+    useAuth: () => mockUseAuth()
+}))
+
 describe('EditRecipeClient', () => {
     const mockRouter = { push: jest.fn() }
 
     beforeEach(() => {
         jest.clearAllMocks();
         (useRouter as jest.Mock).mockReturnValue(mockRouter);
+        mockUseAuth.mockReturnValue({ profile: { id: 'user1' } })
     })
 
     it('renders loading state', () => {
@@ -34,11 +49,7 @@ describe('EditRecipeClient', () => {
 
         render(<EditRecipeClient id="1" />)
         // Check for loading spinner or container
-        expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument() // Assuming spinner has role status or we check container class
-        // Since we don't have role status on the spinner div, let's check by class or structure if needed, 
-        // but typically we can check for absence of other elements or presence of specific loading UI.
-        // The current implementation has a div with "animate-spin".
-        // Let's just check if it renders without crashing and doesn't show form or error.
+        expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument()
         expect(screen.queryByTestId('recipe-form')).not.toBeInTheDocument()
         expect(screen.queryByText('Receta no encontrada 😢')).not.toBeInTheDocument()
     })
@@ -88,5 +99,19 @@ describe('EditRecipeClient', () => {
         expect(screen.getByTestId('recipe-form')).toBeInTheDocument()
         expect(screen.getByTestId('recipe-title')).toHaveTextContent('Delicious Cake')
         expect(screen.getByTestId('is-editing')).toHaveTextContent('true')
+    })
+
+    it('redirects to recipes if user is not authenticated', () => {
+        mockUseAuth.mockReturnValue({ profile: null });
+        (useRecipe as jest.Mock).mockReturnValue({
+            data: { id: '1', title: 'Test' },
+            isLoading: false,
+            isError: false
+        })
+
+        render(<EditRecipeClient id="1" />)
+
+        expect(mockShowSnackbar).toHaveBeenCalledWith("Debes iniciar sesión para editar una receta", "error")
+        expect(mockRouter.push).toHaveBeenCalledWith("/recipes")
     })
 })
