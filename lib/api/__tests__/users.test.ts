@@ -1,235 +1,292 @@
-import { getUsers, getUsersWithRecipes, getUserProfile, updateUserProfile } from '../users'
+import { initProfile, getUsers, getUsersWithRecipes, getUserProfile, updateUserProfile } from '../users'
+import { User } from 'firebase/auth'
 import { auth } from '@/lib/firebase/client'
 
-// Mock Firebase Auth
-jest.mock('@/lib/firebase/client', () => ({
-    auth: {
-        currentUser: {
-            getIdToken: jest.fn().mockResolvedValue('mock-token')
-        }
-    }
-}))
-
-// Mock global fetch
+// Mock fetch
 global.fetch = jest.fn()
 
-// Mock console.error to avoid noise in tests
-const originalConsoleError = console.error
-beforeAll(() => {
-    console.error = jest.fn()
-})
-afterAll(() => {
-    console.error = originalConsoleError
-})
+// Mock Firebase auth
+jest.mock('@/lib/firebase/client', () => ({
+    auth: {
+        currentUser: null,
+    },
+}))
 
-describe('lib/api/users', () => {
+describe('initProfile', () => {
+    const mockUser = {
+        uid: 'test-uid',
+        getIdToken: jest.fn().mockResolvedValue('test-token'),
+    } as unknown as User
+
     beforeEach(() => {
         jest.clearAllMocks()
     })
 
-    describe('getUsers', () => {
-        it('fetches users successfully', async () => {
-            const mockUsers = [{ id: '1', full_name: 'User 1' }]
-                ; (global.fetch as jest.Mock).mockResolvedValue({
-                    ok: true,
-                    json: async () => ({ data: mockUsers })
-                })
-
-            const result = await getUsers()
-
-            expect(global.fetch).toHaveBeenCalledWith('/api/users')
-            expect(result).toEqual(mockUsers)
-        })
-
-        it('returns empty array on error', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: false
-            })
-
-            const result = await getUsers()
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching users')
-            expect(result).toEqual([])
-        })
-
-        it('getUsers returns empty array if data is null', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => ({ data: null })
-            })
-
-            const result = await getUsers()
-            expect(result).toEqual([])
-        })
-
-        it('returns empty array on invalid JSON', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => { throw new Error('Invalid JSON') }
-            })
-
-            const result = await getUsers()
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing users:', expect.any(Error))
-            expect(result).toEqual([])
-        })
+    it('returns null if user is null', async () => {
+        const result = await initProfile(null)
+        expect(result).toBeNull()
     })
 
-    describe('getUsersWithRecipes', () => {
-        it('fetches users with recipes successfully', async () => {
-            const mockUsers = [{ id: '1', full_name: 'User 1', recipe_count: 5 }]
-                ; (global.fetch as jest.Mock).mockResolvedValue({
-                    ok: true,
-                    json: async () => ({ data: mockUsers })
-                })
-
-            const result = await getUsersWithRecipes()
-
-            expect(global.fetch).toHaveBeenCalledWith('/api/users?withRecipes=true')
-            expect(result).toEqual(mockUsers)
+    it('returns user profile on success', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ user: { id: '1', firebase_uid: 'test-uid' } }),
         })
 
-        it('returns empty array on error', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: false
+        const result = await initProfile(mockUser)
+        expect(result).toEqual({ id: '1', firebase_uid: 'test-uid' })
+        expect(mockUser.getIdToken).toHaveBeenCalled()
+        expect(global.fetch).toHaveBeenCalledWith('/api/me', expect.objectContaining({
+            headers: expect.objectContaining({
+                'Authorization': 'Bearer test-token'
             })
-
-            const result = await getUsersWithRecipes()
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching users with recipes')
-            expect(result).toEqual([])
-        })
-
-        it('getUsersWithRecipes returns empty array if data is null', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => ({ data: null })
-            })
-
-            const result = await getUsersWithRecipes()
-            expect(result).toEqual([])
-        })
-
-        it('returns empty array on invalid JSON', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => { throw new Error('Invalid JSON') }
-            })
-
-            const result = await getUsersWithRecipes()
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing users with recipes:', expect.any(Error))
-            expect(result).toEqual([])
-        })
+        }))
     })
 
-    describe('getUserProfile', () => {
-        it('fetches user profile successfully', async () => {
-            const mockUser = { id: '1', full_name: 'Test User' }
-                ; (global.fetch as jest.Mock).mockResolvedValue({
-                    ok: true,
-                    json: async () => ({ data: mockUser })
-                })
-
-            const result = await getUserProfile('fb1')
-
-            expect(global.fetch).toHaveBeenCalledWith('/api/users/fb1')
-            expect(result).toEqual(mockUser)
+    it('returns null if fetch fails', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: false,
         })
 
-        it('returns null on error', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: false
-            })
-
-            const result = await getUserProfile('fb1')
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching user profile')
-            expect(result).toBeNull()
-        })
-
-        it('returns null on invalid JSON', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => { throw new Error('Invalid JSON') }
-            })
-
-            const result = await getUserProfile('fb1')
-
-            expect(console.error).toHaveBeenCalledWith('Error fetching or parsing user profile:', expect.any(Error))
-            expect(result).toBeNull()
-        })
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await initProfile(mockUser)
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith('Error initializing user profile')
+        consoleError.mockRestore()
     })
 
-    describe('updateUserProfile', () => {
-        it('updates user profile successfully', async () => {
-            const mockUser = { id: '1', full_name: 'Updated User' }
-                ; (global.fetch as jest.Mock).mockResolvedValue({
-                    ok: true,
-                    json: async () => ({ data: mockUser })
-                })
+    it('returns null if fetch throws', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
 
-            const result = await updateUserProfile('fb1', { full_name: 'Updated User' })
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await initProfile(mockUser)
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith('Network error')
+        consoleError.mockRestore()
+    })
 
-            expect(global.fetch).toHaveBeenCalledWith('/api/users/fb1', expect.objectContaining({
-                method: 'PATCH',
-                body: JSON.stringify({ full_name: 'Updated User' }),
-                headers: expect.objectContaining({
-                    'Authorization': 'Bearer mock-token'
-                })
-            }))
-            expect(result).toEqual(mockUser)
+    it('returns null if json parsing fails', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => { throw new Error('Invalid JSON') },
         })
 
-        it('throws generic error on unknown error', async () => {
-            ; (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await initProfile(mockUser)
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith('Invalid JSON')
+        consoleError.mockRestore()
+    })
 
-            await expect(updateUserProfile('fb1', {})).rejects.toThrow('Network error')
+    it('logs default error if exception message is missing', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue({})
+
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await initProfile(mockUser)
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalledWith('Error initializing user profile')
+        consoleError.mockRestore()
+    })
+
+    it('returns null if json.user is missing', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({}),
         })
 
-        it('throws default error message on unknown error without message', async () => {
-            ; (global.fetch as jest.Mock).mockRejectedValue(new Error())
+        const result = await initProfile(mockUser)
+        expect(result).toBeNull()
+    })
+})
 
-            await expect(updateUserProfile('fb1', {})).rejects.toThrow('Error updating user profile')
+describe('getUsers', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('returns users on success', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: [{ id: '1' }] }),
         })
 
-        it('throws error on update failure', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: false,
-                json: async () => ({ error: 'Update Error' })
-            })
+        const result = await getUsers()
+        expect(result).toEqual([{ id: '1' }])
+        expect(global.fetch).toHaveBeenCalledWith('/api/users')
+    })
 
-            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('Update Error')
+    it('returns empty array on error', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({ ok: false })
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUsers()
+        expect(result).toEqual([])
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
+
+    it('returns empty array on exception', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUsers()
+        expect(result).toEqual([])
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
+
+    it('returns empty array if data is null', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: null }),
+        })
+        const result = await getUsers()
+        expect(result).toEqual([])
+    })
+})
+
+describe('getUsersWithRecipes', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('returns users with recipes on success', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: [{ id: '1', recipe_count: 5 }] }),
         })
 
-        it('throws error if user not authenticated', async () => {
-            // @ts-ignore
-            auth.currentUser = null
-            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('User not authenticated')
+        const result = await getUsersWithRecipes()
+        expect(result).toEqual([{ id: '1', recipe_count: 5 }])
+        expect(global.fetch).toHaveBeenCalledWith('/api/users?withRecipes=true')
+    })
+
+    it('returns empty array on error', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({ ok: false })
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUsersWithRecipes()
+        expect(result).toEqual([])
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
+
+    it('returns empty array on exception', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUsersWithRecipes()
+        expect(result).toEqual([])
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
+
+    it('returns empty array if data is null', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: null }),
+        })
+        const result = await getUsersWithRecipes()
+        expect(result).toEqual([])
+    })
+})
+
+describe('getUserProfile', () => {
+    beforeEach(() => {
+        jest.clearAllMocks()
+    })
+
+    it('returns profile on success', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: { id: '1' } }),
         })
 
-        it('throws default error on update failure without message', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: false,
-                json: async () => ({})
-            })
+        const result = await getUserProfile('uid-123')
+        expect(result).toEqual({ id: '1' })
+        expect(global.fetch).toHaveBeenCalledWith('/api/users/uid-123')
+    })
 
-            // @ts-ignore
-            auth.currentUser = { getIdToken: jest.fn().mockResolvedValue('token') }
+    it('returns null on error', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({ ok: false })
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUserProfile('uid-123')
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
 
-            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('Error updating user profile')
+    it('returns null on exception', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+        const consoleError = jest.spyOn(console, 'error').mockImplementation()
+        const result = await getUserProfile('uid-123')
+        expect(result).toBeNull()
+        expect(consoleError).toHaveBeenCalled()
+        consoleError.mockRestore()
+    })
+})
+
+describe('updateUserProfile', () => {
+    const mockUser = {
+        getIdToken: jest.fn().mockResolvedValue('test-token'),
+    }
+
+    beforeEach(() => {
+        jest.clearAllMocks()
+        // @ts-ignore
+        auth.currentUser = mockUser
+    })
+
+    it('throws if user not authenticated', async () => {
+        // @ts-ignore
+        auth.currentUser = null
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('User not authenticated')
+    })
+
+    it('updates profile on success', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ data: { id: '1', name: 'Updated' } }),
         })
 
-        it('throws error on invalid JSON response', async () => {
-            ; (global.fetch as jest.Mock).mockResolvedValue({
-                ok: true,
-                json: async () => { throw new Error('Invalid JSON') }
-            })
+        const result = await updateUserProfile('uid-123', { full_name: 'Updated' })
+        expect(result).toEqual({ id: '1', name: 'Updated' })
+        expect(global.fetch).toHaveBeenCalledWith('/api/users/uid-123', expect.objectContaining({
+            method: 'PATCH',
+            body: JSON.stringify({ full_name: 'Updated' })
+        }))
+    })
 
-            // @ts-ignore
-            auth.currentUser = { getIdToken: jest.fn().mockResolvedValue('token') }
-
-            await expect(updateUserProfile('fb1', { full_name: 'Updated User' })).rejects.toThrow('Error al procesar la respuesta del servidor')
+    it('throws on API error', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: false,
+            json: async () => ({ error: 'Update failed' }),
         })
+
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('Update failed')
+    })
+
+    it('throws on JSON parse error', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => { throw new Error('Invalid JSON') },
+        })
+
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('Error al procesar la respuesta del servidor')
+    })
+
+    it('throws on network error', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'))
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('Network error')
+    })
+
+    it('throws default error if API error message is missing', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: false,
+            json: async () => ({}),
+        })
+
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('Error updating user profile')
+    })
+
+    it('throws default error if network error message is missing', async () => {
+        (global.fetch as jest.Mock).mockRejectedValue({})
+        await expect(updateUserProfile('uid-123', {})).rejects.toThrow('Error updating user profile')
     })
 })

@@ -6,17 +6,31 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
+import { useRecipe } from "@/hooks/queries/useRecipe"
 
 interface CookingModeClientProps {
-    steps: RecipeStep[]
+
     recipeId: string
-    recipeTitle: string
 }
 
-export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeClientProps) {
+export function CookingModeClient({ recipeId }: CookingModeClientProps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0)
     const router = useRouter()
+
+    const { data: recipe, isLoading, isError } = useRecipe(recipeId)
+
+    if (isLoading) {
+        return (
+            <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+            </div>
+        )
+    }
+
+    if (isError || !recipe || !recipe.recipe_steps || recipe.recipe_steps.length === 0) {
+        notFound()
+    }
 
     // Wake Lock API
     useEffect(() => {
@@ -41,9 +55,9 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
         }
     }, [])
 
-    const currentStep = steps[currentStepIndex]
+    const currentStep = recipe.recipe_steps[currentStepIndex]
     const isFirstStep = currentStepIndex === 0
-    const isLastStep = currentStepIndex === steps.length - 1
+    const isLastStep = currentStepIndex === recipe.recipe_steps.length - 1
 
     const handleNext = () => {
         if (isLastStep) {
@@ -73,7 +87,7 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
                         Modo Cocina
                     </h2>
                     <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                        {recipeTitle}
+                        {recipe.title}
                     </p>
                 </div>
                 <div className="w-10" /> {/* Spacer */}
@@ -84,7 +98,7 @@ export function CookingModeClient({ steps, recipeId, recipeTitle }: CookingModeC
                 <div
                     className="h-full bg-primary transition-all duration-300"
                     style={{
-                        width: `${((currentStepIndex + 1) / steps.length) * 100}%`,
+                        width: `${((currentStepIndex + 1) / recipe.recipe_steps.length) * 100}%`,
                     }}
                 />
             </div>

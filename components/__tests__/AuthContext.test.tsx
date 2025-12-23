@@ -1,16 +1,32 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { AuthProvider, useAuth } from '../AuthContext'
 import { useFirebaseAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from '@/hooks/queries/useProfile'
+import { useInitProfile } from '@/hooks/queries/useInitProfile'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Mock dependencies
 jest.mock('@/features/auth/hooks/useAuth', () => ({
     useFirebaseAuth: jest.fn(),
 }))
 
-jest.mock('@/hooks/queries/useProfile', () => ({
-    useProfile: jest.fn(),
+jest.mock('@/hooks/queries/useInitProfile', () => ({
+    useInitProfile: jest.fn(),
 }))
+
+const createWrapper = () => {
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                retry: false,
+            },
+        },
+    })
+    return ({ children }: { children: React.ReactNode }) => (
+        <QueryClientProvider client={queryClient}>
+            <AuthProvider>{children}</AuthProvider>
+        </QueryClientProvider>
+    )
+}
 
 describe('AuthContext', () => {
     beforeEach(() => {
@@ -21,7 +37,7 @@ describe('AuthContext', () => {
                 loginWithGoogle: jest.fn(),
                 logout: jest.fn(),
             })
-            ; (useProfile as jest.Mock).mockReturnValue({
+            ; (useInitProfile as jest.Mock).mockReturnValue({
                 data: null,
                 isLoading: false,
             })
@@ -33,11 +49,7 @@ describe('AuthContext', () => {
             return <div>{isLoading ? 'Loading' : 'Loaded'}</div>
         }
 
-        render(
-            <AuthProvider>
-                <TestComponent />
-            </AuthProvider>
-        )
+        render(<TestComponent />, { wrapper: createWrapper() })
 
         expect(screen.getByText('Loading')).toBeInTheDocument()
     })
@@ -65,7 +77,7 @@ describe('AuthContext', () => {
                 logout: jest.fn(),
             })
 
-            ; (useProfile as jest.Mock).mockReturnValue({
+            ; (useInitProfile as jest.Mock).mockReturnValue({
                 data: mockProfile,
                 isLoading: false,
             })
@@ -81,18 +93,14 @@ describe('AuthContext', () => {
             )
         }
 
-        render(
-            <AuthProvider>
-                <TestComponent />
-            </AuthProvider>
-        )
+        render(<TestComponent />, { wrapper: createWrapper() })
 
         await waitFor(() => {
             expect(screen.getByTestId('profile-name')).toHaveTextContent('Test Profile')
             expect(screen.getByTestId('firebase-email')).toHaveTextContent('test@example.com')
         })
 
-        expect(useProfile).toHaveBeenCalledWith('123')
+        expect(useInitProfile).toHaveBeenCalledWith(mockUser)
     })
 
     it('handles logout', async () => {
@@ -109,11 +117,7 @@ describe('AuthContext', () => {
             return <div>{profile ? 'Logged In' : 'Logged Out'}</div>
         }
 
-        render(
-            <AuthProvider>
-                <TestComponent />
-            </AuthProvider>
-        )
+        render(<TestComponent />, { wrapper: createWrapper() })
 
         await waitFor(() => {
             expect(screen.getByText('Logged Out')).toBeInTheDocument()

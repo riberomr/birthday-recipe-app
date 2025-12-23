@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth'; // Keep this for now as FirebaseUser is our custom type but we need the raw firebase user for auth state
 import { useFirebaseAuth } from '@/features/auth/hooks/useAuth';
 import { FirebaseUser, Profile } from '@/types';
-import { useProfile } from '@/hooks/queries/useProfile';
+import { useInitProfile } from '@/hooks/queries/useInitProfile';
 
 type AuthContextType = {
     firebaseUser: User | FirebaseUser | null; // Our custom subset
@@ -18,8 +18,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { user, loading, loginWithGoogle, logout } = useFirebaseAuth();
-    const { data: profile, isLoading: isProfileLoading } = useProfile(user?.uid);
+    const { data: profile, isLoading: isProfileLoading } = useInitProfile(user);
 
+    console.log(profile, isProfileLoading, user)
     const firebaseUser: FirebaseUser | null = user ? {
         uid: user.uid,
         email: user.email,
