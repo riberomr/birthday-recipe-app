@@ -1,5 +1,6 @@
 import { Profile } from "@/types"
 import { auth } from "@/lib/firebase/client"
+import { User } from "firebase/auth"
 
 export async function getUsers(): Promise<Profile[]> {
     try {
@@ -78,5 +79,35 @@ export async function updateUserProfile(firebaseUid: string, updates: Partial<Pr
         return result.data;
     } catch (error: any) {
         throw new Error(error.message || "Error updating user profile");
+    }
+}
+
+export async function initProfile(user: User | null): Promise<Profile | null> {
+    try {
+        if (!user) {
+            // If no user is provided, do not attempt to initialize a profile and return null.
+            return null;
+        }
+
+        const token = await user.getIdToken();
+        const response = await fetch(`/api/me`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Error initializing user profile");
+            return null;
+        }
+
+        const json = await response.json();
+        // The API returns { user: ... }
+        return json.user || null;
+    } catch (error: any) {
+        console.error(error.message || "Error initializing user profile");
+        return null;
     }
 }

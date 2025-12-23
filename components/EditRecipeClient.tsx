@@ -4,6 +4,9 @@ import { useRecipe } from "@/hooks/queries/useRecipe"
 import { RecipeForm } from "@/components/RecipeForm"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useAuth } from "./AuthContext"
+import { useEffect } from "react"
+import { useSnackbar } from "./ui/Snackbar"
 
 interface EditRecipeClientProps {
     id: string
@@ -11,7 +14,16 @@ interface EditRecipeClientProps {
 
 export function EditRecipeClient({ id }: EditRecipeClientProps) {
     const router = useRouter()
+    const { showSnackbar } = useSnackbar()
+    const { profile } = useAuth()
     const { data: recipe, isLoading, isError } = useRecipe(id)
+
+    useEffect(() => {
+        if (!profile) {
+            showSnackbar("Debes iniciar sesión para editar una receta", "error")
+            router.push("/recipes")
+        }
+    }, [profile, router])
 
     if (isLoading) {
         return (
