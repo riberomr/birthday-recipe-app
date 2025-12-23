@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
-import { notFound, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useRecipe } from "@/hooks/queries/useRecipe"
 
 interface CookingModeClientProps {
-
     recipeId: string
 }
 
@@ -29,7 +28,24 @@ export function CookingModeClient({ recipeId }: CookingModeClientProps) {
     }
 
     if (isError || !recipe || !recipe.recipe_steps || recipe.recipe_steps.length === 0) {
-        notFound()
+        return (
+            <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center p-6 text-center">
+                <div className="text-destructive mb-4">
+                    <X className="h-12 w-12 mx-auto" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                    Receta no encontrada
+                </h2>
+                <p className="text-muted-foreground mb-6 max-w-md">
+                    No pudimos encontrar la receta que buscas o no tiene pasos de preparación.
+                </p>
+                <Link href="/recipes">
+                    <Button variant="default" size="lg">
+                        Volver a Recetas
+                    </Button>
+                </Link>
+            </div>
+        )
     }
 
     // Wake Lock API

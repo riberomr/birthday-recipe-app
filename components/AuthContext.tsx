@@ -20,7 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { user, loading, loginWithGoogle, logout } = useFirebaseAuth();
     const { data: profile, isLoading: isProfileLoading } = useInitProfile(user);
 
-    console.log(profile, isProfileLoading, user)
     const firebaseUser: FirebaseUser | null = user ? {
         uid: user.uid,
         email: user.email,

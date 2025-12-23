@@ -85,9 +85,7 @@ export async function updateUserProfile(firebaseUid: string, updates: Partial<Pr
 export async function initProfile(user: User | null): Promise<Profile | null> {
     try {
         if (!user) {
-            // If we are here, it means useInitProfile was enabled, so we should have a user.
-            // But if auth.currentUser is not ready yet (though it should be if passed from AuthContext),
-            // we return null.
+            // If no user is provided, do not attempt to initialize a profile and return null.
             return null;
         }
 

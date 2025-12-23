@@ -8,7 +8,6 @@ jest.mock('next/navigation', () => ({
     useRouter: jest.fn(() => ({
         push: mockPush,
     })),
-    notFound: jest.fn(() => { throw new Error('NEXT_NOT_FOUND') }),
 }))
 
 jest.mock('@/hooks/queries/useRecipe')
@@ -153,15 +152,15 @@ describe('CookingModeClient', () => {
         expect(screen.getByText('Step 1')).toBeInTheDocument()
     })
 
-    it('calls notFound when recipe is missing or error occurs', () => {
-        const { notFound } = require('next/navigation')
-            ; (useRecipe as jest.Mock).mockReturnValue({
-                data: null,
-                isLoading: false,
-                isError: true,
-            })
+    it('renders error state when recipe is missing or error occurs', () => {
+        ; (useRecipe as jest.Mock).mockReturnValue({
+            data: null,
+            isLoading: false,
+            isError: true,
+        })
 
-        expect(() => render(<CookingModeClient recipeId="1" />)).toThrow('NEXT_NOT_FOUND')
-        expect(notFound).toHaveBeenCalled()
+        render(<CookingModeClient recipeId="1" />)
+        expect(screen.getByText('Receta no encontrada')).toBeInTheDocument()
+        expect(screen.getByText('Volver a Recetas')).toBeInTheDocument()
     })
 })
