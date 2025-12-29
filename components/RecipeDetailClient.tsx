@@ -18,6 +18,7 @@ import { FavoriteButton } from "@/components/FavoriteButton"
 import { RatingSection } from "@/components/RatingSection"
 import { EditRecipeButton } from "@/components/EditRecipeButton"
 import { DeleteRecipeButton } from "@/components/DeleteRecipeButton"
+import { useAuth } from "./AuthContext"
 
 interface RecipeDetailClientProps {
     id: string
@@ -25,6 +26,7 @@ interface RecipeDetailClientProps {
 
 export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
     const router = useRouter()
+    const { profile } = useAuth()
     const { data: recipe, isLoading, isError } = useRecipe(id)
 
     const { data: communityPhotos } = useQuery({
@@ -189,13 +191,13 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                             <ShareButtons title={recipe.title} />
                             <DownloadButton />
                         </div>
-                        <div className="flex gap-2 print:hidden mt-4">
+                        {profile && profile.id === recipe.user_id && <div className="flex gap-2 print:hidden mt-4">
                             <div className="flex-1">
                                 Puedes realizar cambios en la receta
                             </div>
                             <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
                             <DeleteRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
-                        </div>
+                        </div>}
                         {/* Social Features - Hidden on Print */}
                         <div className="mt-8 space-y-8 print:hidden">
                             <div className="border-t border-primary/10 dark:border-primary/20 pt-8">
@@ -205,6 +207,11 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                                     </h3>
                                     {communityPhotos && communityPhotos.length > 0 &&
                                         <CommunityPhotosCarousel photos={communityPhotos} />
+                                    }
+                                    {communityPhotos && communityPhotos.length === 0 &&
+                                        <div className="text-muted-foreground">
+                                            No hay fotos de la comunidad
+                                        </div>
                                     }
                                 </div>
                             </div>
