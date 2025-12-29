@@ -12,6 +12,9 @@ jest.mock('@tanstack/react-query', () => ({
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn(),
 }))
+jest.mock('../AuthContext', () => ({
+    useAuth: jest.fn(),
+}))
 jest.mock('@/components/StarRating', () => ({
     StarRating: () => <div data-testid="star-rating" />,
 }))
@@ -60,6 +63,8 @@ const mockRecipe = {
     average_rating: { rating: 4.5, count: 10 },
 }
 
+import { useAuth } from '../AuthContext'
+
 describe('RecipeDetailClient', () => {
     const mockRouter = { push: jest.fn() }
 
@@ -73,6 +78,9 @@ describe('RecipeDetailClient', () => {
             })
             ; (useQuery as jest.Mock).mockReturnValue({
                 data: [],
+            })
+            ; (useAuth as jest.Mock).mockReturnValue({
+                profile: { id: 'user1' }, // Match recipe owner by default
             })
     })
 
@@ -124,5 +132,47 @@ describe('RecipeDetailClient', () => {
 
         render(<RecipeDetailClient id="1" />)
         expect(screen.getByTestId('community-photos')).toBeInTheDocument()
+        expect(screen.queryByText('No hay fotos de la comunidad')).not.toBeInTheDocument()
+    })
+
+    it('shows empty state message when no community photos', () => {
+        ; (useQuery as jest.Mock).mockReturnValue({
+            data: [],
+        })
+
+        render(<RecipeDetailClient id="1" />)
+        expect(screen.getByText('No hay fotos de la comunidad')).toBeInTheDocument()
+    })
+
+    it('shows edit/delete controls when user is owner', () => {
+        render(<RecipeDetailClient id="1" />)
+
+        expect(screen.getByText('Puedes realizar cambios en la receta')).toBeInTheDocument()
+        expect(screen.getByText('Edit')).toBeInTheDocument()
+        expect(screen.getByText('Delete')).toBeInTheDocument()
+    })
+
+    it('hides edit/delete controls when user is not owner', () => {
+        ; (useAuth as jest.Mock).mockReturnValue({
+            profile: { id: 'other-user' },
+        })
+
+        render(<RecipeDetailClient id="1" />)
+
+        expect(screen.queryByText('Puedes realizar cambios en la receta')).not.toBeInTheDocument()
+        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+        expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+    })
+
+    it('hides edit/delete controls when user is not logged in', () => {
+        ; (useAuth as jest.Mock).mockReturnValue({
+            profile: null,
+        })
+
+        render(<RecipeDetailClient id="1" />)
+
+        expect(screen.queryByText('Puedes realizar cambios en la receta')).not.toBeInTheDocument()
+        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+        expect(screen.queryByText('Delete')).not.toBeInTheDocument()
     })
 })

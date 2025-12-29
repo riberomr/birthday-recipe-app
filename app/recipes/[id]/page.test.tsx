@@ -49,6 +49,13 @@ jest.mock('@/components/DeleteRecipeButton', () => ({
     DeleteRecipeButton: () => <button data-testid="delete-button">Delete</button>
 }))
 
+// Mock AuthContext
+jest.mock('@/components/AuthContext', () => ({
+    useAuth: jest.fn(() => ({
+        profile: { id: 'user-1' } // Match default mockRecipe.user_id
+    }))
+}))
+
 describe('RecipePage', () => {
     const mockRecipe = {
         id: '1',
