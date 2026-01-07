@@ -30,7 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 
 export function ProfileMenu() {
-    const { profile, logout } = useAuth()
+    const { profile, logout, login } = useAuth()
     const { setTheme, theme } = useTheme()
     const { open: openLoginModal } = useModal('login-confirmation')
 
@@ -41,9 +41,6 @@ export function ProfileMenu() {
             }
         })
     }
-
-    // We need the login function to pass to the modal if that's how it's wired
-    const { login } = useAuth()
 
     const LoginItem = () => (
         <DropdownMenuItem onClick={handleLoginClick}>
@@ -97,7 +94,6 @@ export function ProfileMenu() {
                 <DropdownMenuGroup>
                     {profile ? (
                         <>
-                            {/* <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel> */}
                             <Link href="/recipes/me">
                                 <DropdownMenuItem>
                                     <Album className="mr-2 h-4 w-4" />

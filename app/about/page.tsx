@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 // import Image from 'next/image';
+
+// TODO: Add real chef image, remove placeholder and uncomment Image import
 import Link from 'next/link';
 import { ChefHat, Heart, Users, ArrowRight, CookingPotIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';

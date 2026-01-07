@@ -2,13 +2,9 @@
 
 import Link from "next/link"
 import { ChefHat } from "lucide-react"
-import { useAuth } from "@/components/AuthContext"
 import { ProfileMenu } from "@/components/ProfileMenu"
 
 export function Navbar() {
-    const { profile } = useAuth()
-
-
     return (
         <nav className="nav-glass print:hidden">
             <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">

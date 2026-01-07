@@ -1,8 +1,8 @@
 import { Recipe, RecipeCategory } from "@/types"
 import { auth } from "@/lib/firebase/client";
 
-// getBaseUrl is implemented because it is not possible to use the environment variables in the server side
-// 
+// getBaseUrl is implemented because it is not possible to use environment variables directly on the server side.
+// It resolves the base URL differently depending on whether the code is running in the browser or on the server.
 
 function getBaseUrl() {
     if (typeof window !== 'undefined') return '';

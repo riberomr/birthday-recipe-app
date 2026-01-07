@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { ProfileMenu } from '../ProfileMenu'
 import { useAuth } from '../AuthContext'
 import { useTheme } from 'next-themes'
