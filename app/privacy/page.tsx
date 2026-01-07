@@ -11,7 +11,7 @@ export default function PrivacyPage() {
         <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
             <div className="mb-12 text-center md:text-left">
                 <h1 className="text-4xl font-bold tracking-tight mb-4">Política de Privacidad</h1>
-                <p className="text-muted-foreground">Última actualización: {new Date().toLocaleDateString()}</p>
+                <p className="text-muted-foreground">Última actualización: 07/01/2026</p>
             </div>
 
             <div className="space-y-12">
