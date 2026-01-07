@@ -10,7 +10,7 @@ export default function PhotosPage() {
             </div>
             <h1 className="text-3xl font-bold text-muted-foreground mb-2">Próximamente</h1>
             <p className="text-muted-foreground mb-8">Las fotos del cumpleaños estarán disponibles aquí.</p>
-            <Link href="/recipes">
+            <Link href="/">
                 <Button variant="outline">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Volver al Inicio
