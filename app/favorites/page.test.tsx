@@ -43,7 +43,7 @@ describe('FavoritesPage', () => {
 
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Debes iniciar sesión para ver tus favoritos', 'error')
-            expect(mockRouter.push).toHaveBeenCalledWith('/')
+            expect(mockRouter.push).toHaveBeenCalledWith('/recipes')
         })
     })
 

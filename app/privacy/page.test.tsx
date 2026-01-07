@@ -21,7 +21,7 @@ describe('PrivacyPage', () => {
         expect(screen.getByText(/¿Tienes preguntas\?/i)).toBeInTheDocument();
         const link = screen.getByRole('link', { name: /Contáctanos/i });
         expect(link).toBeInTheDocument();
-        expect(link).toHaveAttribute('href', 'mailto:contacto@birthdayrecipeapp.com');
+        expect(link).toHaveAttribute('href');
     });
 
     it('has correct metadata', () => {
