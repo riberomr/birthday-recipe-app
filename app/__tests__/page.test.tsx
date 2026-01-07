@@ -12,7 +12,7 @@ describe('Home Page', () => {
     it('renders the home page content', () => {
         render(<Home />)
 
-        expect(screen.getByText('V1 pagina de recetas')).toBeInTheDocument()
+        expect(screen.getByText('Pagina de recetas')).toBeInTheDocument()
         expect(screen.getByText('🥰 Cocinando Amor 🥰')).toBeInTheDocument()
 
         expect(screen.getByRole('link', { name: /ver recetas/i })).toHaveAttribute('href', '/recipes')

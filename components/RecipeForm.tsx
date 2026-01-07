@@ -67,7 +67,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
     // Protect Edit Route
     useEffect(() => {
         if (isEditing && initialData && profile && profile.id !== initialData.user_id) {
-            router.push("/")
+            router.push("/recipes")
             showSnackbar("No tienes permiso para editar esta receta", "error")
         }
     }, [profile, initialData, isEditing, router, showSnackbar])

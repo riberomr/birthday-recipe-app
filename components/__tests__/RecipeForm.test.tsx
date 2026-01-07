@@ -113,7 +113,7 @@ describe('RecipeForm', () => {
 
         render(<RecipeForm initialData={initialData} isEditing={true} />)
 
-        expect(mockRouter.push).toHaveBeenCalledWith('/')
+        expect(mockRouter.push).toHaveBeenCalledWith('/recipes')
         expect(mockShowSnackbar).toHaveBeenCalledWith(expect.stringContaining('No tienes permiso'), 'error')
     })
 

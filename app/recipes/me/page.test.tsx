@@ -72,7 +72,7 @@ describe('MyRecipesPage', () => {
 
         await waitFor(() => {
             expect(mockShowSnackbar).toHaveBeenCalledWith('Debes iniciar sesión para ver tus recetas', 'error')
-            expect(mockRouter.push).toHaveBeenCalledWith('/')
+            expect(mockRouter.push).toHaveBeenCalledWith('/recipes')
         })
     })
 

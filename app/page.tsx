@@ -34,7 +34,7 @@ export default function Home() {
           transition={{ type: "spring", bounce: 0.5 }}
           className="card-kawaii"
         >
-          <h1 className="text-4xl font-bold text-primary mb-2">V1 pagina de recetas</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">Pagina de recetas</h1>
           <p className="text-xl text-muted-foreground">🥰 Cocinando Amor 🥰</p>
           <div className="mt-6 text-6xl">🎂</div>
         </motion.div>
