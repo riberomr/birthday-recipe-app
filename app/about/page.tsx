@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-    title: 'Sobre Nosotros - Birthday Recipe App',
+    title: 'Sobre Nosotros - Recetario La María',
     description: 'Conoce más sobre nuestra misión y la pasión por la cocina casera.',
 };
 

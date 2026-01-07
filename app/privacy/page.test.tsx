@@ -26,7 +26,7 @@ describe('PrivacyPage', () => {
 
     it('has correct metadata', () => {
         expect(metadata).toEqual({
-            title: 'Política de Privacidad - Birthday Recipe App',
+            title: 'Política de Privacidad - Recetario La María',
             description: 'Política de privacidad y manejo de datos.',
         });
     });

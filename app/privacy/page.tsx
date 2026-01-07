@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: 'Política de Privacidad - Birthday Recipe App',
+    title: 'Política de Privacidad - Recetario La María',
     description: 'Política de privacidad y manejo de datos.',
 };
 

@@ -33,7 +33,7 @@ describe('AboutPage', () => {
 
     it('has correct metadata', () => {
         expect(metadata).toEqual({
-            title: 'Sobre Nosotros - Birthday Recipe App',
+            title: 'Sobre Nosotros - Recetario La María',
             description: 'Conoce más sobre nuestra misión y la pasión por la cocina casera.',
         });
     });
