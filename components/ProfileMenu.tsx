@@ -28,12 +28,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { usePathname } from "next/navigation"
 
 export function ProfileMenu() {
     const { profile, logout, login } = useAuth()
     const { setTheme, theme } = useTheme()
     const { open: openLoginModal } = useModal('login-confirmation')
-
+    const pathname = usePathname()
+    const isCreatingRecipe = pathname === "/recipes/create"
     const handleLoginClick = () => {
         openLoginModal({
             onConfirm: async () => {
@@ -53,6 +55,15 @@ export function ProfileMenu() {
         e.preventDefault()
         setTheme(theme === "light" ? "dark" : "light")
     }
+
+
+    const handleLogout = () => {
+        if (isCreatingRecipe) {
+            return // Don't allow logout while creating recipe
+        }
+        logout()
+    }
+
 
     return (
         <DropdownMenu>
@@ -160,7 +171,7 @@ export function ProfileMenu() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
-                                onClick={() => logout()}
+                                onClick={handleLogout}
                             >
                                 <LogOut className="mr-2 h-4 w-4" />
                                 <span>Cerrar Sesión</span>

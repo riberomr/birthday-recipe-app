@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext'
 import { useTheme } from 'next-themes'
 import { useModal } from '@/hooks/ui/useModal'
 import userEvent from '@testing-library/user-event'
+import { usePathname } from 'next/navigation'
 
 // Helper for Radix UI Dropdown
 class ResizeObserver {
@@ -17,6 +18,11 @@ global.ResizeObserver = ResizeObserver
 jest.mock('../AuthContext', () => ({
     useAuth: jest.fn(),
 }))
+
+jest.mock('next/navigation', () => ({
+    usePathname: jest.fn(),
+}))
+
 jest.mock('next-themes', () => ({
     useTheme: jest.fn(),
 }))
@@ -120,6 +126,7 @@ describe('ProfileMenu', () => {
                 profile: mockProfile,
                 logout: mockLogout,
             })
+                ; (usePathname as jest.Mock).mockReturnValue('/')
         })
 
         it('renders user avatar and name trigger', () => {
@@ -153,6 +160,21 @@ describe('ProfileMenu', () => {
             await userEvent.click(logoutButton)
 
             expect(mockLogout).toHaveBeenCalled()
+        })
+
+        it('disables logout when creating recipe', async () => {
+            ; (usePathname as jest.Mock).mockReturnValue('/recipes/create')
+            render(<ProfileMenu />)
+
+            await userEvent.click(screen.getByRole('button', { name: /Juan Perez/i })) // Open menu
+
+            const item = await screen.findByText('Cerrar Sesión')
+
+            // In Radix UI, disabled items might not receive click events or might have aria-disabled
+            // Let's try to click it and assert logout is not called
+            await userEvent.click(item)
+
+            expect(mockLogout).not.toHaveBeenCalled()
         })
     })
 
