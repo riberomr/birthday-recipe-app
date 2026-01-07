@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
-import { ChefHat, Heart, Users, ArrowRight } from 'lucide-react';
+import { ChefHat, Heart, Users, ArrowRight, CookingPotIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -67,7 +67,7 @@ export default function AboutPage() {
                     <Card className="border-none shadow-md hover:shadow-lg transition-shadow bg-card/50">
                         <CardContent className="pt-6 text-center">
                             <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
-                                <ChefHat className="w-6 h-6" />
+                                <CookingPotIcon className="w-6 h-6" />
                             </div>
                             <h3 className="text-xl font-semibold mb-2">Ingredientes Reales</h3>
                             <p className="text-muted-foreground">Priorizamos ingredientes frescos, de temporada y accesibles. Nada de complicaciones innecesarias.</p>

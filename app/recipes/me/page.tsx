@@ -26,7 +26,7 @@ export default function MyRecipesPage() {
     useEffect(() => {
         if (!authLoading && !profile) {
             showSnackbar("Debes iniciar sesión para ver tus recetas", "error");
-            router.push("/");
+            router.push("/recipes");
         }
     }, [profile, authLoading, showSnackbar, router]);
 
