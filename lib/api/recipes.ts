@@ -1,9 +1,18 @@
 import { Recipe, RecipeCategory } from "@/types"
 import { auth } from "@/lib/firebase/client";
 
+// getBaseUrl is implemented because it is not possible to use the environment variables in the server side
+// 
+
+function getBaseUrl() {
+    if (typeof window !== 'undefined') return '';
+    if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+    return 'http://localhost:3000';
+}
+
 export async function getCategories(): Promise<RecipeCategory[]> {
     try {
-        const response = await fetch(`/api/recipes/categories`);
+        const response = await fetch(`${getBaseUrl()}/api/recipes/categories`);
         if (!response.ok) {
             console.error("Error fetching categories");
             return [];
@@ -42,7 +51,7 @@ export async function getRecipes(
     if (filters.user_id) params.append('user_id', filters.user_id);
 
     try {
-        const response = await fetch(`/api/recipes?${params.toString()}`);
+        const response = await fetch(`${getBaseUrl()}/api/recipes?${params.toString()}`);
 
         if (!response.ok) {
             console.error("Error fetching recipes");
@@ -59,7 +68,7 @@ export async function getRecipes(
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
     try {
-        const response = await fetch(`/api/recipes/${id}`);
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}`);
 
         if (!response.ok) {
             console.error("Error fetching recipe");
@@ -79,7 +88,7 @@ type RecipeCommunityPhoto = {
 }
 export async function getRecipeCommunityPhotos(recipeId: string): Promise<RecipeCommunityPhoto[] | null> {
     try {
-        const response = await fetch(`/api/recipes/${recipeId}/photos`);
+        const response = await fetch(`${getBaseUrl()}/api/recipes/${recipeId}/photos`);
 
         if (!response.ok) {
             console.error("Error fetching community photos");
