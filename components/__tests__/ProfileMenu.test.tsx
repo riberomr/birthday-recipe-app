@@ -3,7 +3,7 @@ import { ProfileMenu } from '../ProfileMenu'
 import { useAuth } from '../AuthContext'
 import { useTheme } from 'next-themes'
 import { useModal } from '@/hooks/ui/useModal'
-import { userEvent } from '@testing-library/user-event'
+import userEvent from '@testing-library/user-event'
 
 // Helper for Radix UI Dropdown
 class ResizeObserver {
