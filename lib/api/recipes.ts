@@ -3,11 +3,12 @@ import { auth } from "@/lib/firebase/client";
 
 // getBaseUrl is implemented because it is not possible to use environment variables directly on the server side.
 // It resolves the base URL differently depending on whether the code is running in the browser or on the server.
+// But in production, the base URL is the same for both the browser and the server.
 
 function getBaseUrl() {
-    if (typeof window !== 'undefined') return '';
+    //if process.env.NEXT_PUBLIC_APP_URL is not defined, return '' for production
     if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-    return 'http://localhost:3000';
+    else return ''
 }
 
 export async function getCategories(): Promise<RecipeCategory[]> {
