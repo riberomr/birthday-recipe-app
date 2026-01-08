@@ -3,12 +3,24 @@ import { auth } from "@/lib/firebase/client";
 
 // getBaseUrl is implemented because it is not possible to use environment variables directly on the server side.
 // It resolves the base URL differently depending on whether the code is running in the browser or on the server.
-// But in production, the base URL is the same for both the browser and the server.
 
 function getBaseUrl() {
-    //if process.env.NEXT_PUBLIC_APP_URL is not defined, return '' for production
-    if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-    else return ''
+    // 1. If running in the browser, use relative path
+    if (typeof window !== 'undefined') return '';
+
+    // 2. Check for explicit custom URL (set in Vercel Env Vars)
+    if (process.env.NEXT_PUBLIC_APP_URL) {
+        return process.env.NEXT_PUBLIC_APP_URL;
+    }
+
+    // 3. Fallback for Vercel deployments (automatically set by Vercel)
+    // Note: VERCEL_URL does not include 'https://', so we must prepend it.
+    if (process.env.VERCEL_URL) {
+        return `https://${process.env.VERCEL_URL}`;
+    }
+
+    // 4. Fallback for local development
+    return 'http://localhost:3000';
 }
 
 export async function getCategories(): Promise<RecipeCategory[]> {
