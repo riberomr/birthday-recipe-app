@@ -1,10 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RecipeListClient } from '../RecipeListClient'
 import { useRecipes } from '@/hooks/queries/useRecipes'
+import { useCategories } from '@/hooks/queries/useCategories'
 import { useInView } from 'framer-motion'
 
 // Mock dependencies
 jest.mock('@/hooks/queries/useRecipes')
+jest.mock('@/hooks/queries/useCategories')
 jest.mock('@/components/FilterBar', () => ({
     FilterBar: ({ onFilterChange }: any) => (
         <button onClick={() => onFilterChange({ search: 'test' })}>Filter</button>
@@ -46,10 +48,14 @@ describe('RecipeListClient', () => {
                 isLoading: false,
                 isError: false,
             })
+            ; (useCategories as jest.Mock).mockReturnValue({
+                data: [{ id: '1', name: 'Test Category' }],
+                isLoading: false,
+            })
     })
 
     it('renders initial recipes', () => {
-        render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={2} categories={[]} />)
+        render(<RecipeListClient />)
         expect(screen.getByText('Recipe 1')).toBeInTheDocument()
         expect(screen.getByText('Recipe 2')).toBeInTheDocument()
     })
@@ -64,12 +70,12 @@ describe('RecipeListClient', () => {
             isError: false,
         })
 
-        render(<RecipeListClient initialRecipes={[]} initialTotal={0} categories={[]} />)
+        render(<RecipeListClient />)
         expect(screen.getByText('No se encontraron recetas 🍰')).toBeInTheDocument()
     })
 
     it('filters recipes', async () => {
-        render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={2} categories={[]} />)
+        render(<RecipeListClient />)
 
         fireEvent.click(screen.getByText('Filter'))
 
@@ -90,7 +96,7 @@ describe('RecipeListClient', () => {
             isError: false,
         })
 
-        render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={3} categories={[]} />)
+        render(<RecipeListClient />)
 
         const loadMoreButton = screen.getByText('Cargar más')
         fireEvent.click(loadMoreButton)
@@ -110,7 +116,7 @@ describe('RecipeListClient', () => {
             isError: false,
         })
 
-        render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={3} categories={[]} />)
+        render(<RecipeListClient />)
 
         expect(screen.getAllByTestId('skeleton')).toHaveLength(3)
     })
@@ -128,7 +134,7 @@ describe('RecipeListClient', () => {
                 isError: false,
             })
 
-        render(<RecipeListClient initialRecipes={mockRecipes as any} initialTotal={3} categories={[]} />)
+        render(<RecipeListClient />)
 
         await waitFor(() => {
             expect(mockFetchNextPage).toHaveBeenCalled()

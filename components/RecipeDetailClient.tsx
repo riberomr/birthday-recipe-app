@@ -8,7 +8,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Clock, ChefHat, Play } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { StarRating } from "@/components/StarRating"
+import { DisplayRating } from "@/components/DisplayRating"
 import { CommentSection } from "@/components/CommentSection"
 import { DownloadButton } from "@/components/DownloadButton"
 import { ShareButtons } from "@/components/ShareButtons"
@@ -134,7 +134,7 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 print:hidden">
-                                <StarRating recipeId={recipe.id} readonly size="sm" />
+                                <DisplayRating rating={recipe.average_rating?.rating || 0} size="sm" showCount={false} />
                                 <span data-testid="average-rating">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
                             </div>
                         </div>

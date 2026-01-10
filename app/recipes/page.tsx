@@ -1,13 +1,8 @@
-import { getRecipes, getCategories } from "@/lib/api/recipes"
 import { RecipeListClient } from "@/components/RecipeListClient"
 
 export const dynamic = "force-dynamic"
 
 export default async function RecipesPage() {
-    const [{ recipes, total }, categories] = await Promise.all([
-        getRecipes(1, 6), // Initial fetch
-        getCategories(),
-    ])
 
     return (
         <div className="page-container p-4">
@@ -16,7 +11,7 @@ export default async function RecipesPage() {
                     <h1 className="text-3xl font-bold text-primary">Recetas</h1>
                 </div>
 
-                <RecipeListClient initialRecipes={recipes} initialTotal={total} categories={categories} />
+                <RecipeListClient />
             </div>
         </div>
     )

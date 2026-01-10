@@ -9,15 +9,13 @@ import { motion } from "framer-motion"
 import { RecipeFilters } from "@/lib/api/recipes"
 import { useInView } from "framer-motion"
 import { useRecipes } from "@/hooks/queries/useRecipes"
+import { useCategories } from "@/hooks/queries/useCategories"
 
-interface RecipeListClientProps {
-    initialRecipes: Recipe[]
-    initialTotal: number
-    categories: RecipeCategory[]
-}
-
-export function RecipeListClient({ initialRecipes, initialTotal, categories }: RecipeListClientProps) {
+export function RecipeListClient() {
     // Filters state
+    const { data: categories } = useCategories()
+
+
     const [filters, setFilters] = useState<RecipeFilters>({
         search: "",
         category: "",
@@ -46,7 +44,7 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
     }, [isInView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
     // Flatten pages into a single array of recipes
-    const recipes = data ? data.pages.flatMap(page => page.recipes) : initialRecipes
+    const recipes = data ? data.pages.flatMap(page => page.recipes) : []
     // Use initial data if query is loading initially (though useRecipes handles this if we passed initialData, 
     // but here we are just falling back to props if data is undefined which happens on first render if not hydrated)
     // Actually, to properly use initial data with useInfiniteQuery we would need to pass it to the hook.
@@ -56,11 +54,11 @@ export function RecipeListClient({ initialRecipes, initialTotal, categories }: R
     // Let's just use the data from the hook. If it's loading and we have no data, show skeletons.
     // If we want to show initialRecipes while loading, we can check if filters are empty.
     const showInitial = !data && isLoading && Object.values(filters).every(v => !v || (Array.isArray(v) && v.length === 0))
-    const displayRecipes = showInitial ? initialRecipes : recipes
+    const displayRecipes = showInitial ? [] : recipes
 
     return (
         <div className="space-y-6">
-            <FilterBar categories={categories} onFilterChange={(newFilters: any) => setFilters(prev => ({ ...prev, ...newFilters }))} />
+            <FilterBar categories={categories || []} onFilterChange={(newFilters: any) => setFilters(prev => ({ ...prev, ...newFilters }))} />
 
             {displayRecipes.length === 0 && !isLoading ? (
                 <div className="text-center py-12 text-muted-foreground">

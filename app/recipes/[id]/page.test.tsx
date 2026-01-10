@@ -15,8 +15,8 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock all child components
-jest.mock('@/components/StarRating', () => ({
-    StarRating: () => <div data-testid="star-rating">Star Rating</div>
+jest.mock('@/components/DisplayRating', () => ({
+    DisplayRating: () => <div data-testid="star-rating">Star Rating</div>
 }))
 jest.mock('@/components/CommentSection', () => ({
     CommentSection: () => <div data-testid="comment-section">Comments</div>

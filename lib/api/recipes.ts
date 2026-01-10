@@ -1,31 +1,9 @@
 import { Recipe, RecipeCategory } from "@/types"
 import { auth } from "@/lib/firebase/client";
 
-// getBaseUrl is implemented because it is not possible to use environment variables directly on the server side.
-// It resolves the base URL differently depending on whether the code is running in the browser or on the server.
-
-function getBaseUrl() {
-    // 1. If running in the browser, use relative path
-    if (typeof window !== 'undefined') return '';
-
-    // 2. Check for explicit custom URL (set in Vercel Env Vars)
-    if (process.env.NEXT_PUBLIC_APP_URL) {
-        return process.env.NEXT_PUBLIC_APP_URL;
-    }
-
-    // 3. Fallback for Vercel deployments (automatically set by Vercel)
-    // Note: VERCEL_URL does not include 'https://', so we must prepend it.
-    if (process.env.VERCEL_URL) {
-        return `https://${process.env.VERCEL_URL}`;
-    }
-
-    // 4. Fallback for local development
-    return 'http://localhost:3000';
-}
-
 export async function getCategories(): Promise<RecipeCategory[]> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/categories`);
+        const response = await fetch(`/api/recipes/categories`);
         if (!response.ok) {
             console.error("Error fetching categories");
             return [];
@@ -64,7 +42,7 @@ export async function getRecipes(
     if (filters.user_id) params.append('user_id', filters.user_id);
 
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes?${params.toString()}`);
+        const response = await fetch(`/api/recipes?${params.toString()}`);
 
         if (!response.ok) {
             console.error("Error fetching recipes");
@@ -81,7 +59,7 @@ export async function getRecipes(
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${id}`);
+        const response = await fetch(`/api/recipes/${id}`);
 
         if (!response.ok) {
             console.error("Error fetching recipe");
@@ -101,7 +79,7 @@ type RecipeCommunityPhoto = {
 }
 export async function getRecipeCommunityPhotos(recipeId: string): Promise<RecipeCommunityPhoto[] | null> {
     try {
-        const response = await fetch(`${getBaseUrl()}/api/recipes/${recipeId}/photos`);
+        const response = await fetch(`/api/recipes/${recipeId}/photos`);
 
         if (!response.ok) {
             console.error("Error fetching community photos");
