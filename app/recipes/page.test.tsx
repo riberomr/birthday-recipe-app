@@ -11,8 +11,6 @@ jest.mock('@/components/RecipeListClient', () => ({
 
 describe('RecipesPage', () => {
     it('fetches data and renders RecipeListClient', async () => {
-        const mockRecipes = [{ id: '1', title: 'Recipe 1' }]
-        const mockCategories = [{ id: '1', name: 'Cat 1' }]
 
         const jsx = await RecipesPage()
         render(jsx)

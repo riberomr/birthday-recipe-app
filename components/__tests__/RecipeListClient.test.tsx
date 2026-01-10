@@ -61,7 +61,7 @@ describe('RecipeListClient', () => {
     })
 
     it('renders empty state', () => {
-        (useRecipes as jest.Mock).mockReturnValue({
+        ; (useRecipes as jest.Mock).mockReturnValue({
             data: { pages: [{ recipes: [], total: 0 }] },
             fetchNextPage: mockFetchNextPage,
             hasNextPage: false,

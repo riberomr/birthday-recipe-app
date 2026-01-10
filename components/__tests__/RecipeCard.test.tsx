@@ -15,9 +15,6 @@ jest.mock('../FavoriteButton', () => ({
 // But StarRating uses useUserRating which calls API. We should probably mock StarRating to isolate RecipeCard test.
 // However, the error was "No QueryClient set", so wrapping should fix it.
 // Let's also mock StarRating to keep unit test isolated and avoid network calls.
-jest.mock('../StarRating', () => ({
-    StarRating: () => <div data-testid="star-rating">Star Rating</div>,
-}))
 
 const mockRecipe: any = {
     id: '1',
