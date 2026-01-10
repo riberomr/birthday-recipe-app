@@ -1,12 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import RecipesPage from './page'
-import { getRecipes, getCategories } from '@/lib/api/recipes'
-
-// Mock dependencies
-jest.mock('@/lib/api/recipes', () => ({
-    getRecipes: jest.fn(),
-    getCategories: jest.fn()
-}))
 
 jest.mock('@/components/RecipeListClient', () => ({
     RecipeListClient: () => (

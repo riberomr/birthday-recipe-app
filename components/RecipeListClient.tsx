@@ -15,7 +15,6 @@ export function RecipeListClient() {
     // Filters state
     const { data: categories } = useCategories()
 
-
     const [filters, setFilters] = useState<RecipeFilters>({
         search: "",
         category: "",
