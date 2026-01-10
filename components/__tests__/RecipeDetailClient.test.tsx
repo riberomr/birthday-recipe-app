@@ -15,9 +15,7 @@ jest.mock('next/navigation', () => ({
 jest.mock('../AuthContext', () => ({
     useAuth: jest.fn(),
 }))
-jest.mock('@/components/StarRating', () => ({
-    StarRating: () => <div data-testid="star-rating" />,
-}))
+
 jest.mock('@/components/CommentSection', () => ({
     CommentSection: () => <div data-testid="comment-section" />,
 }))

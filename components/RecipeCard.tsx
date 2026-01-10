@@ -2,9 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Clock, ChefHat } from "lucide-react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Recipe } from "@/types"
-import { StarRating } from "@/components/StarRating"
+import { DisplayRating } from "@/components/DisplayRating"
 import { FavoriteButton } from "@/components/FavoriteButton"
 
 interface RecipeCardProps {
@@ -58,7 +57,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
                         <span className="text-xs">{recipe.cook_time_minutes} min cook</span>
                     </div>
                     <div className="mt-1 flex justify-between items-center w-full">
-                        <StarRating recipeId={recipe.id} readonly size="sm" />
+                        <DisplayRating rating={recipe.average_rating?.rating || 0} size="sm" showCount={false} />
                         <span className="text-xs text-muted-foreground">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
                     </div>
                 </CardFooter>
