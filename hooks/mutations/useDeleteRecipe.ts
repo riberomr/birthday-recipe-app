@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { deleteRecipe } from "@/lib/api/recipes"
 
-export function useDeleteRecipe() {
+export function useDeleteRecipe(userId?: string) {
     const queryClient = useQueryClient()
 
     return useMutation({
@@ -9,6 +9,7 @@ export function useDeleteRecipe() {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["recipes"] })
             queryClient.invalidateQueries({ queryKey: ["recipes", id] })
+            queryClient.invalidateQueries({ queryKey: ["recipes", "my-recipes", userId] })
         },
     })
 }
