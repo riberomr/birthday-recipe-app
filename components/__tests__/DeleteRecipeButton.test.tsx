@@ -80,6 +80,7 @@ describe("DeleteRecipeButton", () => {
     it("handles delete confirmation success", async () => {
         render(<DeleteRecipeButton recipeId="recipe123" ownerId="user123" />)
         fireEvent.click(screen.getByRole("button", { name: /eliminar receta/i }))
+        mockDeleteRecipe.mockResolvedValue({ success: true })
 
         // Simulate modal confirm callback
         const modalConfig = mockOpen.mock.calls[0][0]
