@@ -2,10 +2,9 @@ import { render, screen, fireEvent } from "@testing-library/react"
 import { DeleteRecipeButton } from "../DeleteRecipeButton"
 import { useAuth } from "@/components/AuthContext"
 import { useModal } from "@/hooks/ui/useModal"
-import { deleteRecipe } from "@/lib/api/recipes"
 import { useRouter } from "next/navigation"
 import { useSnackbar } from "@/components/ui/Snackbar"
-
+import { useDeleteRecipe } from "@/hooks/mutations/useDeleteRecipe"
 // Mock dependencies
 jest.mock("@/components/AuthContext")
 jest.mock("@/hooks/ui/useModal")
@@ -14,12 +13,16 @@ jest.mock("next/navigation", () => ({
     useRouter: jest.fn()
 }))
 jest.mock("@/components/ui/Snackbar")
+jest.mock("@/hooks/mutations/useDeleteRecipe", () => ({
+    useDeleteRecipe: jest.fn()
+}))
 
 describe("DeleteRecipeButton", () => {
     const mockOpen = jest.fn()
     const mockClose = jest.fn()
     const mockPush = jest.fn()
     const mockShowSnackbar = jest.fn()
+    const mockDeleteRecipe = jest.fn()
 
     beforeEach(() => {
         jest.clearAllMocks()
@@ -36,6 +39,9 @@ describe("DeleteRecipeButton", () => {
             })
             ; (useSnackbar as jest.Mock).mockReturnValue({
                 showSnackbar: mockShowSnackbar
+            })
+            ; (useDeleteRecipe as jest.Mock).mockReturnValue({
+                mutateAsync: mockDeleteRecipe
             })
     })
 
@@ -72,31 +78,30 @@ describe("DeleteRecipeButton", () => {
     })
 
     it("handles delete confirmation success", async () => {
-        (deleteRecipe as jest.Mock).mockResolvedValue({ success: true })
-
         render(<DeleteRecipeButton recipeId="recipe123" ownerId="user123" />)
         fireEvent.click(screen.getByRole("button", { name: /eliminar receta/i }))
+        mockDeleteRecipe.mockResolvedValue({ success: true })
 
         // Simulate modal confirm callback
         const modalConfig = mockOpen.mock.calls[0][0]
         await modalConfig.onConfirm()
 
-        expect(deleteRecipe).toHaveBeenCalledWith("recipe123")
+        expect(useDeleteRecipe).toHaveBeenCalledWith("user123")
+        expect(mockDeleteRecipe).toHaveBeenCalledWith("recipe123")
         expect(mockShowSnackbar).toHaveBeenCalledWith("Receta eliminada correctamente", "success")
         expect(mockPush).toHaveBeenCalledWith("/recipes")
     })
 
     it("handles delete confirmation error", async () => {
-        (deleteRecipe as jest.Mock).mockRejectedValue(new Error("Failed"))
-
         render(<DeleteRecipeButton recipeId="recipe123" ownerId="user123" />)
         fireEvent.click(screen.getByRole("button", { name: /eliminar receta/i }))
-
+        mockDeleteRecipe.mockRejectedValue(new Error('Delete failed'));
         // Simulate modal confirm callback
         const modalConfig = mockOpen.mock.calls[0][0]
-        await expect(modalConfig.onConfirm()).rejects.toThrow("Failed")
+        await expect(modalConfig.onConfirm()).rejects.toThrow("Delete failed")
 
-        expect(deleteRecipe).toHaveBeenCalledWith("recipe123")
+        expect(useDeleteRecipe).toHaveBeenCalledWith("user123")
+        expect(mockDeleteRecipe).toHaveBeenCalledWith("recipe123")
         expect(mockShowSnackbar).toHaveBeenCalledWith("Error al eliminar la receta", "error")
         expect(mockPush).not.toHaveBeenCalled()
         expect(mockClose).not.toHaveBeenCalled()

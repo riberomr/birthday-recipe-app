@@ -22,12 +22,13 @@ describe('useDeleteRecipe', () => {
         (deleteRecipe as jest.Mock).mockResolvedValue({ success: true });
         const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-        const { result } = renderHook(() => useDeleteRecipe(), { wrapper });
+        const { result } = renderHook(() => useDeleteRecipe('user1'), { wrapper });
 
         await result.current.mutateAsync('1');
 
         expect(deleteRecipe).toHaveBeenCalledWith('1');
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['recipes'] });
         expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['recipes', '1'] });
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['recipes', 'my-recipes', 'user1'] });
     });
 });

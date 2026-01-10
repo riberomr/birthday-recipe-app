@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { useAuth } from "@/components/AuthContext"
 import { useModal } from "@/hooks/ui/useModal"
-import { deleteRecipe } from "@/lib/api/recipes"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import { useSnackbar } from "@/components/ui/Snackbar"
+import { useDeleteRecipe } from "@/hooks/mutations/useDeleteRecipe"
 
 interface DeleteRecipeButtonProps {
     recipeId: string
@@ -19,7 +18,7 @@ export function DeleteRecipeButton({ recipeId, ownerId }: DeleteRecipeButtonProp
     const router = useRouter()
     const deleteModal = useModal("delete-confirmation")
     const { showSnackbar } = useSnackbar()
-
+    const { mutateAsync: deleteRecipe } = useDeleteRecipe(profile?.id)
     // Check if user is the owner
     // We need to check against the profile id that matches the firebase uid
     // But useAuth provides profile which should have the id.
