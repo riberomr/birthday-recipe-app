@@ -9,7 +9,9 @@ export function useDeleteRecipe(userId?: string) {
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["recipes"] })
             queryClient.invalidateQueries({ queryKey: ["recipes", id] })
-            queryClient.invalidateQueries({ queryKey: ["recipes", "my-recipes", userId] })
+            if (userId) {
+                queryClient.invalidateQueries({ queryKey: ["recipes", "my-recipes", userId] })
+            }
         },
     })
 }
