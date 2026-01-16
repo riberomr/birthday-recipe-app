@@ -428,6 +428,7 @@ export function RecipeForm({ initialData, isEditing = false }: RecipeFormProps) 
                         <Plus className="w-4 h-4 mr-1" /> Agregar
                     </Button>
                 </div>
+                <p className="text-sm text-muted-foreground">Puedes cargar un aproximado de la información nutricional por porción</p>
                 {formData.nutrition.map((item, idx) => (
                     <div key={idx} className="flex gap-2 sm:flex-row flex-col">
                         <Input

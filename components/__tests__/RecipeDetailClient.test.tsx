@@ -38,11 +38,14 @@ jest.mock('@/components/FavoriteButton', () => ({
 jest.mock('@/components/RatingSection', () => ({
     RatingSection: () => <div data-testid="rating-section" />,
 }))
-jest.mock('@/components/EditRecipeButton', () => ({
-    EditRecipeButton: () => <button>Edit</button>,
-}))
-jest.mock('@/components/DeleteRecipeButton', () => ({
-    DeleteRecipeButton: () => <button>Delete</button>,
+jest.mock('@/components/RecipeActionsMenu', () => ({
+    RecipeActionsMenu: ({ ownerId }: { ownerId: string }) => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { useAuth } = require('../AuthContext')
+        const { profile } = useAuth()
+        if (!profile || profile.id !== ownerId) return null
+        return <div data-testid="recipe-actions-menu" />
+    },
 }))
 
 const mockRecipe = {
@@ -145,9 +148,7 @@ describe('RecipeDetailClient', () => {
     it('shows edit/delete controls when user is owner', () => {
         render(<RecipeDetailClient id="1" />)
 
-        expect(screen.getByText('Puedes realizar cambios en la receta')).toBeInTheDocument()
-        expect(screen.getByText('Edit')).toBeInTheDocument()
-        expect(screen.getByText('Delete')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-actions-menu')).toBeInTheDocument()
     })
 
     it('hides edit/delete controls when user is not owner', () => {
@@ -157,9 +158,7 @@ describe('RecipeDetailClient', () => {
 
         render(<RecipeDetailClient id="1" />)
 
-        expect(screen.queryByText('Puedes realizar cambios en la receta')).not.toBeInTheDocument()
-        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-        expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('recipe-actions-menu')).not.toBeInTheDocument()
     })
 
     it('hides edit/delete controls when user is not logged in', () => {
@@ -169,8 +168,6 @@ describe('RecipeDetailClient', () => {
 
         render(<RecipeDetailClient id="1" />)
 
-        expect(screen.queryByText('Puedes realizar cambios en la receta')).not.toBeInTheDocument()
-        expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-        expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('recipe-actions-menu')).not.toBeInTheDocument()
     })
 })

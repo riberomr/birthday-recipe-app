@@ -97,6 +97,7 @@ export function FilterBar({ categories, onFilterChange }: FilterBarProps) {
         activeFilters.category,
         activeFilters.difficulty,
         activeFilters.time,
+        activeFilters.user_id,
         activeFilters.tags.length > 0 ? 'tags' : ''
     ].filter(Boolean).length;
 

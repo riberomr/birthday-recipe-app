@@ -190,8 +190,6 @@ describe('ProfileMenu', () => {
             const aboutLink = screen.getByText('Sobre Nosotros').closest('a')
             expect(aboutLink).toHaveAttribute('href', '/about')
 
-            const privacyLink = screen.getByText('Privacidad').closest('a')
-            expect(privacyLink).toHaveAttribute('href', '/privacy')
         })
 
         it('toggles dark mode', async () => {
