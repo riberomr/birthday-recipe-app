@@ -139,12 +139,6 @@ export function ProfileMenu() {
                             <span>Sobre Nosotros</span>
                         </DropdownMenuItem>
                     </Link>
-                    <Link href="/privacy">
-                        <DropdownMenuItem>
-                            <HatGlasses className="mr-2 h-4 w-4" />
-                            <span>Privacidad</span>
-                        </DropdownMenuItem>
-                    </Link>
                 </DropdownMenuGroup>
 
                 <DropdownMenuSeparator />

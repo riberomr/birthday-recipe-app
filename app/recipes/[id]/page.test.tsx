@@ -1,7 +1,6 @@
 import { screen } from '@testing-library/react'
 import RecipePage from './page'
 import { getRecipe, getRecipeCommunityPhotos } from '@/lib/api/recipes'
-import { notFound } from 'next/navigation'
 import { renderWithClient } from '@/lib/test-utils'
 
 jest.mock('@/lib/api/recipes')
@@ -42,11 +41,8 @@ jest.mock('@/components/FavoriteButton', () => ({
 jest.mock('@/components/RatingSection', () => ({
     RatingSection: () => <div data-testid="rating-section">Rating</div>
 }))
-jest.mock('@/components/EditRecipeButton', () => ({
-    EditRecipeButton: () => <button data-testid="edit-button">Edit</button>
-}))
-jest.mock('@/components/DeleteRecipeButton', () => ({
-    DeleteRecipeButton: () => <button data-testid="delete-button">Delete</button>
+jest.mock('@/components/RecipeActionsMenu', () => ({
+    RecipeActionsMenu: () => <div data-testid="recipe-actions-menu">Actions</div>
 }))
 
 // Mock AuthContext
@@ -118,7 +114,7 @@ describe('RecipePage', () => {
         const jsx = await RecipePage({ params: Promise.resolve({ id: '1' }) })
         renderWithClient(jsx)
 
-        expect(screen.queryByText('Receta compartida por')).not.toBeInTheDocument()
+        expect(screen.queryByText('Receta compartida por:')).not.toBeInTheDocument()
     })
 
     it('renders with partial profile information', async () => {
@@ -183,13 +179,12 @@ describe('RecipePage', () => {
         renderWithClient(jsx)
 
         expect(await screen.findByTestId('favorite-button')).toBeInTheDocument()
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument()
+        expect(screen.getByTestId('recipe-actions-menu')).toBeInTheDocument()
         expect(screen.getByTestId('download-button')).toBeInTheDocument()
         expect(screen.getByTestId('share-buttons')).toBeInTheDocument()
         expect(screen.getByTestId('star-rating')).toBeInTheDocument()
         expect(screen.getByTestId('rating-section')).toBeInTheDocument()
         expect(screen.getByTestId('comment-section')).toBeInTheDocument()
-        expect(screen.getByTestId('delete-button')).toBeInTheDocument()
     })
 
     it('renders ingredient scaler with correct data', async () => {
@@ -266,28 +261,9 @@ describe('RecipePage', () => {
         expect(await screen.findByText('Ingredientes')).toBeInTheDocument()
     })
 
-    it('calls notFound when recipe does not exist', async () => {
-        // This test is tricky because RecipePage is async and calls notFound (which throws)
-        // But RecipePage returns a component that renders RecipeDetailClient.
-        // RecipeDetailClient handles the not found state (isError or !recipe).
-        // Wait, RecipePage passes ID to RecipeDetailClient.
-        // RecipeDetailClient fetches data.
-        // If data is not found, RecipeDetailClient shows error.
-        // So `notFound` from `next/navigation` is NOT called by `RecipePage` anymore?
-        // Let's check `RecipePage.tsx`.
-        // It just renders `RecipeDetailClient`.
-        // So `RecipePage` does NOT call `notFound`.
-        // The test expects `notFound` to be called.
-        // This test is invalid now.
-        // I should remove it or update it to check for error message in RecipeDetailClient.
-        // But RecipeDetailClient handles it.
-        // I'll skip this test or remove it.
-        // I'll remove it.
-    })
-
     it('exports dynamic configuration', () => {
         const { dynamic } = require('./page')
-        expect(dynamic).toBeUndefined() // It was removed or changed? Let's check page.tsx again.
+        expect(dynamic).toBeUndefined()
     })
 
 

@@ -16,9 +16,8 @@ import { IngredientScaler } from "@/components/IngredientScaler"
 import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel"
 import { FavoriteButton } from "@/components/FavoriteButton"
 import { RatingSection } from "@/components/RatingSection"
-import { EditRecipeButton } from "@/components/EditRecipeButton"
-import { DeleteRecipeButton } from "@/components/DeleteRecipeButton"
 import { useAuth } from "./AuthContext"
+import { RecipeActionsMenu } from "@/components/RecipeActionsMenu"
 
 interface RecipeDetailClientProps {
     id: string
@@ -85,39 +84,49 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                         <span className="sr-only">Volver a recetas</span>
                     </Button>
                 </Link>
+                <div className="absolute top-4 right-4 z-20">
+                    <FavoriteButton
+                        recipe={recipe}
+                        className="rounded-full shadow-lg bg-white/90 backdrop-blur-md hover:bg-white dark:bg-black/60 dark:hover:bg-black/80 min-h-[44px] min-w-[44px]"
+                    />
+                </div>
             </div>
 
             <div className="max-w-3xl mx-auto px-4 -mt-8 relative z-10 print:mt-0 print:px-0 print:max-w-none">
                 <div className="bg-card rounded-3xl shadow-xl p-6 border border-primary/10 dark:border-primary/20 print:shadow-none print:border-0 print:p-0">
                     <div className="flex flex-col gap-4">
-                        <div className="flex items-start justify-between gap-4 print:hidden ">
-                            <div className="flex-1">
-                                <h1 className="text-3xl font-bold text-primary">
+                        <div className="flex justify-between gap-4 print:hidden">
+                            <div className="flex-1 self-center">
+                                <h1 className="text-2xl md:text-3xl font-bold text-primary leading-tight">
                                     {recipe.title}
                                 </h1>
 
                             </div>
                             <div className="flex gap-2">
-                                <FavoriteButton recipe={recipe} />
+                                <RecipeActionsMenu recipeId={recipe.id} ownerId={recipe.user_id} title={recipe.title} />
                             </div>
 
                         </div>
                         {recipe.profile && (
-                            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                <span>Receta compartida por</span>
-                                <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                        src={recipe.profile?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
-                                        alt={recipe.profile?.full_name || 'Usuario'}
-                                        className="w-full h-full object-cover"
-                                    />
+                            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground flex-wrap">
+                                <span>Receta compartida por:</span>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full overflow-hidden border border-primary/20">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={recipe.profile?.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                            alt={recipe.profile?.full_name || 'Usuario'}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <span className="font-medium text-primary">
+                                        {recipe.profile?.full_name || 'Usuario'}
+                                    </span>
                                 </div>
-                                <span className="font-medium text-primary">
-                                    {recipe.profile?.full_name || 'Usuario'}
-                                </span>
                             </div>
                         )}
+
+
                         {/* Print-only description styling */}
                         <p className="text-muted-foreground print:text-black print:text-lg print:mb-6">
                             {recipe.description}
@@ -169,9 +178,12 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
 
                         {recipe.recipe_nutrition && recipe.recipe_nutrition.length > 0 && (
                             <div className="mt-8 p-6 bg-primary/5 dark:bg-muted/30 rounded-2xl print:bg-transparent print:p-0 print:mt-4 print:border-t print:border-gray-300 print:pt-4">
-                                <h2 className="text-xl font-bold text-foreground mb-4 print:text-black">
+                                <h2 className="text-xl font-bold text-foreground mb-1 print:text-black">
                                     Información Nutricional
                                 </h2>
+                                <p className="text-sm text-muted-foreground mb-4 print:text-gray-600">
+                                    Estos son los valores aproximados por porción
+                                </p>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                     {recipe.recipe_nutrition.map((item) => (
                                         <div key={item.id} className="bg-card p-3 rounded-xl shadow-sm border border-primary/10 dark:border-primary/20 print:shadow-none print:border print:border-gray-200">
@@ -191,13 +203,6 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                             <ShareButtons title={recipe.title} />
                             <DownloadButton />
                         </div>
-                        {profile && profile.id === recipe.user_id && <div className="flex gap-2 print:hidden mt-4">
-                            <div className="flex-1">
-                                Puedes realizar cambios en la receta
-                            </div>
-                            <EditRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
-                            <DeleteRecipeButton recipeId={recipe.id} ownerId={recipe.user_id} />
-                        </div>}
                         {/* Social Features - Hidden on Print */}
                         <div className="mt-8 space-y-8 print:hidden">
                             <div className="border-t border-primary/10 dark:border-primary/20 pt-8">
