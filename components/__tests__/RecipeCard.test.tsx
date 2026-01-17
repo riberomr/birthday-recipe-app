@@ -10,11 +10,6 @@ jest.mock('../AuthContext', () => ({
 jest.mock('../FavoriteButton', () => ({
     FavoriteButton: ({ recipeId }: any) => <button data-testid="favorite-btn">Favorite {recipeId}</button>,
 }))
-// Mock StarRating to avoid inner hook issues, or just wrap with provider. 
-// Since we are using renderWithClient, StarRating should work if it uses hooks.
-// But StarRating uses useUserRating which calls API. We should probably mock StarRating to isolate RecipeCard test.
-// However, the error was "No QueryClient set", so wrapping should fix it.
-// Let's also mock StarRating to keep unit test isolated and avoid network calls.
 
 const mockRecipe: any = {
     id: '1',
@@ -33,8 +28,17 @@ const mockRecipe: any = {
 }
 
 describe('RecipeCard', () => {
+    const originalEnv = process.env;
+
     beforeEach(() => {
-        ; (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } })
+        jest.resetModules();
+        process.env = { ...originalEnv };
+        process.env.NEXT_PUBLIC_ENABLE_AVERAGE_RATING = 'true';
+        (useAuth as jest.Mock).mockReturnValue({ profile: { id: 'user-1' } })
+    })
+
+    afterEach(() => {
+        process.env = originalEnv;
     })
 
     it('renders recipe details', () => {
@@ -81,7 +85,14 @@ describe('RecipeCard', () => {
         const recipeNoRating = { ...mockRecipe, average_rating: null }
         renderWithClient(<RecipeCard recipe={recipeNoRating} />)
 
-        // Should render " ()" for the count part when rating is null
-        expect(screen.getByText('()')).toBeInTheDocument()
+        // Should render "()" or similar when rating is null
+        // Using regex to match parens regardless of surrounding whitespace
+        expect(screen.getByText(/\(\)/)).toBeInTheDocument()
+    })
+
+    it('hides rating when flag is disabled', () => {
+        process.env.NEXT_PUBLIC_ENABLE_AVERAGE_RATING = 'false';
+        renderWithClient(<RecipeCard recipe={mockRecipe} />)
+        expect(screen.queryByText('4.5 (10)')).not.toBeInTheDocument()
     })
 })
