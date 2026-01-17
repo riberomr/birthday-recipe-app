@@ -16,7 +16,6 @@ import { IngredientScaler } from "@/components/IngredientScaler"
 import CommunityPhotosCarousel from "@/components/CommunityRecipesPhotoCarrousel"
 import { FavoriteButton } from "@/components/FavoriteButton"
 import { RatingSection } from "@/components/RatingSection"
-import { useAuth } from "./AuthContext"
 import { RecipeActionsMenu } from "@/components/RecipeActionsMenu"
 
 interface RecipeDetailClientProps {
@@ -25,13 +24,14 @@ interface RecipeDetailClientProps {
 
 export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
     const router = useRouter()
-    const { profile } = useAuth()
     const { data: recipe, isLoading, isError } = useRecipe(id)
 
     const { data: communityPhotos } = useQuery({
         queryKey: ["recipes", id, "community-photos"],
         queryFn: () => getRecipeCommunityPhotos(id),
     })
+
+    const showAverageRating = process.env.NEXT_PUBLIC_ENABLE_AVERAGE_RATING === 'true';
 
     if (isLoading) {
         return (
@@ -142,10 +142,12 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                                     <span>Cocción: {recipe.cook_time_minutes}m</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 print:hidden">
-                                <DisplayRating rating={recipe.average_rating?.rating || 0} size="sm" showCount={false} />
-                                <span data-testid="average-rating">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
-                            </div>
+                            {showAverageRating && (
+                                <div className="flex items-center gap-2 print:hidden">
+                                    <DisplayRating rating={recipe.average_rating?.rating || 0} size="sm" showCount={false} />
+                                    <span data-testid="average-rating">{recipe.average_rating?.rating} ({recipe.average_rating?.count})</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-8 print:grid-cols-2 print:gap-8">
@@ -222,7 +224,7 @@ export function RecipeDetailClient({ id }: RecipeDetailClientProps) {
                             </div>
 
                             <div className="border-t border-primary/10 dark:border-primary/20 pt-8">
-                                <RatingSection recipeId={id} />
+                                <RatingSection recipeId={id} initialAverageRating={recipe.average_rating} />
                                 <div className="mt-12 print:hidden">
                                     <CommentSection recipeId={id} recipeOwnerId={recipe.user_id} />
                                 </div>

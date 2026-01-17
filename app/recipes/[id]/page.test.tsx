@@ -83,13 +83,20 @@ describe('RecipePage', () => {
         { id: '2', image_url: 'https://example.com/photo2.jpg' }
     ]
 
+    const originalEnv = process.env;
+
     beforeEach(() => {
         jest.clearAllMocks()
+        process.env = { ...originalEnv }
+        process.env.NEXT_PUBLIC_ENABLE_AVERAGE_RATING = 'true'
+        process.env.NEXT_PUBLIC_ENABLE_USER_RATING = 'true'
             ; (getRecipe as jest.Mock).mockResolvedValue(mockRecipe)
             ; (getRecipeCommunityPhotos as jest.Mock).mockResolvedValue(mockCommunityPhotos)
     })
 
-
+    afterEach(() => {
+        process.env = originalEnv
+    })
 
     it('renders recipe without image (fallback emoji)', async () => {
         ; (getRecipe as jest.Mock).mockResolvedValue({ ...mockRecipe, image_url: null })
